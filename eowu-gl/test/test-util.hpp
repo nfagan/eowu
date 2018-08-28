@@ -25,4 +25,33 @@ namespace {
     auto values = get_values();
     return eowu::Attribute(eowu::attributes::uv, values);
   }
+  
+  GLFWwindow* init_glfw() {
+    GLFWwindow* window;
+    
+    if (!glfwInit()) {
+      return nullptr;
+    }
+    
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+#ifdef __APPLE__
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
+
+    window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
+    
+    if (!window) {
+      glfwTerminate();
+      return nullptr;
+    }
+    
+    /* Make the window's context current */
+    glfwMakeContextCurrent(window);
+    
+    gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
+    
+    return window;
+  }
 }

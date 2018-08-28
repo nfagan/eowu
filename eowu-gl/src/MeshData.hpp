@@ -7,8 +7,8 @@
 
 #pragma once
 
-#include <eowu-common/types.hpp>
 #include "Vertex.hpp"
+#include <eowu-common/types.hpp>
 #include <vector>
 
 namespace eowu {
@@ -32,7 +32,12 @@ private:
   eowu::u32 vao;
   eowu::u32 ebo;
   
-  std::vector<eowu::f32> get_interleaved_data(const std::vector<eowu::Vertex> &vertices) const;
-  
   bool is_created;
+  
+  void create_components();
+  void create_attributes(const std::vector<eowu::Vertex> &vertices);
+  void create_indices(const std::vector<eowu::u32> &indices);
+  
+  std::vector<eowu::f32> get_interleaved_data(const std::vector<eowu::Vertex> &vertices) const;
+  static std::vector<const char*> get_ordered_attribute_kinds();
 };

@@ -16,7 +16,9 @@ include_directories(deps/glad/include)
 include_directories(deps/glm)
 
 file(GLOB TEST_SRC
-  test/*.cpp
+  test/*.cpp 
+  test/*.h
+  test/*.hpp 
 )
 
 file(GLOB_RECURSE LIB_SRC 
@@ -33,6 +35,9 @@ add_library(eowu-gl STATIC ${LIB_SRC})
 
 target_include_directories(eowu-gl PUBLIC include/)
 target_include_directories(eowu-gl-test PUBLIC include/)
+
+set_property(TARGET eowu-gl PROPERTY CXX_STANDARD 17)
+set_property(TARGET eowu-gl-test PROPERTY CXX_STANDARD 17)
 
 target_link_libraries(eowu-gl eowu-common glfw)
 target_link_libraries(eowu-gl-test eowu-gl glfw)

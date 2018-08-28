@@ -7,16 +7,37 @@
 
 #pragma once
 
-#include <eowu-gl/eowu-gl.hpp>
 #include "test-util.hpp"
+#include <eowu-gl/eowu-gl.hpp>
 #include <iostream>
 #include <vector>
 #include <assert.h>
 
 void test_mesh_add_inconsistent_vertices();
+void test_draw();
 
 void test_mesh_run_all() {
   test_mesh_add_inconsistent_vertices();
+  test_draw();
+}
+
+void test_draw() {
+  auto* window = init_glfw();
+  
+  eowu::Program prog = eowu::program_factory::make_debug();
+  eowu::Mesh mesh;
+  eowu::mesh_factory::make_quad(mesh);
+  
+  while (!glfwWindowShouldClose(window))
+  {
+    glClear(GL_COLOR_BUFFER_BIT);
+    
+    prog.Bind();
+    mesh.Draw();
+    
+    glfwSwapBuffers(window);
+    glfwPollEvents();
+  }
 }
 
 void test_mesh_add_inconsistent_vertices() {

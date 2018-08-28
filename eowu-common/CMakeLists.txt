@@ -11,4 +11,3 @@ add_library(eowu-common INTERFACE)
 
 target_include_directories(eowu-common INTERFACE include/)
 
-

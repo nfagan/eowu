@@ -7,9 +7,20 @@
 
 #include "Attribute.hpp"
 
-eowu::Attribute::Attribute(const char *kind, const std::vector<eowu::f32> &components) {
+eowu::Attribute::Attribute(const char *kind, const eowu::AttributeAggregateType &components) {
   this->kind = kind;
   this->components = components;
+}
+
+eowu::Attribute::Attribute(const char *kind, const eowu::AttributeComponentType *components, eowu::u64 n_components) {
+  eowu::AttributeAggregateType vec_components;
+  
+  for (eowu::u64 i = 0; i < n_components; i++) {
+    vec_components.push_back(components[i]);
+  }
+  
+  this->kind = kind;
+  this->components = std::move(vec_components);
 }
 
 bool eowu::Attribute::Matches(const eowu::Attribute& other) const {
@@ -29,7 +40,7 @@ const char* eowu::Attribute::GetKind() const {
   return kind;
 }
 
-const std::vector<eowu::f32>& eowu::Attribute::GetComponents() const {
+const eowu::AttributeAggregateType& eowu::Attribute::GetComponents() const {
   return components;
 }
 
