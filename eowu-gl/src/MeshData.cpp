@@ -80,6 +80,10 @@ void eowu::MeshData::create_attributes(const std::vector<eowu::Vertex> &vertices
   auto float_size = sizeof(eowu::AttributeComponentType);
   auto data_size = interleaved_data.size() * float_size;
   
+  if (data_size == 0) {
+    return;
+  }
+  
   GLsizei stride = float_size * v0.Size();
   eowu::u32 offset = 0;
   
