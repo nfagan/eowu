@@ -78,6 +78,7 @@ void test_program_has_uniform() {
   
   prog.Bind();
   
+  assert(prog.IsFinalized());
   assert(prog.HasUniform("model"));
   assert(!prog.HasUniform("models"));
   
