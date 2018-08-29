@@ -9,6 +9,7 @@
 
 #include "test-util.hpp"
 #include <eowu-gl/eowu-gl.hpp>
+#include <glm/glm.hpp>
 #include <iostream>
 
 namespace source {
@@ -61,8 +62,30 @@ eowu::Shader get_vert_shader() {
   return vert;
 }
 
+//
+//  TESTS
+//
+
+
 void test_shader_compile();
 void test_program_link();
+void test_program_has_uniform();
+
+void test_program_has_uniform() {
+  auto* window = init_glfw();
+  
+  eowu::Program prog = eowu::program_factory::make_debug();
+  
+  prog.Bind();
+  
+  assert(prog.HasUniform("model"));
+  assert(!prog.HasUniform("models"));
+  
+  std::cout << "OK: Uniform model was present in program." << std::endl;
+  std::cout << "OK: Uniform models was not present in program." << std::endl;
+  
+  glfwWindowShouldClose(window);
+}
 
 void test_program_link() {
   auto frag = get_frag_shader();
@@ -138,6 +161,8 @@ void test_shader_compile() {
 }
 
 void test_shader_run_all() {
+  std::cout << "--------" << "shader" << std::endl;
   test_shader_compile();
   test_program_link();
+  test_program_has_uniform();
 }

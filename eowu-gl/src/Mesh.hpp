@@ -43,5 +43,4 @@ private:
   
   void finalize();
   static eowu::u32 get_gl_topology(eowu::u32 topology);
-  
 };

@@ -8,6 +8,8 @@
 #include "test-vertex.hpp"
 #include "test-mesh.hpp"
 #include "test-shader.hpp"
+#include "test-uniform.hpp"
+#include "test-context.hpp"
 
 void test_glfw() {
   auto* window = init_glfw();
@@ -32,6 +34,8 @@ int main(int argc, char** argv) {
   test_vertex_run_all();
   test_mesh_run_all();
   test_shader_run_all();
+  test_uniform_run_all();
+  test_context_run_all();
 //  test_glfw();
   
   return 0;

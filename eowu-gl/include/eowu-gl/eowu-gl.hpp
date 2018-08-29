@@ -9,11 +9,17 @@
 
 #include "../../src/Attribute.hpp"
 #include "../../src/AttributeTypes.hpp"
+#include "../../src/ContextManager.hpp"
+#include "../../src/Model.hpp"
 #include "../../src/Mesh.hpp"
 #include "../../src/MeshFactory.hpp"
 #include "../../src/Vertex.hpp"
 #include "../../src/Shader.hpp"
 #include "../../src/ShaderLibrary.hpp"
+#include "../../src/Transform.hpp"
 #include "../../src/Program.hpp"
 #include "../../src/ProgramFactory.hpp"
+#include "../../src/Units.hpp"
+#include "../../src/Uniform.hpp"
+#include "../../src/Vector.hpp"
 

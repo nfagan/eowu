@@ -11,6 +11,7 @@ void test_vertex_matching();
 void test_attribute_matching();
 
 void test_vertex_run_all() {
+  std::cout << "--------" << "vertex" << std::endl;
   test_vertex_instantiation();
   test_vertex_matching();
   test_attribute_matching();

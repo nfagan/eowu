@@ -1,0 +1,10 @@
+[submodule "eowu-gl/glm"]
+	path = eowu-gl/deps/glm
+	url = https://github.com/g-truc/glm
+[submodule "eowu-gl/deps/glfw"]
+	path = eowu-gl/deps/glfw
+	url = https://github.com/glfw/glfw
+	branch = latest
+[submodule "eowu-gl/deps/variant"]
+	path = eowu-gl/deps/variant
+	url = https://github.com/mpark/variant.git

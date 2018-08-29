@@ -9,6 +9,8 @@
 
 #include "test-util.hpp"
 #include <eowu-gl/eowu-gl.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
 #include <vector>
 #include <assert.h>
@@ -17,6 +19,7 @@ void test_mesh_add_inconsistent_vertices();
 void test_draw();
 
 void test_mesh_run_all() {
+  std::cout << "--------" << "mesh" << std::endl;
   test_mesh_add_inconsistent_vertices();
   test_draw();
 }
@@ -27,12 +30,18 @@ void test_draw() {
   eowu::Program prog = eowu::program_factory::make_debug();
   eowu::Mesh mesh;
   eowu::mesh_factory::make_quad(mesh);
+  eowu::Model model;
   
-  while (!glfwWindowShouldClose(window))
-  {
+  auto proj = glm::ortho(0.0f, 640.0f, 0.0f, 480.0f);
+  const auto &transform = model.GetTransform();
+  
+  prog.Bind();
+  prog.SetUniform("model", transform.GetTransformationMatrix());
+  prog.SetUniform("projection", proj);
+  
+  while (!glfwWindowShouldClose(window)) {
     glClear(GL_COLOR_BUFFER_BIT);
     
-    prog.Bind();
     mesh.Draw();
     
     glfwSwapBuffers(window);

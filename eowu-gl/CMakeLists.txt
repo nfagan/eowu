@@ -6,14 +6,17 @@ set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 
 #  GLFW
-add_subdirectory(deps/glfw-3.2.1)
-include_directories(deps/glfw-3.2.1)
+add_subdirectory(deps/glfw)
+include_directories(deps/glfw)
 
 #  GLAD
 include_directories(deps/glad/include)
 
 #  GLM
 include_directories(deps/glm)
+
+#  VARIANT
+include_directories(deps/variant/include)
 
 file(GLOB TEST_SRC
   test/*.cpp 
