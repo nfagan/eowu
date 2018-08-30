@@ -9,6 +9,7 @@
 
 #include <eowu-common/types.hpp>
 #include <vector>
+#include <string>
 
 namespace eowu {
   class Attribute;
@@ -19,18 +20,18 @@ namespace eowu {
 
 class eowu::Attribute {
 public:
-  Attribute(const char *kind, const eowu::AttributeAggregateType &components);
-  Attribute(const char *kind, const eowu::AttributeComponentType *components, eowu::u64 n_components);
+  Attribute(const std::string &kind, const eowu::AttributeAggregateType &components);
+  Attribute(const std::string &kind, const eowu::AttributeComponentType *components, eowu::u64 n_components);
   
   ~Attribute() = default;
   
   bool Matches(const eowu::Attribute& other) const;
-  const char* GetKind() const;
+  const std::string& GetKind() const;
   const eowu::AttributeAggregateType& GetComponents() const;
   
   eowu::u64 Size() const;
   
 private:
-  const char* kind;
+  std::string kind;
   eowu::AttributeAggregateType components;
 };

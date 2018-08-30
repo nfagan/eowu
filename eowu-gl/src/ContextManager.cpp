@@ -40,6 +40,10 @@ void eowu::ContextManager::CloseWindow(eowu::WindowType win) {
   glfwWindowShouldClose(win->window);
 }
 
+const eowu::WindowContainerType& eowu::ContextManager::GetWindows() const {
+  return windows;
+}
+
 eowu::WindowType eowu::ContextManager::OpenWindow() {
   if (!IsInitialized()) {
     throw ContextNotInitializedError("OpenGL context has not been initialized.");
@@ -51,9 +55,18 @@ eowu::WindowType eowu::ContextManager::OpenWindow() {
   auto width = mode->width;
   auto height = mode->height;
   
-  GLFWwindow *window = glfwCreateWindow(width, height, "", nullptr, nullptr);
+  GLFWwindow *other = nullptr;
   
-  return std::make_shared<eowu::Window>(primary, window, mode->width, mode->height);
+  if (windows.size() > 0) {
+    other = windows[0]->window;
+  }
+  
+  GLFWwindow *window = glfwCreateWindow(width, height, "", nullptr, other);
+  
+  auto win = std::make_shared<eowu::Window>(primary, window, mode->width, mode->height);
+  windows.push_back(win);
+  
+  return win;
 }
 
 eowu::WindowType eowu::ContextManager::OpenWindow(eowu::u64 width, eowu::u64 height) {
@@ -61,10 +74,20 @@ eowu::WindowType eowu::ContextManager::OpenWindow(eowu::u64 width, eowu::u64 hei
     throw ContextNotInitializedError("OpenGL context has not been initialized.");
   }
   
-  auto *primary = get_primary_monitor_with_trap();
-  auto *window = glfwCreateWindow(width, height, "", nullptr, nullptr);
+  GLFWwindow *other = nullptr;
   
-  return std::make_shared<eowu::Window>(primary, window, width, height);
+  if (windows.size() > 0) {
+    other = windows[0]->window;
+  }
+  
+  auto *primary = get_primary_monitor_with_trap();
+  auto *window = glfwCreateWindow(width, height, "", nullptr, other);
+  
+  auto win = std::make_shared<eowu::Window>(primary, window, width, height);
+  
+  windows.push_back(win);
+  
+  return win;
 }
 
 eowu::WindowType eowu::ContextManager::OpenWindow(eowu::u32 index) {
@@ -78,9 +101,19 @@ eowu::WindowType eowu::ContextManager::OpenWindow(eowu::u32 index) {
   auto width = mode->width;
   auto height = mode->height;
   
-  GLFWwindow *window = glfwCreateWindow(width, height, "", nullptr, nullptr);
+  GLFWwindow *other = nullptr;
   
-  return std::make_shared<eowu::Window>(monitor, window, width, height);
+  if (windows.size() > 0) {
+    other = windows[0]->window;
+  }
+  
+  GLFWwindow *window = glfwCreateWindow(width, height, "", monitor, other);
+  
+  auto win = std::make_shared<eowu::Window>(monitor, window, width, height);
+  
+  windows.push_back(win);
+  
+  return win;
 }
 
 eowu::WindowType eowu::ContextManager::OpenWindow(eowu::u32 index, eowu::u64 width, eowu::u64 height) {
@@ -88,10 +121,20 @@ eowu::WindowType eowu::ContextManager::OpenWindow(eowu::u32 index, eowu::u64 wid
     throw ContextNotInitializedError("OpenGL context has not been initialized.");
   }
   
-  auto *monitor = get_monitor_with_trap(index);
-  auto *window = glfwCreateWindow(width, height, "", nullptr, nullptr);
+  GLFWwindow *other = nullptr;
   
-  return std::make_shared<eowu::Window>(monitor, window, width, height);
+  if (windows.size() > 0) {
+    other = windows[0]->window;
+  }
+  
+  auto *monitor = get_monitor_with_trap(index);
+  auto *window = glfwCreateWindow(width, height, "", monitor, other);
+  
+  auto win = std::make_shared<eowu::Window>(monitor, window, width, height);
+  
+  windows.push_back(win);
+  
+  return win;
 }
 
 GLFWmonitor* eowu::ContextManager::get_primary_monitor_with_trap() const {

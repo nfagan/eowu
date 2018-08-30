@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include "Identifier.hpp"
 #include <eowu-common/types.hpp>
 #include <glm/glm.hpp>
 #include <GLFW/glfw3.h>
@@ -25,8 +26,15 @@ public:
   glm::vec2 GetDimensions() const;
   eowu::u64 GetWidth() const;
   eowu::u64 GetHeight() const;
+  const eowu::Identifier& GetIdentifier() const;
+  
+  bool ShouldClose() const;
+  void SwapBuffers() const;
+  void MakeCurrent() const;
   
 private:
+  eowu::Identifier id;
+  
   GLFWwindow *window;
   GLFWmonitor *monitor;
   

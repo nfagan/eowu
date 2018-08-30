@@ -9,9 +9,16 @@
 #include "Error.hpp"
 #include "Topologies.hpp"
 #include <glad/glad.h>
+#include <eowu-common/logging.hpp>
 
-eowu::Mesh::Mesh() {
-  is_finalized = false;
+#ifdef EOWU_DEBUG
+#include <iostream>
+#endif
+
+eowu::Mesh::~Mesh() {
+  for (auto &data : mesh_data) {
+    data.second.Dispose();
+  }
 }
 
 void eowu::Mesh::AddVertex(const eowu::Vertex &vertex) {
@@ -35,20 +42,28 @@ void eowu::Mesh::SetTopology(eowu::u32 topology) {
   this->topology = topology;
 }
 
-bool eowu::Mesh::IsFinalized() const {
-  return is_finalized;
+bool eowu::Mesh::IsFinalized(const eowu::Identifier &id) const {
+  return is_finalized.count(id) > 0 && is_finalized.at(id);
 }
 
 bool eowu::Mesh::HasIndices() const {
   return indices.size() > 0;
 }
 
-void eowu::Mesh::Draw() {
-  if (!IsFinalized()) {
-    finalize();
+bool eowu::Mesh::HasAttribute(const std::string &attr) const {
+  if (vertices.size() == 0) {
+    return false;
   }
   
-  mesh_data.Bind();
+  return vertices[0].HasAttribute(attr);
+}
+
+void eowu::Mesh::Draw(const eowu::Identifier &window_id) {
+  if (!IsFinalized(window_id)) {
+    finalize(window_id);
+  }
+  
+  mesh_data.at(window_id).Bind();
   
   auto gl_topology = get_gl_topology(topology);
   
@@ -58,15 +73,16 @@ void eowu::Mesh::Draw() {
     glDrawArrays(gl_topology, 0, n_fragments);
   }
   
-  mesh_data.Unbind();
+  mesh_data.at(window_id).Unbind();
 }
 
-void eowu::Mesh::finalize() {
-  if (IsFinalized()) {
+void eowu::Mesh::finalize(const eowu::Identifier &window_id) {
+  if (IsFinalized(window_id)) {
     return;
   }
   
-  mesh_data.Create(vertices, indices);
+  eowu::MeshData tmp_mesh_data;
+  tmp_mesh_data.Create(vertices, indices);
   
   if (HasIndices()) {
     n_fragments = indices.size();
@@ -74,7 +90,8 @@ void eowu::Mesh::finalize() {
     n_fragments = vertices.size();
   }
   
-  is_finalized = true;
+  mesh_data[window_id] = tmp_mesh_data;
+  is_finalized[window_id] = true;
 }
 
 eowu::u32 eowu::Mesh::get_gl_topology(eowu::u32 topology) {

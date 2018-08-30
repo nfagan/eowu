@@ -29,20 +29,30 @@ void test_draw() {
   
   eowu::Program prog = eowu::program_factory::make_debug();
   eowu::Mesh mesh;
-  eowu::mesh_factory::make_quad(mesh);
+  eowu::mesh_factory::make_quad(&mesh);
   eowu::Model model;
+  eowu::Transform transform;
+  eowu::Material material;
+  
+  material.SetFaceColor(glm::vec3(1.0f));
+  
+  transform.SetUnits(eowu::units::normalized);
+  transform.SetScale(glm::vec3(0.5f));
+  transform.SetPosition(glm::vec3(0.5f, 0.5f, 1.0f));
+  transform.SetScreenDimensions(glm::vec2(640.0f, 480.0f));
   
   auto proj = glm::ortho(0.0f, 640.0f, 0.0f, 480.0f);
-  const auto &transform = model.GetTransform();
   
   prog.Bind();
   prog.SetUniform("model", transform.GetTransformationMatrix());
   prog.SetUniform("projection", proj);
   
+  eowu::Identifier id;
+  
   while (!glfwWindowShouldClose(window)) {
     glClear(GL_COLOR_BUFFER_BIT);
     
-    mesh.Draw();
+    mesh.Draw(id);
     
     glfwSwapBuffers(window);
     glfwPollEvents();

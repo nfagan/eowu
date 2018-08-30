@@ -10,11 +10,13 @@
 #include "Window.hpp"
 #include <GLFW/glfw3.h>
 #include <memory>
+#include <vector>
 
 namespace eowu {
   class ContextManager;
   
   using WindowType = std::shared_ptr<Window>;
+  using WindowContainerType = std::vector<WindowType>;
 }
 
 class eowu::ContextManager {
@@ -31,6 +33,8 @@ public:
   
   void CloseWindow(eowu::WindowType win);
   
+  const WindowContainerType& GetWindows() const;
+  
   bool IsInitialized() const;
   
 private:
@@ -38,4 +42,6 @@ private:
   
   GLFWmonitor* get_monitor_with_trap(eowu::u32 index) const;
   GLFWmonitor* get_primary_monitor_with_trap() const;
+  
+  WindowContainerType windows;
 };

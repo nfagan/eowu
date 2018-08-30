@@ -8,3 +8,6 @@
 [submodule "eowu-gl/deps/variant"]
 	path = eowu-gl/deps/variant
 	url = https://github.com/mpark/variant.git
+[submodule "eowu-gl/deps/stb"]
+	path = eowu-gl/deps/stb
+	url = https://github.com/nothings/stb

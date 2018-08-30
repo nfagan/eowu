@@ -9,6 +9,7 @@
 
 #include "Shader.hpp"
 #include "Uniform.hpp"
+#include "Identifier.hpp"
 #include <eowu-common/types.hpp>
 #include <vector>
 #include <unordered_map>
@@ -33,7 +34,10 @@ public:
   void SetUniform(const eowu::Uniform &uniform);
   void SetUniform(const std::string &name, const UniformVariantType &value);
   
+  const eowu::Identifier& GetIdentifier() const;
+  
 private:
+  eowu::Identifier resource_id;
   eowu::u32 id;
   std::unordered_map<std::string, eowu::s32> uniform_locations;
   

@@ -15,7 +15,7 @@
 
 namespace eowu {
   namespace mesh_factory {
-    static const void make_quad(eowu::Mesh &mesh) {
+    static const void make_quad(eowu::Mesh *mesh) {
       
       static const float vertex_data[48] = {
         -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
@@ -41,10 +41,10 @@ namespace eowu {
         vertex.AddAttribute(pos);
         vertex.AddAttribute(uv);
         
-        mesh.AddVertex(vertex);
+        mesh->AddVertex(vertex);
       }
       
-      mesh.SetTopology(eowu::topologies::triangles);
+      mesh->SetTopology(eowu::topologies::triangles);
     }
   }
 }

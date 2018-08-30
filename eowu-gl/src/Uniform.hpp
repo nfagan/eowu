@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include "Texture.hpp"
 #include <eowu-common/types.hpp>
 #include <mpark/variant.hpp>
 #include <glm/glm.hpp>
@@ -15,7 +16,7 @@
 namespace eowu {
   class Uniform;
   
-  using UniformVariantType = mpark::variant<bool, glm::vec3, glm::mat4, eowu::s32, eowu::f32>;
+  using UniformVariantType = mpark::variant<eowu::Texture, bool, glm::vec3, glm::mat4, eowu::s32, eowu::f32>;
 }
 
 class eowu::Uniform {

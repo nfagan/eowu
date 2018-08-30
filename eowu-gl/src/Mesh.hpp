@@ -9,8 +9,10 @@
 
 #include "Vertex.hpp"
 #include "MeshData.hpp"
+#include "Identifier.hpp"
 #include <eowu-common/types.hpp>
 #include <vector>
+#include <unordered_map>
 
 namespace eowu {
   class Mesh;
@@ -18,29 +20,30 @@ namespace eowu {
 
 class eowu::Mesh {
 public:
-  Mesh();
-  ~Mesh() = default;
+  Mesh() = default;
+  ~Mesh();
   
   void AddVertex(const eowu::Vertex &vertex);
   void SetIndices(const std::vector<eowu::u32>& indices);
   void SetTopology(eowu::u32 topology);
   
-  void Draw();
+  void Draw(const eowu::Identifier &window_id);
   bool HasIndices() const;
-  bool IsFinalized() const;
+  bool HasAttribute(const std::string &attr) const;
+  bool IsFinalized(const eowu::Identifier &window_id) const;
   
-  void Dispose();
-  
+  void Dispose();  
 private:
   std::vector<eowu::Vertex> vertices;
   std::vector<eowu::u32> indices;
   
   eowu::u32 topology;
-  eowu::MeshData mesh_data;
+  
+  std::unordered_map<eowu::Identifier, eowu::MeshData> mesh_data;
+  std::unordered_map<eowu::Identifier, bool> is_finalized;
+  
   eowu::u64 n_fragments;
   
-  bool is_finalized;
-  
-  void finalize();
+  void finalize(const eowu::Identifier &window_id);
   static eowu::u32 get_gl_topology(eowu::u32 topology);
 };

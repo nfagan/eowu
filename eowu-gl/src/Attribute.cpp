@@ -7,12 +7,12 @@
 
 #include "Attribute.hpp"
 
-eowu::Attribute::Attribute(const char *kind, const eowu::AttributeAggregateType &components) {
+eowu::Attribute::Attribute(const std::string &kind, const eowu::AttributeAggregateType &components) {
   this->kind = kind;
   this->components = components;
 }
 
-eowu::Attribute::Attribute(const char *kind, const eowu::AttributeComponentType *components, eowu::u64 n_components) {
+eowu::Attribute::Attribute(const std::string &kind, const eowu::AttributeComponentType *components, eowu::u64 n_components) {
   eowu::AttributeAggregateType vec_components;
   
   for (eowu::u64 i = 0; i < n_components; i++) {
@@ -29,14 +29,10 @@ bool eowu::Attribute::Matches(const eowu::Attribute& other) const {
     return false;
   }
   
-  if (strcmp(other.GetKind(), GetKind()) != 0) {
-    return false;
-  }
-  
-  return true;
+  return other.GetKind() == GetKind();
 }
 
-const char* eowu::Attribute::GetKind() const {
+const std::string& eowu::Attribute::GetKind() const {
   return kind;
 }
 

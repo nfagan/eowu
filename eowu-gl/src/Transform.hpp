@@ -19,6 +19,12 @@ namespace eowu {
 class eowu::Transform {
 public:
   Transform();
+  Transform(const eowu::Transform &other);
+  Transform(eowu::Transform &&other) noexcept;
+  
+  Transform& operator=(const eowu::Transform& other);
+  Transform& operator=(Transform&& other) noexcept;
+  
   ~Transform() = default;
   
   void SetPosition(const glm::vec3 &pos);

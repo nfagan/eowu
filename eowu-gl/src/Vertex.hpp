@@ -21,9 +21,9 @@ public:
   ~Vertex() = default;
 
   void AddAttribute(const eowu::Attribute &attribute);
-  bool HasAttribute(const char *name) const;
-  const eowu::Attribute* GetAttribute(const char *name) const;
-  const std::vector<const char*> GetAttributeKinds() const;
+  bool HasAttribute(const std::string &name) const;
+  const eowu::Attribute* GetAttribute(const std::string &name) const;
+  std::vector<std::string> GetAttributeKinds() const;
   
   eowu::u64 CountAttributes() const;
   
@@ -32,5 +32,5 @@ public:
   bool Matches(const eowu::Vertex &other) const;
   
 private:
-  std::unordered_map<const char*, eowu::Attribute> attributes;
+  std::unordered_map<std::string, eowu::Attribute> attributes;
 };

@@ -9,6 +9,31 @@
 #include <glad/glad.h>
 #include <glm/gtc/type_ptr.hpp>
 
+struct UniformSettingImplementation {
+  eowu::u32 loc;
+  
+  UniformSettingImplementation(eowu::u32 loc_) : loc(loc_) {};
+  
+  void operator()(bool val) {
+    glUniform1i(loc, val);
+  }
+  void operator()(eowu::s32 val) {
+    glUniform1i(loc, val);
+  }
+  void operator()(eowu::f32 val) {
+    glUniform1f(loc, val);
+  }
+  void operator()(const glm::vec3 &val) {
+    glUniform3f(loc, val.x, val.y, val.z);
+  }
+  void operator()(const glm::mat4 &val) {
+    glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(val));
+  }
+  void operator()(const eowu::Texture &tex) {
+    glUniform1i(loc, tex.index);
+  }
+};
+
 eowu::Uniform::Uniform() {
   has_value = false;
 }
@@ -36,21 +61,5 @@ const std::string& eowu::Uniform::GetName() const {
 }
 
 void eowu::Uniform::Set(eowu::u32 loc) const {
-  
-  auto index = value.index();
-  
-  if (index == 0) {
-    glUniform1i(loc, mpark::get<0>(value));
-  } else if (index == 1) {
-    auto val = mpark::get<1>(value);
-    glUniform3f(loc, val.x, val.y, val.z);
-  } else if (index == 2) {
-    auto val = mpark::get<2>(value);
-    glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(val));
-  } else if (index == 3) {
-    glUniform1i(loc, mpark::get<3>(value));
-  } else if (index == 4) {
-    glUniform1f(loc, mpark::get<4>(value));
-  }
-  
+  mpark::visit(UniformSettingImplementation{loc}, value);
 }

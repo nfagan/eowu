@@ -52,6 +52,10 @@ void eowu::Program::Link(const std::vector<eowu::Shader*>& shaders) {
   is_finalized = true;
 }
 
+const eowu::Identifier& eowu::Program::GetIdentifier() const {
+  return resource_id;
+}
+
 bool eowu::Program::IsFinalized() const {
   return is_finalized;
 }

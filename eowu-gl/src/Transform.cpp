@@ -7,8 +7,9 @@
 
 #include "Transform.hpp"
 #include "Units.hpp"
-#include <mutex>
 #include <glm/gtc/matrix_transform.hpp>
+#include <mutex>
+#include <utility>
 
 eowu::Transform::Transform() {
   position = glm::vec3(0.0f);
@@ -17,6 +18,41 @@ eowu::Transform::Transform() {
   screen_dimensions = glm::vec2(0.0f);
   
   units = eowu::units::pixels;
+}
+
+eowu::Transform::Transform(const eowu::Transform &other) {
+  position = other.GetPosition();
+  rotation = other.GetRotation();
+  scale = other.GetScale();
+  screen_dimensions = other.GetScreenDimensions();
+  
+  units = other.units.load();
+}
+
+eowu::Transform::Transform(eowu::Transform &&other) noexcept {
+  position = std::move(other.GetPosition());
+  rotation = std::move(other.GetRotation());
+  scale = std::move(other.GetScale());
+  screen_dimensions = std::move(other.GetScreenDimensions());
+  
+  units = std::move(other.units.load());
+}
+
+eowu::Transform& eowu::Transform::operator=(eowu::Transform&& other) noexcept {
+  position = std::move(other.GetPosition());
+  rotation = std::move(other.GetRotation());
+  scale = std::move(other.GetScale());
+  screen_dimensions = std::move(other.GetScreenDimensions());
+  
+  units = std::move(other.units.load());
+  
+  return *this;
+}
+
+eowu::Transform& eowu::Transform::operator=(const eowu::Transform& other) {
+  eowu::Transform tmp(other);
+  *this = std::move(tmp);
+  return *this;
 }
 
 void eowu::Transform::SetPosition(const glm::vec3 &pos) {

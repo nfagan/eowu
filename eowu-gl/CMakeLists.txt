@@ -18,6 +18,9 @@ include_directories(deps/glm)
 #  VARIANT
 include_directories(deps/variant/include)
 
+#  STB
+include_directories(deps/stb)
+
 file(GLOB TEST_SRC
   test/*.cpp 
   test/*.h

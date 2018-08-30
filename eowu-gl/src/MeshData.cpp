@@ -15,7 +15,7 @@ eowu::MeshData::MeshData() {
 }
 
 eowu::MeshData::~MeshData() {
-  Dispose();
+//  Dispose();
 }
 
 void eowu::MeshData::Dispose() {

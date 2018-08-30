@@ -14,6 +14,10 @@ eowu::Window::Window(GLFWmonitor *monitor, GLFWwindow *window, eowu::u64 width, 
   this->height = height;
 }
 
+const eowu::Identifier& eowu::Window::GetIdentifier() const {
+  return id;
+}
+
 glm::vec2 eowu::Window::GetDimensions() const {
   return glm::vec2(width, height);
 }
@@ -24,4 +28,16 @@ eowu::u64 eowu::Window::GetWidth() const {
 
 eowu::u64 eowu::Window::GetHeight() const {
   return height;
+}
+
+bool eowu::Window::ShouldClose() const {
+  return glfwWindowShouldClose(window);
+}
+
+void eowu::Window::SwapBuffers() const {
+  glfwSwapBuffers(window);
+}
+
+void eowu::Window::MakeCurrent() const {
+  glfwMakeContextCurrent(window);
 }

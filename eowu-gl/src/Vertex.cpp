@@ -13,8 +13,8 @@ void eowu::Vertex::AddAttribute(const eowu::Attribute &attribute) {
   attributes.insert(std::make_pair(attribute.GetKind(), attribute));
 }
 
-bool eowu::Vertex::HasAttribute(const char *name) const {
-  const auto& it = attributes.find(name);
+bool eowu::Vertex::HasAttribute(const std::string &name) const {
+  const auto &it = attributes.find(name);
   return it != attributes.end();
 }
 
@@ -22,7 +22,7 @@ eowu::u64 eowu::Vertex::CountAttributes() const {
   return attributes.size();
 }
 
-const eowu::Attribute* eowu::Vertex::GetAttribute(const char *name) const {
+const eowu::Attribute* eowu::Vertex::GetAttribute(const std::string &name) const {
   if (!HasAttribute(name)) {
     return nullptr;
   }
@@ -30,8 +30,8 @@ const eowu::Attribute* eowu::Vertex::GetAttribute(const char *name) const {
   return &attributes.at(name);
 }
 
-const std::vector<const char*> eowu::Vertex::GetAttributeKinds() const {
-  std::vector<const char*> res;
+std::vector<std::string> eowu::Vertex::GetAttributeKinds() const {
+  std::vector<std::string> res;
   
   for (const auto& it : attributes) {
     res.push_back(it.first);
