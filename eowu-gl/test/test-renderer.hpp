@@ -91,7 +91,11 @@ void test_renderer_instantiation() {
   auto mesh = std::make_shared<eowu::Mesh>();
   auto material = std::make_shared<eowu::Material>();
   auto material2 = std::make_shared<eowu::Material>(material);
+#ifdef APPLE
   auto tex = eowu::load::image("/Users/Nick/Documents/MATLAB/repositories/hwwba/stimuli/ac/go1.png");
+#else
+  auto tex = eowu::load::image("C:\\Users\\changLab\\Repositories\\cpp\\eowu\\eowu-gl\\deps\\stb\\data\\map_01.png");
+#endif
   
   material2->SetFaceColor(tex);
   
