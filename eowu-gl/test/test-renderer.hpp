@@ -26,7 +26,7 @@ bool any_should_close(const std::vector<eowu::WindowType> &wins) {
 
 void test_many_models() {
   auto manager = std::make_shared<eowu::ContextManager>();
-  auto renderer = eowu::Renderer(manager);
+  eowu::Renderer renderer(manager);
   
   manager->Initialize();
   

@@ -8,6 +8,9 @@
 #include "Parser.hpp"
 #include "Components.hpp"
 #include <sstream>
+#include <ostream>
+#include <iterator>
+#include <algorithm>
 
 std::string join(const std::vector<std::string>& components, const char *delim) {
   std::ostringstream joined;
