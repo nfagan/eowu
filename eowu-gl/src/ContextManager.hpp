@@ -39,9 +39,12 @@ public:
   
 private:
   bool is_initialized;
+  bool loaded_gl_pointers;
   
   GLFWmonitor* get_monitor_with_trap(eowu::u32 index) const;
   GLFWmonitor* get_primary_monitor_with_trap() const;
   
   WindowContainerType windows;
+  
+  void register_window(eowu::WindowType win);
 };

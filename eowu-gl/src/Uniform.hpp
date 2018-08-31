@@ -17,6 +17,19 @@ namespace eowu {
   class Uniform;
   
   using UniformVariantType = mpark::variant<eowu::Texture, bool, glm::vec3, glm::mat4, eowu::s32, eowu::f32>;
+  
+  template<typename UniformT>
+  bool uniform_is_texture(const UniformT &value) {
+    return mpark::visit([](auto &&arg) -> bool {
+      using T = std::decay_t<decltype(arg)>;
+      
+      if constexpr (std::is_same_v<T, eowu::Texture>) {
+        return true;
+      } else {
+        return false;
+      }
+    }, value);
+  }
 }
 
 class eowu::Uniform {

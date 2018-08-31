@@ -52,7 +52,9 @@ void test_draw() {
   while (!glfwWindowShouldClose(window)) {
     glClear(GL_COLOR_BUFFER_BIT);
     
-    mesh.Draw(id);
+    mesh.Bind(id);
+    mesh.Draw();
+    mesh.Unbind(id);
     
     glfwSwapBuffers(window);
     glfwPollEvents();

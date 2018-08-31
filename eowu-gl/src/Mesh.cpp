@@ -42,6 +42,10 @@ void eowu::Mesh::SetTopology(eowu::u32 topology) {
   this->topology = topology;
 }
 
+const eowu::Identifier& eowu::Mesh::GetIdentifier() const {
+  return resource_id;
+}
+
 bool eowu::Mesh::IsFinalized(const eowu::Identifier &id) const {
   return is_finalized.count(id) > 0 && is_finalized.at(id);
 }
@@ -58,13 +62,23 @@ bool eowu::Mesh::HasAttribute(const std::string &attr) const {
   return vertices[0].HasAttribute(attr);
 }
 
-void eowu::Mesh::Draw(const eowu::Identifier &window_id) {
+void eowu::Mesh::Bind(const eowu::Identifier &window_id) {
   if (!IsFinalized(window_id)) {
     finalize(window_id);
   }
   
   mesh_data.at(window_id).Bind();
+}
+
+void eowu::Mesh::Unbind(const eowu::Identifier &window_id) {
+  if (!IsFinalized(window_id)) {
+    finalize(window_id);
+  }
   
+  mesh_data.at(window_id).Unbind();
+}
+
+void eowu::Mesh::Draw() const {
   auto gl_topology = get_gl_topology(topology);
   
   if (HasIndices()) {
@@ -72,8 +86,6 @@ void eowu::Mesh::Draw(const eowu::Identifier &window_id) {
   } else {
     glDrawArrays(gl_topology, 0, n_fragments);
   }
-  
-  mesh_data.at(window_id).Unbind();
 }
 
 void eowu::Mesh::finalize(const eowu::Identifier &window_id) {

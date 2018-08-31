@@ -5,11 +5,13 @@
 //  Created by Nick Fagan on 8/29/18.
 //
 
+#include <glad/glad.h>
 #include "ContextManager.hpp"
 #include "Error.hpp"
 
 eowu::ContextManager::ContextManager() {
   is_initialized = false;
+  loaded_gl_pointers = false;
 }
 
 void eowu::ContextManager::Initialize() {
@@ -64,7 +66,8 @@ eowu::WindowType eowu::ContextManager::OpenWindow() {
   GLFWwindow *window = glfwCreateWindow(width, height, "", nullptr, other);
   
   auto win = std::make_shared<eowu::Window>(primary, window, mode->width, mode->height);
-  windows.push_back(win);
+  
+  register_window(win);
   
   return win;
 }
@@ -85,7 +88,7 @@ eowu::WindowType eowu::ContextManager::OpenWindow(eowu::u64 width, eowu::u64 hei
   
   auto win = std::make_shared<eowu::Window>(primary, window, width, height);
   
-  windows.push_back(win);
+  register_window(win);
   
   return win;
 }
@@ -111,7 +114,7 @@ eowu::WindowType eowu::ContextManager::OpenWindow(eowu::u32 index) {
   
   auto win = std::make_shared<eowu::Window>(monitor, window, width, height);
   
-  windows.push_back(win);
+  register_window(win);
   
   return win;
 }
@@ -132,7 +135,7 @@ eowu::WindowType eowu::ContextManager::OpenWindow(eowu::u32 index, eowu::u64 wid
   
   auto win = std::make_shared<eowu::Window>(monitor, window, width, height);
   
-  windows.push_back(win);
+  register_window(win);
   
   return win;
 }
@@ -157,4 +160,14 @@ GLFWmonitor* eowu::ContextManager::get_monitor_with_trap(eowu::u32 index) const 
   }
   
   return monitors[index];
+}
+
+void eowu::ContextManager::register_window(eowu::WindowType win) {
+  windows.push_back(win);
+  
+  if (!loaded_gl_pointers) {
+    win->MakeCurrent();
+    gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
+    loaded_gl_pointers = true;
+  }
 }

@@ -13,7 +13,7 @@
 #include <vector>
 
 namespace eowu {
-  struct Texture;
+  class Texture;
   
   namespace glsl {
     enum Types {

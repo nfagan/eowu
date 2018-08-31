@@ -18,6 +18,40 @@ eowu::Texture::Texture() {
 
 eowu::Texture::~Texture() {
   if (!is_empty) {
-    glDeleteTextures(1, &id);
+//    glDeleteTextures(1, &id);
   }
+}
+
+void eowu::Texture::Bind() const {
+  glActiveTexture(GL_TEXTURE0 + index);
+  glBindTexture(GL_TEXTURE_2D, id);
+}
+
+void eowu::Texture::SetId(eowu::u32 id) {
+  this->id = id;
+  is_empty = false;
+}
+
+void eowu::Texture::SetIndex(eowu::u32 index) {
+  this->index = index;
+}
+
+void eowu::Texture::SetWidth(eowu::u32 width) {
+  this->width = width;
+}
+
+void eowu::Texture::SetHeight(eowu::u32 height) {
+  this->height = height;
+}
+
+eowu::u32 eowu::Texture::GetIndex() const {
+  return index;
+}
+
+eowu::u32 eowu::Texture::GetHeight() const {
+  return height;
+}
+
+eowu::u32 eowu::Texture::GetWidth() const {
+  return width;
 }

@@ -30,7 +30,7 @@ struct UniformSettingImplementation {
     glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(val));
   }
   void operator()(const eowu::Texture &tex) {
-    glUniform1i(loc, tex.index);
+    glUniform1i(loc, tex.GetIndex());
   }
 };
 

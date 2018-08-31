@@ -53,10 +53,9 @@ eowu::Texture eowu::load::image(const std::string &filename) {
   
   eowu::Texture texture;
   
-  texture.width = width;
-  texture.height = height;
-  texture.id = texture_id;
-  texture.is_empty = false;
+  texture.SetWidth(width);
+  texture.SetHeight(height);
+  texture.SetId(texture_id);
   
   return texture;  
 }

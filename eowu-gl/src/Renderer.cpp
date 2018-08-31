@@ -82,12 +82,15 @@ void eowu::Renderer::draw_one_model(const eowu::WindowType& window, const eowu::
   auto transform = model.GetTransform();
   
   if (!material || !mesh) {
+    EOWU_LOG_INFO("Renderer::draw_one_model: Material or Mesh was null.");
     return;
   }
   
   transform.SetScreenDimensions(window->GetDimensions());
   
+  auto window_id = window->GetIdentifier();
   auto material_id = material->GetIdentifier();
+  auto mesh_id = mesh->GetIdentifier();
   bool has_program_for_material = programs_by_material_id.count(material_id) > 0;
   bool material_schema_changed = material->SchemaChanged();
   bool prog_need_bind = false;
@@ -97,7 +100,7 @@ void eowu::Renderer::draw_one_model(const eowu::WindowType& window, const eowu::
   if (!has_program_for_material || material_schema_changed) {
     //  analyze material to see whether we need to make
     //  a new shader
-    EOWU_LOG_INFO("Renderer: draw_one_model: Analyzing material." << std::endl);
+    EOWU_LOG_INFO("Renderer::draw_one_model: Analyzing material.");
     
     const eowu::Mesh &ref_mesh = *(mesh.get());
     const eowu::Material &ref_mat = *(material.get());
@@ -112,20 +115,21 @@ void eowu::Renderer::draw_one_model(const eowu::WindowType& window, const eowu::
     
     if (prog_exists) {
       prog = programs.at(hash_code);
+      EOWU_LOG_INFO("Renderer::draw_one_model: Using cached shader.");
     } else {
-      EOWU_LOG_INFO("Renderer: draw_one_model: Generating new program.");
+      EOWU_LOG_INFO("Renderer::draw_one_model: Generating new program.");
       prog = eowu::builder::from_source(v_src, f_src);
     }
     
-    programs.insert(std::make_pair(hash_code, prog));
-    programs_by_material_id.insert(std::make_pair(material_id, hash_code));
+    programs[hash_code] = prog;
+    programs_by_material_id[material_id] = hash_code;
     
     prog_need_bind = true;
   } else {
     prog = programs.at(programs_by_material_id.at(material_id));
     
     bool is_new_prog = last_program->GetIdentifier() != prog->GetIdentifier();
-    bool is_new_window = !last_window || last_window->GetIdentifier() != window->GetIdentifier();
+    bool is_new_window = !last_window || last_window->GetIdentifier() != window_id;
     
     prog_need_bind = is_new_prog || is_new_window;
   }
@@ -143,9 +147,20 @@ void eowu::Renderer::draw_one_model(const eowu::WindowType& window, const eowu::
   prog->SetUniform(eowu::uniforms::view, glm::mat4(1.0f));
   prog->SetUniform(eowu::uniforms::projection, proj);
   
-  mesh->Draw(window->GetIdentifier());
+  bool mesh_need_bind = prog_need_bind || !last_mesh || last_mesh->GetIdentifier() != mesh_id;
   
-  last_program = prog;  
+  if (mesh_need_bind) {    
+    if (last_mesh) {
+      last_mesh->Unbind(window_id);
+    }
+    
+    mesh->Bind(window_id);
+  }
+  
+  mesh->Draw();
+  
+  last_program = prog;
+  last_mesh = mesh;
 }
 
 glm::mat4 eowu::Renderer::get_projection_matrix(eowu::WindowType window) const {

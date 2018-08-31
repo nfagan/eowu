@@ -20,7 +20,19 @@ eowu::Material::Material(const eowu::Material &other) : face_color(other.face_co
 eowu::Material::Material(const std::shared_ptr<eowu::Material> &other) : face_color(other->face_color) {};
 
 void eowu::Material::Configure(eowu::Program &prog) {
-  auto fc = eowu::variant_cast(face_color.GetValue());
+  auto fv = face_color.GetValue();
+  auto fc = eowu::variant_cast(fv);
+  
+  eowu::u32 n_textures = 0;
+  
+  bool is_tex = eowu::uniform_is_texture(fv);
+  
+  if (is_tex) {
+    auto& val = mpark::get<eowu::Texture>(fv);
+    val.SetIndex(n_textures++);
+    val.Bind();
+  }
+  
   prog.SetUniform(face_color.GetName(), fc);
 }
 

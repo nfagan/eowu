@@ -27,15 +27,20 @@ public:
   void SetIndices(const std::vector<eowu::u32>& indices);
   void SetTopology(eowu::u32 topology);
   
-  void Draw(const eowu::Identifier &window_id);
+  void Bind(const eowu::Identifier &window_id);
+  void Unbind(const eowu::Identifier &window_id);
+  void Draw() const;
   bool HasIndices() const;
   bool HasAttribute(const std::string &attr) const;
   bool IsFinalized(const eowu::Identifier &window_id) const;
+  const eowu::Identifier& GetIdentifier() const;
   
   void Dispose();  
 private:
   std::vector<eowu::Vertex> vertices;
   std::vector<eowu::u32> indices;
+  
+  eowu::Identifier resource_id;
   
   eowu::u32 topology;
   

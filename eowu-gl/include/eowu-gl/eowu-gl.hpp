@@ -18,6 +18,8 @@
 #include "../../src/Shader.hpp"
 #include "../../src/ShaderBuilder.hpp"
 #include "../../src/ShaderLibrary.hpp"
+#include "../../src/Texture.hpp"
+#include "../../src/TextureLoader.hpp"
 #include "../../src/Transform.hpp"
 #include "../../src/Program.hpp"
 #include "../../src/ProgramFactory.hpp"

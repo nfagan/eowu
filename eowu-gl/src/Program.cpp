@@ -74,7 +74,7 @@ bool eowu::Program::HasUniform(const std::string &name) {
       return false;
     }
     
-    uniform_locations.insert(std::make_pair(name, loc));
+    uniform_locations[name] = loc;
   }
   
   return true;
