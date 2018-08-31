@@ -79,7 +79,7 @@ void test_many_models() {
 void test_renderer_instantiation() {
   
   auto manager = std::make_shared<eowu::ContextManager>();
-  auto renderer = eowu::Renderer(manager);
+  eowu::Renderer renderer(manager);
   
   manager->Initialize();
   
