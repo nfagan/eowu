@@ -18,22 +18,22 @@ public:
   Texture();
   ~Texture();
   
-  void SetId(eowu::u32 id);
-  void SetWidth(eowu::u32 width);
-  void SetHeight(eowu::u32 height);
-  void SetIndex(eowu::u32 index);
+  void SetId(unsigned int id);
+  void SetWidth(unsigned int width);
+  void SetHeight(unsigned int height);
+  void SetIndex(unsigned int index);
   
   void Bind() const;
   
-  eowu::u32 GetIndex() const;
-  eowu::u32 GetWidth() const;
-  eowu::u32 GetHeight() const;
+  unsigned int GetIndex() const;
+  unsigned int GetWidth() const;
+  unsigned int GetHeight() const;
   
 private:
   bool is_empty;
   
-  eowu::u32 id;
-  eowu::u32 width;
-  eowu::u32 height;
-  eowu::u32 index;
+  unsigned int id;
+  unsigned int width;
+  unsigned int height;
+  unsigned int index;
 };

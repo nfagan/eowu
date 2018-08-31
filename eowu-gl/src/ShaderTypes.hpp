@@ -11,7 +11,7 @@
 
 namespace eowu {
   namespace shader_types {
-    static constexpr eowu::u32 vertex = 0;
-    static constexpr eowu::u32 fragment = 1;
+    static constexpr unsigned int vertex = 0;
+    static constexpr unsigned int fragment = 1;
   }
 }

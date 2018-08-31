@@ -72,7 +72,7 @@ eowu::WindowType eowu::ContextManager::OpenWindow() {
   return win;
 }
 
-eowu::WindowType eowu::ContextManager::OpenWindow(eowu::u64 width, eowu::u64 height) {
+eowu::WindowType eowu::ContextManager::OpenWindow(unsigned int width, unsigned int height) {
   if (!IsInitialized()) {
     throw ContextNotInitializedError("OpenGL context has not been initialized.");
   }
@@ -93,7 +93,7 @@ eowu::WindowType eowu::ContextManager::OpenWindow(eowu::u64 width, eowu::u64 hei
   return win;
 }
 
-eowu::WindowType eowu::ContextManager::OpenWindow(eowu::u32 index) {
+eowu::WindowType eowu::ContextManager::OpenWindow(unsigned int index) {
   if (!IsInitialized()) {
     throw ContextNotInitializedError("OpenGL context has not been initialized.");
   }
@@ -119,7 +119,7 @@ eowu::WindowType eowu::ContextManager::OpenWindow(eowu::u32 index) {
   return win;
 }
 
-eowu::WindowType eowu::ContextManager::OpenWindow(eowu::u32 index, eowu::u64 width, eowu::u64 height) {
+eowu::WindowType eowu::ContextManager::OpenWindow(unsigned int index, unsigned int width, unsigned int height) {
   if (!IsInitialized()) {
     throw ContextNotInitializedError("OpenGL context has not been initialized.");
   }
@@ -150,7 +150,7 @@ GLFWmonitor* eowu::ContextManager::get_primary_monitor_with_trap() const {
   return primary;
 }
 
-GLFWmonitor* eowu::ContextManager::get_monitor_with_trap(eowu::u32 index) const {
+GLFWmonitor* eowu::ContextManager::get_monitor_with_trap(unsigned int index) const {
   int count;
   
   auto **monitors = glfwGetMonitors(&count);

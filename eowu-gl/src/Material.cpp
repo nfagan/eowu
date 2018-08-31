@@ -23,7 +23,7 @@ void eowu::Material::Configure(eowu::Program &prog) {
   auto fv = face_color.GetValue();
   auto fc = eowu::variant_cast(fv);
   
-  eowu::u32 n_textures = 0;
+  unsigned int n_textures = 0;
   
   bool is_tex = eowu::uniform_is_texture(fv);
   

@@ -10,6 +10,7 @@
 #include "Attribute.hpp"
 #include <eowu-common/types.hpp>
 #include <unordered_map>
+#include <cstddef>
 
 namespace eowu {
   class Vertex;
@@ -25,9 +26,9 @@ public:
   const eowu::Attribute* GetAttribute(const std::string &name) const;
   std::vector<std::string> GetAttributeKinds() const;
   
-  eowu::u64 CountAttributes() const;
+  std::size_t CountAttributes() const;
   
-  eowu::u64 Size() const;
+  std::size_t Size() const;
   
   bool Matches(const eowu::Vertex &other) const;
   

@@ -11,7 +11,7 @@
 
 namespace detail {
   
-  template<eowu::u32 N>
+  template<unsigned int N>
   struct glm_vec;
   
   template<>
@@ -67,14 +67,14 @@ namespace detail {
 }
 
 namespace eowu {
-  template<eowu::u32 N>
+  template<unsigned int N>
   class Vector;
 }
 
-template<eowu::u32 N>
+template<unsigned int N>
 class eowu::Vector {
 public:
-  Vector(eowu::f32 val) {
+  Vector(float val) {
     value = typename detail::glm_vec<N>::type(val);
   }
   

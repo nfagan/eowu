@@ -166,7 +166,7 @@ void eowu::Renderer::draw_one_model(const eowu::WindowType& window, const eowu::
 glm::mat4 eowu::Renderer::get_projection_matrix(eowu::WindowType window) const {
   
   if (projection_type == eowu::projection_types::orthographic) {
-    return glm::ortho(0.0f, (eowu::f32)window->GetWidth(), 0.0f, (eowu::f32)window->GetHeight());
+    return glm::ortho(0.0f, (float)window->GetWidth(), 0.0f, (float)window->GetHeight());
   } else {
     throw eowu::NotImplementedError("Non-orthographic projections not yet implemented.");
   }

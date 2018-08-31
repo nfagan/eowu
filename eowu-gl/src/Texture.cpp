@@ -27,31 +27,31 @@ void eowu::Texture::Bind() const {
   glBindTexture(GL_TEXTURE_2D, id);
 }
 
-void eowu::Texture::SetId(eowu::u32 id) {
+void eowu::Texture::SetId(unsigned int id) {
   this->id = id;
   is_empty = false;
 }
 
-void eowu::Texture::SetIndex(eowu::u32 index) {
+void eowu::Texture::SetIndex(unsigned int index) {
   this->index = index;
 }
 
-void eowu::Texture::SetWidth(eowu::u32 width) {
+void eowu::Texture::SetWidth(unsigned int width) {
   this->width = width;
 }
 
-void eowu::Texture::SetHeight(eowu::u32 height) {
+void eowu::Texture::SetHeight(unsigned int height) {
   this->height = height;
 }
 
-eowu::u32 eowu::Texture::GetIndex() const {
+unsigned int eowu::Texture::GetIndex() const {
   return index;
 }
 
-eowu::u32 eowu::Texture::GetHeight() const {
+unsigned int eowu::Texture::GetHeight() const {
   return height;
 }
 
-eowu::u32 eowu::Texture::GetWidth() const {
+unsigned int eowu::Texture::GetWidth() const {
   return width;
 }

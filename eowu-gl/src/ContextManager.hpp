@@ -27,9 +27,9 @@ public:
   void Initialize();
   
   eowu::WindowType OpenWindow();
-  eowu::WindowType OpenWindow(eowu::u32 index);
-  eowu::WindowType OpenWindow(eowu::u32 index, eowu::u64 width, eowu::u64 height);
-  eowu::WindowType OpenWindow(eowu::u64 width, eowu::u64 height);
+  eowu::WindowType OpenWindow(unsigned int index);
+  eowu::WindowType OpenWindow(unsigned int index, unsigned int width, unsigned int height);
+  eowu::WindowType OpenWindow(unsigned int width, unsigned int height);
   
   void CloseWindow(eowu::WindowType win);
   
@@ -41,7 +41,7 @@ private:
   bool is_initialized;
   bool loaded_gl_pointers;
   
-  GLFWmonitor* get_monitor_with_trap(eowu::u32 index) const;
+  GLFWmonitor* get_monitor_with_trap(unsigned int index) const;
   GLFWmonitor* get_primary_monitor_with_trap() const;
   
   WindowContainerType windows;

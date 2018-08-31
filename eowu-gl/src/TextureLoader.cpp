@@ -13,7 +13,7 @@
 #include <glad/glad.h>
 
 eowu::Texture eowu::load::image(const std::string &filename) {
-  eowu::s32 width, height, n_components;
+  int width, height, n_components;
   
   unsigned char *data = stbi_load(filename.c_str(), &width, &height, &n_components, 0);
   
@@ -37,7 +37,7 @@ eowu::Texture eowu::load::image(const std::string &filename) {
       throw eowu::TextureLoadError("Unsupported texture format in file: " + filename);
   }
   
-  eowu::u32 texture_id;
+  unsigned int texture_id;
   glGenTextures(1, &texture_id);
   
   glBindTexture(GL_TEXTURE_2D, texture_id);

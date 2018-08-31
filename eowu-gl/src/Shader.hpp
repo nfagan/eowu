@@ -19,16 +19,16 @@ public:
   Shader();
   ~Shader();
   
-  void Create(const char *source, eowu::u32);
+  void Create(const char *source, unsigned int type);
   void Dispose();
-  void Attach(eowu::u32 program_id) const;
+  void Attach(unsigned int program_id) const;
   
   bool IsCreated() const;
   
 private:
   bool is_created;
-  eowu::u32 id;
+  unsigned int id;
   
-  static eowu::u32 get_gl_id_from_type(eowu::u32 type);
-  static void validate_shader(eowu::u32 id);
+  static unsigned int get_gl_id_from_type(unsigned int type);
+  static void validate_shader(unsigned int id);
 };

@@ -68,7 +68,7 @@ bool eowu::Program::HasUniform(const std::string &name) {
   const auto& it = uniform_locations.find(name);
   
   if (it == uniform_locations.end()) {
-    eowu::s32 loc = glGetUniformLocation(id, name.c_str());
+    int loc = glGetUniformLocation(id, name.c_str());
     
     if (loc == -1) {
       return false;
@@ -92,7 +92,7 @@ void eowu::Program::SetUniform(const eowu::Uniform &uniform) {
     return;
   }
   
-  eowu::s32 loc = uniform_locations.at(name);
+  int loc = uniform_locations.at(name);
   uniform.Set(loc);
 }
 
@@ -112,7 +112,7 @@ void eowu::Program::Unbind() {
   glUseProgram(0);
 }
 
-void eowu::Program::check_link_errors(eowu::u32 id) {
+void eowu::Program::check_link_errors(unsigned int id) {
   int success;
   char info_log[1024];
   

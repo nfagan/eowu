@@ -13,6 +13,7 @@
 #include <eowu-common/types.hpp>
 #include <vector>
 #include <unordered_map>
+#include <cstddef>
 
 namespace eowu {
   class Mesh;
@@ -24,8 +25,8 @@ public:
   ~Mesh();
   
   void AddVertex(const eowu::Vertex &vertex);
-  void SetIndices(const std::vector<eowu::u32>& indices);
-  void SetTopology(eowu::u32 topology);
+  void SetIndices(const std::vector<unsigned int>& indices);
+  void SetTopology(unsigned int topology);
   
   void Bind(const eowu::Identifier &window_id);
   void Unbind(const eowu::Identifier &window_id);
@@ -38,17 +39,17 @@ public:
   void Dispose();  
 private:
   std::vector<eowu::Vertex> vertices;
-  std::vector<eowu::u32> indices;
+  std::vector<unsigned int> indices;
   
   eowu::Identifier resource_id;
   
-  eowu::u32 topology;
+  unsigned int topology;
   
   std::unordered_map<eowu::Identifier, eowu::MeshData> mesh_data;
   std::unordered_map<eowu::Identifier, bool> is_finalized;
   
-  eowu::u64 n_fragments;
+  std::size_t n_fragments;
   
   void finalize(const eowu::Identifier &window_id);
-  static eowu::u32 get_gl_topology(eowu::u32 topology);
+  static unsigned int get_gl_topology(unsigned int topology);
 };

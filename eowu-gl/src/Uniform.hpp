@@ -16,7 +16,7 @@
 namespace eowu {
   class Uniform;
   
-  using UniformVariantType = mpark::variant<eowu::Texture, bool, glm::vec3, glm::mat4, eowu::s32, eowu::f32>;
+  using UniformVariantType = mpark::variant<eowu::Texture, bool, glm::vec3, glm::mat4, int, float>;
   
   template<typename UniformT>
   bool uniform_is_texture(const UniformT &value) {
@@ -44,7 +44,7 @@ public:
   void SetContents(const std::string &name, const eowu::UniformVariantType &value);
   const std::string& GetName() const;
   
-  void Set(eowu::u32 loc) const;
+  void Set(unsigned int loc) const;
 private:
   std::string name;
   eowu::UniformVariantType value;

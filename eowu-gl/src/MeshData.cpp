@@ -9,6 +9,7 @@
 #include "Attribute.hpp"
 #include "AttributeTypes.hpp"
 #include <glad/glad.h>
+#include <cstddef>
 
 eowu::MeshData::MeshData() {
   is_created = false;
@@ -38,7 +39,7 @@ void eowu::MeshData::Unbind() const {
   glBindVertexArray(0);
 }
 
-void eowu::MeshData::Create(const std::vector<eowu::Vertex> &vertices, const std::vector<eowu::u32> &indices) {
+void eowu::MeshData::Create(const std::vector<eowu::Vertex> &vertices, const std::vector<unsigned int> &indices) {
   if (IsCreated()) {
     Dispose();
   }
@@ -62,15 +63,15 @@ void eowu::MeshData::Create(const std::vector<eowu::Vertex> &vertices, const std
   is_created = true;
 }
 
-void eowu::MeshData::create_indices(const std::vector<eowu::u32> &indices) {
-  eowu::u64 sz = indices.size();
+void eowu::MeshData::create_indices(const std::vector<unsigned int> &indices) {
+  std::size_t sz = indices.size();
   
   if (sz == 0) {
     return;
   }
   
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(eowu::u32) * sz, &indices[0], GL_STATIC_DRAW);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * sz, &indices[0], GL_STATIC_DRAW);
 }
 
 void eowu::MeshData::create_attributes(const std::vector<eowu::Vertex> &vertices) {
@@ -85,13 +86,13 @@ void eowu::MeshData::create_attributes(const std::vector<eowu::Vertex> &vertices
   }
   
   GLsizei stride = float_size * v0.Size();
-  eowu::u32 offset = 0;
+  unsigned int offset = 0;
   
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
   glBufferData(GL_ARRAY_BUFFER, data_size, &interleaved_data[0], GL_STATIC_DRAW);
   
   auto attrib_kinds = get_ordered_attribute_kinds();
-  eowu::u64 idx = 0;
+  unsigned int idx = 0;
   
   for (const auto& kind : attrib_kinds) {
     if (!v0.HasAttribute(kind)) {
@@ -147,9 +148,9 @@ eowu::AttributeAggregateType eowu::MeshData::get_interleaved_data(const std::vec
       
       const auto* attrib = vert.GetAttribute(kind);
       const auto& components = attrib->GetComponents();
-      const eowu::u64 sz = attrib->Size();
+      const std::size_t sz = attrib->Size();
       
-      for (eowu::u64 i = 0; i < sz; i++) {
+      for (std::size_t i = 0; i < sz; i++) {
         res.push_back(components[i]);
       }
     }

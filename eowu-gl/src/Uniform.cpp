@@ -10,17 +10,17 @@
 #include <glm/gtc/type_ptr.hpp>
 
 struct UniformSettingImplementation {
-  eowu::u32 loc;
+  unsigned int loc;
   
-  UniformSettingImplementation(eowu::u32 loc_) : loc(loc_) {};
+  UniformSettingImplementation(unsigned int loc_) : loc(loc_) {};
   
   void operator()(bool val) {
     glUniform1i(loc, val);
   }
-  void operator()(eowu::s32 val) {
+  void operator()(int val) {
     glUniform1i(loc, val);
   }
-  void operator()(eowu::f32 val) {
+  void operator()(float val) {
     glUniform1f(loc, val);
   }
   void operator()(const glm::vec3 &val) {
@@ -60,6 +60,6 @@ const std::string& eowu::Uniform::GetName() const {
   return name;
 }
 
-void eowu::Uniform::Set(eowu::u32 loc) const {
+void eowu::Uniform::Set(unsigned int loc) const {
   mpark::visit(UniformSettingImplementation{loc}, value);
 }

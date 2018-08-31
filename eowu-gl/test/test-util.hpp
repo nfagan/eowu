@@ -8,8 +8,8 @@
 #pragma once
 
 namespace {
-  std::vector<eowu::f32> get_values() {
-    std::vector<eowu::f32> values;
+  std::vector<float> get_values() {
+    std::vector<float> values;
     values.push_back(0.1);
     values.push_back(0.2);
     

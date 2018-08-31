@@ -14,14 +14,12 @@
 #include <vector>
 #include <assert.h>
 #include <chrono>
+#include <algorithm>
 
 bool any_should_close(const std::vector<eowu::WindowType> &wins) {
-  for (const auto& win : wins) {
-    if (win->ShouldClose()) {
-      return true;
-    }
-  }
-  return false;
+  return std::any_of(wins.cbegin(), wins.cend(), [](const auto &win) {
+    return win->ShouldClose();
+  });
 }
 
 void test_many_models() {
@@ -41,9 +39,9 @@ void test_many_models() {
   
   std::vector<eowu::Model> models;
   
-  eowu::u32 n_models = 1000;
+  unsigned int n_models = 1000;
   
-  for (eowu::u32 i = 0; i < n_models; i++) {
+  for (unsigned int i = 0; i < n_models; i++) {
     eowu::Model model(mesh, material);
     auto &transform = model.GetTransform();
     
@@ -91,7 +89,7 @@ void test_renderer_instantiation() {
   auto mesh = std::make_shared<eowu::Mesh>();
   auto material = std::make_shared<eowu::Material>();
   auto material2 = std::make_shared<eowu::Material>(material);
-#ifdef APPLE
+#ifdef __APPLE__
   auto tex = eowu::load::image("/Users/Nick/Documents/MATLAB/repositories/hwwba/stimuli/ac/go1.png");
 #else
   auto tex = eowu::load::image("C:\\Users\\changLab\\Repositories\\cpp\\eowu\\eowu-gl\\deps\\stb\\data\\map_01.png");

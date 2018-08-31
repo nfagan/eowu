@@ -18,7 +18,7 @@ bool eowu::Vertex::HasAttribute(const std::string &name) const {
   return it != attributes.end();
 }
 
-eowu::u64 eowu::Vertex::CountAttributes() const {
+std::size_t eowu::Vertex::CountAttributes() const {
   return attributes.size();
 }
 
@@ -40,8 +40,8 @@ std::vector<std::string> eowu::Vertex::GetAttributeKinds() const {
   return res;
 }
 
-eowu::u64 eowu::Vertex::Size() const {
-  eowu::u64 sz = 0;
+std::size_t eowu::Vertex::Size() const {
+  std::size_t sz = 0;
   
   for (const auto& it : attributes) {
     sz += it.second.Size();

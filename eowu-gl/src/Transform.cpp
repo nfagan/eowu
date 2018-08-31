@@ -65,7 +65,7 @@ void eowu::Transform::SetScale(const glm::vec3 &scl) {
   scale = scl;
 }
 
-void eowu::Transform::SetUnits(eowu::u32 units) {
+void eowu::Transform::SetUnits(unsigned int units) {
   this->units.store(units);
 }
 

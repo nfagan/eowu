@@ -34,11 +34,11 @@ void eowu::Mesh::AddVertex(const eowu::Vertex &vertex) {
   vertices.push_back(vertex);
 }
 
-void eowu::Mesh::SetIndices(const std::vector<eowu::u32> &indices) {
+void eowu::Mesh::SetIndices(const std::vector<unsigned int> &indices) {
   this->indices = indices;
 }
 
-void eowu::Mesh::SetTopology(eowu::u32 topology) {
+void eowu::Mesh::SetTopology(unsigned int topology) {
   this->topology = topology;
 }
 
@@ -106,7 +106,7 @@ void eowu::Mesh::finalize(const eowu::Identifier &window_id) {
   is_finalized[window_id] = true;
 }
 
-eowu::u32 eowu::Mesh::get_gl_topology(eowu::u32 topology) {
+unsigned int eowu::Mesh::get_gl_topology(unsigned int topology) {
   switch (topology) {
     case eowu::topologies::triangles:
       return GL_TRIANGLES;

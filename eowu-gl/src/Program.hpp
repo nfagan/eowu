@@ -38,10 +38,10 @@ public:
   
 private:
   eowu::Identifier resource_id;
-  eowu::u32 id;
-  std::unordered_map<std::string, eowu::s32> uniform_locations;
+  unsigned int id;
+  std::unordered_map<std::string, int> uniform_locations;
   
   bool is_finalized;
   
-  static void check_link_errors(eowu::u32 id);
+  static void check_link_errors(unsigned int id);
 };

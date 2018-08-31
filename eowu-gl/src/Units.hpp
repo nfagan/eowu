@@ -11,7 +11,7 @@
 
 namespace eowu {
   namespace units {
-    static constexpr eowu::u32 normalized = 0;
-    static constexpr eowu::u32 pixels = 1;
+    static constexpr unsigned int normalized = 0;
+    static constexpr unsigned int pixels = 1;
   }
 }

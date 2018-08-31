@@ -30,7 +30,7 @@ public:
   void SetPosition(const glm::vec3 &pos);
   void SetRotation(const glm::vec3 &rot);
   void SetScale(const glm::vec3 &scale);
-  void SetUnits(eowu::u32 units);
+  void SetUnits(unsigned int units);
   void SetScreenDimensions(const glm::vec2 &dims);
   
   glm::vec3 GetPosition() const;
@@ -43,7 +43,7 @@ public:
 private:
   mutable std::shared_mutex mut;
   
-  std::atomic<eowu::u32> units;
+  std::atomic<unsigned int> units;
   
   glm::vec3 position;
   glm::vec3 rotation;

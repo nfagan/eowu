@@ -21,11 +21,11 @@ class eowu::Window {
   friend class ContextManager;
   
 public:
-  Window(GLFWmonitor *monitor, GLFWwindow *window, eowu::u64 width, eowu::u64 height);
+  Window(GLFWmonitor *monitor, GLFWwindow *window, unsigned int width, unsigned int height);
   
   glm::vec2 GetDimensions() const;
-  eowu::u64 GetWidth() const;
-  eowu::u64 GetHeight() const;
+  unsigned int GetWidth() const;
+  unsigned int GetHeight() const;
   const eowu::Identifier& GetIdentifier() const;
   
   bool ShouldClose() const;
@@ -38,6 +38,6 @@ private:
   GLFWwindow *window;
   GLFWmonitor *monitor;
   
-  eowu::u64 width;
-  eowu::u64 height;
+  unsigned int width;
+  unsigned int height;
 };

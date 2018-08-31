@@ -12,10 +12,10 @@ eowu::Attribute::Attribute(const std::string &kind, const eowu::AttributeAggrega
   this->components = components;
 }
 
-eowu::Attribute::Attribute(const std::string &kind, const eowu::AttributeComponentType *components, eowu::u64 n_components) {
+eowu::Attribute::Attribute(const std::string &kind, const eowu::AttributeComponentType *components, std::size_t n_components) {
   eowu::AttributeAggregateType vec_components;
   
-  for (eowu::u64 i = 0; i < n_components; i++) {
+  for (std::size_t i = 0; i < n_components; i++) {
     vec_components.push_back(components[i]);
   }
   
@@ -40,6 +40,6 @@ const eowu::AttributeAggregateType& eowu::Attribute::GetComponents() const {
   return components;
 }
 
-eowu::u64 eowu::Attribute::Size() const {
+std::size_t eowu::Attribute::Size() const {
   return components.size();
 }

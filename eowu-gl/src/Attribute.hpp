@@ -10,18 +10,19 @@
 #include <eowu-common/types.hpp>
 #include <vector>
 #include <string>
+#include <cstddef>
 
 namespace eowu {
   class Attribute;
   
-  using AttributeComponentType = eowu::f32;
-  using AttributeAggregateType = std::vector<eowu::f32>;
+  using AttributeComponentType = float;
+  using AttributeAggregateType = std::vector<float>;
 }
 
 class eowu::Attribute {
 public:
   Attribute(const std::string &kind, const eowu::AttributeAggregateType &components);
-  Attribute(const std::string &kind, const eowu::AttributeComponentType *components, eowu::u64 n_components);
+  Attribute(const std::string &kind, const eowu::AttributeComponentType *components, std::size_t n_components);
   
   ~Attribute() = default;
   
@@ -29,7 +30,7 @@ public:
   const std::string& GetKind() const;
   const eowu::AttributeAggregateType& GetComponents() const;
   
-  eowu::u64 Size() const;
+  std::size_t Size() const;
   
 private:
   std::string kind;
