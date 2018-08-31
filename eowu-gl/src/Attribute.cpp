@@ -12,7 +12,9 @@ eowu::Attribute::Attribute(const std::string &kind, const eowu::AttributeAggrega
   this->components = components;
 }
 
-eowu::Attribute::Attribute(const std::string &kind, const eowu::AttributeComponentType *components, std::size_t n_components) {
+eowu::Attribute::Attribute(const std::string &kind, const eowu::AttributeComponentType *components,
+                           std::size_t n_components) {
+  
   eowu::AttributeAggregateType vec_components;
   
   for (std::size_t i = 0; i < n_components; i++) {

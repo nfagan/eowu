@@ -5,3 +5,4 @@ set(EOWU_CXX_STANDARD, 17)
 
 add_subdirectory(eowu-common)
 add_subdirectory(eowu-gl)
+add_subdirectory(eowu-script)
