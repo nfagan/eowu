@@ -8,6 +8,7 @@
 #include "test-util.hpp"
 #include <eowu-script/eowu-script.hpp>
 #include "Lua.hpp"
+#include <stdexcept>
 
 std::string util::get_lua_test_script_directory() {
 #ifdef __APPLE__
@@ -24,6 +25,26 @@ namespace detail {
   
     return &vec;
   }
+}
+
+luabridge::LuaRef util::get_global_from_script_with_trap(lua_State *L, const std::string &file, const std::string &name) {
+  using namespace luabridge;
+  
+  int res = luaL_dofile(L, file.c_str());
+  lua_pcall(L, 0, 0, 0);
+  
+  if (res != 0) {
+    auto msg = "File " + file + " failed to parse with message: " + lua_tostring(L, -1);
+    throw std::runtime_error(msg);
+  }
+  
+  auto glob = getGlobal(L, name.c_str());
+  
+  if (glob.isNil()) {
+    throw std::runtime_error("Global variable " + name + " does not exist.");
+  }
+  
+  return glob;
 }
 
 void util::run_lua_test_script(lua_State *L, const std::string &file) {

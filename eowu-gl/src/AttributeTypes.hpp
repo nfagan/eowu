@@ -9,7 +9,7 @@
 
 namespace eowu {
   namespace attributes {
-    static const char *position = "position";
-    static const char *uv = "uv";
+    extern const char* const position;
+    extern const char* const uv;
   }
 }
