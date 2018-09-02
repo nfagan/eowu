@@ -1,14 +1,10 @@
-extern "C" {
-# include "lua.h"
-# include "lauxlib.h"
-# include "lualib.h"
-}
-
-#include <LuaBridge/LuaBridge.h>
+#include "test-wrapper.hpp"
+#include "test-gl-script.hpp"
 
 int main(int argc, char** argv) {
   
-  int test = 10;
-
+  test_gl_script_run_all();
+  test_wrapper_run_all();
+  
   return 0;
 }

@@ -22,6 +22,7 @@ class eowu::Window {
   
 public:
   Window(GLFWmonitor *monitor, GLFWwindow *window, unsigned int width, unsigned int height);
+  ~Window() = default;
   
   glm::vec2 GetDimensions() const;
   unsigned int GetWidth() const;
@@ -31,6 +32,7 @@ public:
   bool ShouldClose() const;
   void SwapBuffers() const;
   void MakeCurrent() const;
+  void Show() const;
   
 private:
   eowu::Identifier id;

@@ -5,12 +5,14 @@ file(GLOB TEST_SRC
   test/*.cpp 
   test/*.h
   test/*.hpp 
+  include/*.hpp
 )
 
 file(GLOB_RECURSE LIB_SRC 
   src/*.cpp
   src/*.h
   src/*.hpp
+  include/*.hpp
 )
 
 if(APPLE)
@@ -30,16 +32,15 @@ set_target_properties(lua PROPERTIES
 add_executable(eowu-script-test ${TEST_SRC})
 add_library(eowu-script STATIC ${LIB_SRC})
 
-include_directories(deps/lua/include)
-include_directories(deps/LuaBridge/Source/)
-
+target_include_directories(eowu-script PRIVATE src/ deps/LuaBridge/Source/)
 target_include_directories(eowu-script PUBLIC include/)
-target_include_directories(eowu-script-test PUBLIC include/)
+
+target_include_directories(eowu-script-test PRIVATE src/ deps/LuaBridge/Source/)
 
 set_property(TARGET eowu-script PROPERTY CXX_STANDARD 17)
 set_property(TARGET eowu-script-test PROPERTY CXX_STANDARD 17)
 
-target_link_libraries(eowu-script eowu-common lua)
-target_link_libraries(eowu-script-test eowu-common lua)
+target_link_libraries(eowu-script eowu-gl eowu-state lua)
+target_link_libraries(eowu-script-test eowu-script)
 
 

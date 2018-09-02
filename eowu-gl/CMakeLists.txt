@@ -5,6 +5,9 @@ set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 
+set(EOWU_GL_SOURCEDIR "${CMAKE_SOURCE_DIR}/eowu-gl")
+set(EOWU_GL_DEPDIR "${EOWU_GL_SOURCEDIR}/deps")
+
 #  GLFW
 add_subdirectory(deps/glfw)
 include_directories(deps/glfw)
@@ -33,13 +36,22 @@ file(GLOB_RECURSE LIB_SRC
   src/*.hpp
 )
 
+set(GLM_INCLUDE_DIR "${EOWU_GL_DEPDIR}/glm")
+set(VARIANT_INCLUDE_DIR "${EOWU_GL_DEPDIR}/variant/include")
+set(EOWU_GL_INCLUDE_DIR "${EOWU_GL_SOURCEDIR}/include")
+
 list(APPEND TEST_SRC "deps/glad/src/glad.c")
 list(APPEND LIB_SRC "deps/glad/src/glad.c")
 
 add_executable(eowu-gl-test ${TEST_SRC})
 add_library(eowu-gl STATIC ${LIB_SRC})
 
-target_include_directories(eowu-gl PUBLIC include/)
+target_include_directories(eowu-gl PUBLIC 
+  ${GLM_INCLUDE_DIR} 
+  ${VARIANT_INCLUDE_DIR} 
+  ${EOWU_GL_INCLUDE_DIR}
+)
+
 target_include_directories(eowu-gl-test PUBLIC include/)
 
 set_property(TARGET eowu-gl PROPERTY CXX_STANDARD 17)

@@ -16,6 +16,7 @@
 #include <mutex>
 #include <utility>
 #include <iostream>
+#include <functional>
 
 namespace eowu {
   template<typename ...T>
@@ -23,6 +24,9 @@ namespace eowu {
   
   template<typename ...T>
   using MaterialAttributeAggregateType = mpark::variant<T...>;
+  
+  template<typename T>
+  using ConstraintType = std::function<typename std::decay<T>::type(typename std::decay<T>::type)>;
 }
 
 template<typename ...T>
@@ -34,8 +38,13 @@ public:
   ~MaterialAttribute() = default;
   
   void SetName(const std::string &name);
+  
   template<typename VT>
   void SetValue(const VT &value);
+  
+  template<typename VT>
+  void SetValue(const VT &value, eowu::ConstraintType<VT> *constraint);
+  
   template<typename VT>
   void SetContents(const std::string &name, const VT &value);
   
@@ -137,6 +146,18 @@ void eowu::MaterialAttribute<T...>::SetValue(const VT &value) {
   auto current_index = this->value.index();
   
   this->value = value;
+  this->glsl_type = eowu::glsl::TypeMap<VT>::value;
+  this->type_did_change = this->value.index() != current_index;
+}
+
+template<typename ...T>
+template<typename VT>
+void eowu::MaterialAttribute<T...>::SetValue(const VT &value, eowu::ConstraintType<VT> *constraint) {
+  std::unique_lock<std::shared_mutex> lock(mut);
+  
+  auto current_index = this->value.index();
+  
+  this->value = constraint(value);
   this->glsl_type = eowu::glsl::TypeMap<VT>::value;
   this->type_did_change = this->value.index() != current_index;
 }

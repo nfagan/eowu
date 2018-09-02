@@ -11,3 +11,6 @@
 [submodule "eowu-gl/deps/stb"]
 	path = eowu-gl/deps/stb
 	url = https://github.com/nothings/stb
+[submodule "eowu-script/deps/LuaBridge"]
+	path = eowu-script/deps/LuaBridge
+	url = https://github.com/vinniefalco/LuaBridge

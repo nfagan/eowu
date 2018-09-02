@@ -32,6 +32,9 @@ public:
   void SetMaterial(std::shared_ptr<eowu::Material> material);
   void SetTransform(const eowu::Transform &trans);
   
+  bool HasMesh() const;
+  bool HasMaterial() const;
+  
   eowu::Transform& GetTransform();
   const eowu::Transform& GetTransform() const;
   std::shared_ptr<eowu::Material> GetMaterial() const;

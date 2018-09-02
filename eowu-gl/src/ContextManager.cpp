@@ -8,6 +8,7 @@
 #include <glad/glad.h>
 #include "ContextManager.hpp"
 #include "Error.hpp"
+#include <iostream>
 
 eowu::ContextManager::ContextManager() {
   is_initialized = false;
@@ -32,7 +33,6 @@ void eowu::ContextManager::Initialize() {
   
   is_initialized = true;
 }
-
 
 bool eowu::ContextManager::IsInitialized() const {
   return is_initialized;

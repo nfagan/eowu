@@ -38,6 +38,14 @@ eowu::Transform& eowu::Model::GetTransform() {
   return transform;
 }
 
+bool eowu::Model::HasMesh() const {
+  return GetMesh() != nullptr;
+}
+
+bool eowu::Model::HasMaterial() const {
+  return GetMaterial() != nullptr;
+}
+
 void eowu::Model::SetMesh(std::shared_ptr<eowu::Mesh> mesh) {
   std::unique_lock<std::shared_mutex> lock(mut);
   this->mesh = mesh;

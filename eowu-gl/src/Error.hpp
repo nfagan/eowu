@@ -9,12 +9,7 @@
 
 #include <stdexcept>
 #include <string>
-
-#define EOWU_GENERIC_ERROR(name) \
-  class name : public std::runtime_error { \
-  public: \
-    name(const std::string &msg) : std::runtime_error(msg) {} \
-  } \
+#include <eowu-common/error.hpp>
 
 namespace eowu {
   EOWU_GENERIC_ERROR(NonMatchingVerticesError);
@@ -31,4 +26,6 @@ namespace eowu {
   
   EOWU_GENERIC_ERROR(TextureLoadError);
   EOWU_GENERIC_ERROR(IncompleteModelError);
+  
+  EOWU_GENERIC_ERROR(NonexistentResourceError);
 }

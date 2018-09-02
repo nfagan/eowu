@@ -41,3 +41,7 @@ void eowu::Window::SwapBuffers() const {
 void eowu::Window::MakeCurrent() const {
   glfwMakeContextCurrent(window);
 }
+
+void eowu::Window::Show() const {
+  glfwShowWindow(window);
+}

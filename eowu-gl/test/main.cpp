@@ -13,6 +13,7 @@
 #include "test-shader-builder.hpp"
 #include "test-renderer.hpp"
 #include "test-identifier.hpp"
+#include "test-resource-manager.hpp"
 
 void test_glfw() {
   auto* window = init_glfw();
@@ -34,6 +35,7 @@ void test_glfw() {
 
 int main(int argc, char** argv) {
   
+  test_resource_manager_run_all();
   test_identifier_run_all();
   test_renderer_run_all();
   test_vertex_run_all();

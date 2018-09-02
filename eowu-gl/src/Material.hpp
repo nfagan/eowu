@@ -10,6 +10,7 @@
 #include "MaterialAttribute.hpp"
 #include "Texture.hpp"
 #include "Identifier.hpp"
+#include "Constraints.hpp"
 #include <glm/glm.hpp>
 
 namespace eowu {
@@ -45,7 +46,7 @@ private:
 };
 
 template<typename T>
-void eowu::Material::SetFaceColor(const T &value) {
+void eowu::Material::SetFaceColor(const T &value) {  
   face_color.SetValue(value);
 }
 
