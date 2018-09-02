@@ -19,7 +19,7 @@ if(APPLE)
   set(PLATFORM_DIRECTORY "maci64")
   set(LUA_LIB "liblua53.a")
 else()
-  set(PLATFORM_DIRECTORY, "win64")
+  set(PLATFORM_DIRECTORY "win64")
   set(LUA_LIB "lua53.lib")
 endif()
 
