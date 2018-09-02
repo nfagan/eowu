@@ -18,6 +18,7 @@ namespace eowu {
 class eowu::Timer {
 public:
   Timer();
+  Timer(const eowu::Timer &other);
   ~Timer() = default;
   
   void Reset();

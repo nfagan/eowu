@@ -11,6 +11,11 @@ eowu::Timer::Timer() {
   Reset();
 }
 
+eowu::Timer::Timer(const eowu::Timer &other) {
+  last_time = other.last_time.load();
+  current_time = other.current_time.load();
+}
+
 void eowu::Timer::Reset() {
   last_time = eowu::time::now();
   current_time = last_time.load();
