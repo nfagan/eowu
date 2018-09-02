@@ -69,7 +69,7 @@ void test1() {
   //  gl initialization
   context_manager->Initialize();
   
-  auto win = context_manager->OpenWindow();
+  auto win = context_manager->OpenWindow(400, 400);
   
   win->MakeCurrent();
   
