@@ -20,7 +20,7 @@ if(APPLE)
   set(LUA_LIB "liblua53.a")
 else()
   set(PLATFORM_DIRECTORY, "win64")
-  set(LUA_LIB "")
+  set(LUA_LIB "lua53.lib")
 endif()
 
 add_library(lua STATIC IMPORTED)
