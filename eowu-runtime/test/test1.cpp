@@ -63,7 +63,7 @@ void test1() {
   using namespace eowu;
   
   auto context_manager = std::make_shared<ContextManager>();
-  auto resource_manager = ResourceManager();
+  ResourceManager resource_manager;
   auto renderer = Renderer(context_manager);
   
   //  gl initialization
