@@ -89,8 +89,8 @@ void test1() {
 
   //  state initialization
   
-  auto state_manager = StateManager();
-  auto state_runner = StateRunner();
+  StateManager state_manager;
+  StateRunner state_runner;
   
   auto state1 = state_manager.CreateState("first");
   state1->SetDuration(std::chrono::milliseconds(5000));
