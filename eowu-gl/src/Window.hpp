@@ -10,7 +10,9 @@
 #include "Identifier.hpp"
 #include <eowu-common/types.hpp>
 #include <glm/glm.hpp>
-#include <GLFW/glfw3.h>
+
+struct GLFWwindow;
+struct GLFWmonitor;
 
 namespace eowu {
   class Window;

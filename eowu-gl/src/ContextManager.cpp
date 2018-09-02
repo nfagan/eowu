@@ -6,6 +6,7 @@
 //
 
 #include <glad/glad.h>
+#include <GLFW/glfw3.h>
 #include "ContextManager.hpp"
 #include "Error.hpp"
 #include <iostream>
@@ -32,6 +33,10 @@ void eowu::ContextManager::Initialize() {
 #endif
   
   is_initialized = true;
+}
+
+void eowu::ContextManager::PollEvents() const {
+  glfwPollEvents();
 }
 
 bool eowu::ContextManager::IsInitialized() const {
@@ -170,4 +175,8 @@ void eowu::ContextManager::register_window(eowu::WindowType win) {
     gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
     loaded_gl_pointers = true;
   }
+  
+  //  Seems to be necessary to enable window display
+  //  in macOS :(
+  PollEvents();
 }

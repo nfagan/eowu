@@ -6,6 +6,7 @@
 //
 
 #include "Window.hpp"
+#include <GLFW/glfw3.h>
 
 eowu::Window::Window(GLFWmonitor *monitor, GLFWwindow *window, unsigned int width, unsigned int height) {
   this->monitor = monitor;

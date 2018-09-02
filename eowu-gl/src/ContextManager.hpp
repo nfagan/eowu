@@ -8,9 +8,10 @@
 #pragma once
 
 #include "Window.hpp"
-#include <GLFW/glfw3.h>
 #include <memory>
 #include <vector>
+
+struct GLFWmonitor;
 
 namespace eowu {
   class ContextManager;
@@ -25,18 +26,17 @@ public:
   ~ContextManager() = default;
   
   void Initialize();
+  bool IsInitialized() const;
+  
+  void PollEvents() const;
   
   eowu::WindowType OpenWindow();
   eowu::WindowType OpenWindow(unsigned int index);
   eowu::WindowType OpenWindow(unsigned int index, unsigned int width, unsigned int height);
   eowu::WindowType OpenWindow(unsigned int width, unsigned int height);
   
-  void CloseWindow(eowu::WindowType win);
-  
   const WindowContainerType& GetWindows() const;
-  
-  bool IsInitialized() const;
-  
+  void CloseWindow(eowu::WindowType win);
 private:
   bool is_initialized;
   bool loaded_gl_pointers;

@@ -7,11 +7,11 @@
 
 #include "Timer.hpp"
 
-eowu::Timer::Timer() : last_time(eowu::time::now()), current_time(eowu::time::now()) {
-  Reset();
+eowu::Timer::Timer() : current_time(eowu::time::now()), last_time(eowu::time::now()) {
+  //
 }
 
-eowu::Timer::Timer(const eowu::Timer &other) : last_time(other.last_time.load()), current_time(other.current_time.load()) {
+eowu::Timer::Timer(const eowu::Timer &other) : current_time(other.last_time.load()), last_time(other.current_time.load()) {
   //
 }
 
