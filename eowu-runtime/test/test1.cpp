@@ -81,7 +81,7 @@ void test1() {
 
   model1->GetTransform().SetUnits(units::normalized);
   model1->GetTransform().SetScale(glm::vec3(0.5));
-  model1->GetTransform().SetPosition(glm::vec3(0.0, 1.0, 1.0));
+  model1->GetTransform().SetPosition(glm::vec3(0.5, 0.5, 1.0));
 
   material1->SetFaceColor(glm::vec3(1.0));
 

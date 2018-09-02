@@ -10,7 +10,11 @@
 #include "Lua.hpp"
 
 std::string util::get_lua_test_script_directory() {
+#ifdef __APPLE__
   return "/Users/Nick/repositories/cpp/eowu/eowu-script/test/script/";
+#else
+  return "C:\\Users\\changLab\\Repositories\\cpp\\eowu\\eowu-script\\test\\script\\";
+#endif
 }
 
 namespace detail {
