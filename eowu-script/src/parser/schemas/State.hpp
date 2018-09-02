@@ -7,9 +7,9 @@
 
 #pragma once
 
+#include "Lua.hpp"
 #include <unordered_map>
 #include <string>
-#include "Lua.hpp"
 
 namespace eowu {
   namespace schema {
@@ -17,6 +17,15 @@ namespace eowu {
       luabridge::LuaRef entry_function;
       luabridge::LuaRef loop_function;
       luabridge::LuaRef exit_function;
+      
+      double duration;
+      
+      State(lua_State *L);
+      ~State() = default;
+    };
+    
+    struct States {
+      std::unordered_map<std::string, State> mapping;
     };
   }
 }

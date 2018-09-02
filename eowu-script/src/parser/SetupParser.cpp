@@ -199,3 +199,59 @@ eowu::parser::ParseResult<eowu::schema::Targets> eowu::parser::targets(const lua
   
   return result;
 }
+
+
+//
+//  State
+//
+
+eowu::parser::ParseResult<eowu::schema::States> eowu::parser::states(const luabridge::LuaRef &table) {
+  using namespace eowu::parser;
+  using namespace eowu::schema;
+  
+  ParseResult<States> result;
+  
+  auto kv = get_string_map_from_table(table);
+  
+  for (const auto &it : kv) {
+    auto state_res = eowu::parser::state(it.second);
+    
+    if (!state_res.success) {
+      result.message = state_res.message;
+      return result;
+    }
+    
+    result.result.mapping.emplace(it.first, state_res.result);
+  }
+  
+  result.success = true;
+  
+  return result;
+}
+
+eowu::parser::ParseResult<eowu::schema::State> eowu::parser::state(const luabridge::LuaRef &table) {
+  using namespace eowu::parser;
+  using namespace eowu::schema;
+  
+  ParseResult<State> result(table.state());
+  
+  auto kv = get_string_map_from_table(table);
+  
+  try {
+    result.result.duration = eowu::parser::get_numeric_value_or<double>(kv, "Duration", 0.0);
+    result.result.entry_function = eowu::parser::get_function_or_error(kv, "Entry");
+    result.result.loop_function = eowu::parser::get_function_or_error(kv, "Loop");
+    result.result.exit_function = eowu::parser::get_function_or_error(kv, "Exit");
+    
+  } catch (const std::exception &e) {
+    result.message = e.what();
+    
+    return result;
+  }
+  
+  result.success = true;
+  
+  return result;
+}
+
+

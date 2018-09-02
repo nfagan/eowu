@@ -32,10 +32,10 @@ set_target_properties(lua PROPERTIES
 add_executable(eowu-script-test ${TEST_SRC})
 add_library(eowu-script STATIC ${LIB_SRC})
 
-target_include_directories(eowu-script PRIVATE src/ deps/LuaBridge/Source/)
-target_include_directories(eowu-script PUBLIC include/)
+target_include_directories(eowu-script PUBLIC include/ src/ deps/LuaBridge/Source/)
+#target_include_directories(eowu-script PUBLIC include/)
 
-target_include_directories(eowu-script-test PRIVATE src/ deps/LuaBridge/Source/)
+target_include_directories(eowu-script-test PUBLIC src/ deps/LuaBridge/Source/)
 
 set_property(TARGET eowu-script PROPERTY CXX_STANDARD 17)
 set_property(TARGET eowu-script-test PROPERTY CXX_STANDARD 17)

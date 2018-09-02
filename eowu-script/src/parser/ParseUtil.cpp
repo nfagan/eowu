@@ -325,5 +325,24 @@ std::string eowu::parser::get_string_or_error(const eowu::parser::MapTableType &
   return ref.tostring();
 }
 
+//
+//  function
+//
+
+luabridge::LuaRef eowu::parser::get_function_or_error(const eowu::parser::MapTableType &table,
+                                                      const std::string &key) {
+  if (table.count(key) == 0) {
+    throw eowu::ScriptParseError("Missing key: " + key);
+  }
+  
+  const auto &ref = table.at(key);
+  
+  if (!ref.isFunction()) {
+    throw eowu::ScriptParseError(eowu::parser::get_type_error_message(key, "function"));
+  }
+  
+  return ref;
+}
+
 
 
