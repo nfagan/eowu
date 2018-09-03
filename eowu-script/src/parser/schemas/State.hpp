@@ -19,6 +19,8 @@ namespace eowu {
       luabridge::LuaRef exit_function;
       luabridge::LuaRef render_function;
       
+      std::string state_id;
+      
       double duration;
       
       State(lua_State *L);

@@ -243,6 +243,7 @@ eowu::parser::ParseResult<eowu::schema::State> eowu::parser::state(const luabrid
     result.result.loop_function = eowu::parser::get_function_or_error(kv, "Loop");
     result.result.exit_function = eowu::parser::get_function_or_error(kv, "Exit");
     result.result.render_function = eowu::parser::get_function_or_error(kv, "Render");
+    result.result.state_id = eowu::parser::get_string_or_error(kv, "ID");
     
   } catch (const std::exception &e) {
     result.message = e.what();

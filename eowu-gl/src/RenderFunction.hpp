@@ -23,8 +23,6 @@ public:
   
   void SetOnNextFrame(const RenderFunctionCallbackType &cb);
   void Call() const;
-  void Lock() const;
-  void Unlock() const;
   
 private:
   mutable std::mutex mut;

@@ -12,6 +12,9 @@
 #include <eowu-state/eowu-state.hpp>
 #include <iostream>
 #include <thread>
+#include <mutex>
+
+namespace gl {
 
 void task_thread(std::shared_ptr<eowu::RenderFunction> render_func);
 void render_thread(std::shared_ptr<eowu::Renderer> renderer,
@@ -19,6 +22,10 @@ void render_thread(std::shared_ptr<eowu::Renderer> renderer,
                    std::shared_ptr<eowu::RenderFunction> render_func);
 
 static std::shared_ptr<eowu::RenderFunction> render_func;
+
+std::mutex lua_context_mutex;
+std::mutex lua_call_mutex;
+luabridge::LuaRef *lua_render_function = nullptr;
 
 void main_create() {
   using namespace eowu;
@@ -46,6 +53,26 @@ void main_create() {
   t1.join();
 }
 
+void render_loop_cb_alternate(lua_State *L) {
+  auto func = luabridge::LuaRef::fromStack(L, -1);
+  
+  if (!func.isFunction()) {
+    throw std::runtime_error("was not function");
+  }
+  
+  std::cout << "Setting 2... " << std::endl;
+  
+  std::unique_lock<std::mutex> lk1(lua_context_mutex, std::defer_lock);
+  std::unique_lock<std::mutex> lk2(lua_call_mutex, std::defer_lock);
+  std::cout << "Locking ... " << std::endl;
+  std::lock(lk1, lk2);
+  std::cout << "Done locking ... " << std::endl;
+  
+  *lua_render_function = func;
+  
+  std::cout << "done" << std::endl;
+}
+
 void render_loop_cb(lua_State *L) {
   auto func = luabridge::LuaRef::fromStack(L, -1);
   
@@ -53,7 +80,10 @@ void render_loop_cb(lua_State *L) {
     throw std::runtime_error("was not function");
   }
   
-  render_func->SetOnNextFrame([=]() {
+  std::cout << "Setting ... " << std::endl;
+  
+  render_func->SetOnNextFrame([&, func]() {
+    std::unique_lock<std::mutex> lock(lua_context_mutex);
     func();
   });
 }
@@ -67,7 +97,7 @@ void task_thread(std::shared_ptr<eowu::RenderFunction> render_func) {
   
   getGlobalNamespace(L)
   .beginNamespace("eowu")
-  .addFunction("test", render_loop_cb)
+  .addFunction("test", render_loop_cb_alternate)
   .endNamespace();
   
   auto file = util::get_lua_test_script_directory() + "test-parser-state.lua";
@@ -79,10 +109,13 @@ void task_thread(std::shared_ptr<eowu::RenderFunction> render_func) {
   
   LuaRef lua_loop = res["Loop"];
   LuaRef lua_entry = res["Entry"];
+  LuaRef lua_render = res["Render"];
   
-  if (!lua_loop.isFunction() || !lua_entry.isFunction()) {
+  if (!lua_loop.isFunction() || !lua_entry.isFunction() || !lua_render.isFunction()) {
     std::cout << "No state1 loop function found" << std::endl;
   }
+  
+  lua_render_function = &lua_render;
   
   StateRunner runner;
   StateManager manager;
@@ -92,23 +125,32 @@ void task_thread(std::shared_ptr<eowu::RenderFunction> render_func) {
   runner.Next(first);
   
   first->SetOnLoop([&](auto *state) {
-    render_func->Lock();
+//    std::unique_lock<std::mutex> lock(lua_context_mutex);
+    std::unique_lock<std::mutex> lk1(lua_context_mutex, std::defer_lock);
+    std::unique_lock<std::mutex> lk2(lua_call_mutex, std::defer_lock);
+    std::lock(lk1, lk2);
+    
     lua_loop();
-    render_func->Unlock();
   });
   
   first->SetOnEntry([&](auto *state) {
-    std::cout << "Entering" << std::endl;
-    render_func->Lock();
+//    std::unique_lock<std::mutex> lock(lua_context_mutex);
+    std::unique_lock<std::mutex> lk1(lua_context_mutex, std::defer_lock);
+    std::unique_lock<std::mutex> lk2(lua_call_mutex, std::defer_lock);
+    std::lock(lk1, lk2);
     lua_entry();
-    render_func->Unlock();
-    first->Next(first);
   });
   
-  first->SetOnExit([](auto *state) {
+  first->SetOnExit([&](auto *state) {
     std::cout << "Exiting" << std::endl;
     std::cout << state->GetTimer().Ellapsed().count() << std::endl;
+    state->Next(first);
   });
+  
+//  render_func->SetOnNextFrame([&](){
+//    std::unique_lock<std::mutex> lock(lua_context_mutex);
+//    lua_render();
+//  });
   
   while (!runner.Update()) {
     //
@@ -121,7 +163,17 @@ void render_thread(std::shared_ptr<eowu::Renderer> renderer,
                    std::shared_ptr<eowu::Window> window,
                    std::shared_ptr<eowu::RenderFunction> render_func) {
   while (true) {
-    render_func->Call();
+    
+    {
+      std::unique_lock<std::mutex> lk1(lua_context_mutex, std::defer_lock);
+      std::unique_lock<std::mutex> lk2(lua_call_mutex, std::defer_lock);
+      std::lock(lk1, lk2);
+      
+      if (lua_render_function != nullptr) {
+        (*lua_render_function)();
+      }
+    }
+    
     renderer->Draw(window);
     renderer->ClearQueue();
   }
@@ -130,4 +182,6 @@ void render_thread(std::shared_ptr<eowu::Renderer> renderer,
 
 void test_gl_script_run_all() {
   main_create();
+}
+  
 }

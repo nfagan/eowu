@@ -8,22 +8,12 @@
 #include "RenderFunction.hpp"
 
 eowu::RenderFunction::RenderFunction() {
-  SetOnNextFrame([]() {
-    
-  });
+  SetOnNextFrame([]() {});
 }
 
 void eowu::RenderFunction::Call() const {
   std::unique_lock<std::mutex> lock(mut);
   on_next_frame();
-}
-
-void eowu::RenderFunction::Lock() const {
-  mut.lock();
-}
-
-void eowu::RenderFunction::Unlock() const {
-  mut.unlock();
 }
 
 void eowu::RenderFunction::SetOnNextFrame(const RenderFunctionCallbackType &cb) {

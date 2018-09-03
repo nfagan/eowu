@@ -13,4 +13,6 @@ namespace eowu {
   EOWU_GENERIC_ERROR(InvalidModelError);
   
   EOWU_GENERIC_ERROR(ScriptParseError);
+  
+  EOWU_GENERIC_ERROR(LuaError);
 }

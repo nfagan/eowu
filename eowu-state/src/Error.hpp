@@ -11,4 +11,5 @@
 
 namespace eowu {
   EOWU_GENERIC_ERROR(StateCreationError);
+  EOWU_GENERIC_ERROR(NonexistentStateError);
 }

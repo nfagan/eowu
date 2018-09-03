@@ -7,4 +7,6 @@
 
 #pragma once
 
-void test_gl_script_run_all();
+namespace gl {
+  void test_gl_script_run_all();
+}

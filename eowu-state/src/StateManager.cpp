@@ -36,7 +36,7 @@ eowu::State* eowu::StateManager::GetState(const std::string &id) const {
   const auto it = states.find(id);
   
   if (it == states.end()) {
-    return nullptr;
+    throw eowu::NonexistentStateError("State '" + id + "' does not exist.");
   }
   
   return it->second;
