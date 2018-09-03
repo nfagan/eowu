@@ -6,6 +6,7 @@ Setup.States = {
     Entry = function() return 1; end,
     Loop = function() return 2; end,
     Exit = function() return 3; end,
+    Render = function() return 4; end
   }
 }
 

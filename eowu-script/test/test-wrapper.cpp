@@ -14,13 +14,15 @@
 class Resources {
 private:
   Resources() {
-    resource_manager = new eowu::ResourceManager();
-    command_queue = std::make_shared<eowu::CommandQueue>();
+    resource_manager = std::make_shared<eowu::ResourceManager>();
+    context_manager = std::make_shared<eowu::ContextManager>();
+    renderer = std::make_shared<eowu::Renderer>(context_manager);
   }
   
 public:
-  eowu::ResourceManager *resource_manager;
-  std::shared_ptr<eowu::CommandQueue> command_queue;
+  std::shared_ptr<eowu::ResourceManager> resource_manager;
+  std::shared_ptr<eowu::Renderer> renderer;
+  std::shared_ptr<eowu::ContextManager> context_manager;
   
 public:
   static Resources* GetInstance() {
@@ -35,21 +37,18 @@ public:
 };
 
 namespace detail {
-  void execute() {
-    Resources::GetInstance()->command_queue->Execute();
-  }
-  
+ 
   eowu::ModelWrapper create_model(const std::string &id) {
     using namespace eowu;
     
     auto instance = Resources::GetInstance();
     auto rsrc = instance->resource_manager;
-    auto queue = instance->command_queue;
+    auto render = instance->renderer;
     auto mat = rsrc->Create<Material>(id);
     
     auto model = rsrc->Create<Model>(id, nullptr, mat);
     
-    return ModelWrapper(queue, model);
+    return ModelWrapper(model, render);
   }
   
   eowu::ModelWrapper get_model(const std::string &id) {
@@ -57,10 +56,10 @@ namespace detail {
     
     auto instance = Resources::GetInstance();
     auto rsrc = instance->resource_manager;
-    auto queue = instance->command_queue;
+    auto render = instance->renderer;
     auto model = rsrc->Get<Model>(id);
     
-    return ModelWrapper(queue, model);
+    return ModelWrapper(model, render);
   }
 }
 
@@ -78,7 +77,6 @@ void test_vector_property_setting() {
   .beginNamespace("eowu")
   .addFunction("CreateModel", detail::create_model)
   .addFunction("Model", detail::get_model)
-  .addFunction("Execute", detail::execute)
   .endNamespace();
   
   util::run_lua_test_script(L, util::get_lua_test_script_directory() + "test-position-setting.lua");

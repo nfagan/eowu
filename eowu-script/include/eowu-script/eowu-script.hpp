@@ -10,4 +10,5 @@
 #include "../../src/ModelWrapper.hpp"
 #include "../../src/VectorWrapper.hpp"
 #include "../../src/StateWrapper.hpp"
+#include "../../src/GLResourceWrapper.hpp"
 #include "../../src/Parser.hpp"

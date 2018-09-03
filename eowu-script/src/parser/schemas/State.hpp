@@ -17,6 +17,7 @@ namespace eowu {
       luabridge::LuaRef entry_function;
       luabridge::LuaRef loop_function;
       luabridge::LuaRef exit_function;
+      luabridge::LuaRef render_function;
       
       double duration;
       

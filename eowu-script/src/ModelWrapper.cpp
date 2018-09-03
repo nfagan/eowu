@@ -13,12 +13,8 @@
 
 #define EOWU_VEC_SETTER(name) \
 void eowu::ModelWrapper::name(const eowu::VectorWrapper &val) {\
-  auto model_ = model; \
-  auto setter = [=]() -> void { \
-    auto &trans = model_->GetTransform(); \
-    trans.name(val.GetValue()); \
-  }; \
-  command_queue->Push(setter); \
+  auto &trans = model->GetTransform(); \
+  trans.name(val.GetValue()); \
 }
 
 #define EOWU_VEC_GETTER(name) \
@@ -27,8 +23,8 @@ eowu::VectorWrapper eowu::ModelWrapper::name() const { \
   return trans.name(); \
 }
 
-eowu::ModelWrapper::ModelWrapper(std::shared_ptr<eowu::CommandQueue> command_queue, std::shared_ptr<eowu::Model> model) {
-  this->command_queue = command_queue;
+eowu::ModelWrapper::ModelWrapper(std::shared_ptr<eowu::Model> model, std::shared_ptr<eowu::Renderer> renderer) {
+  this->renderer = renderer;
   this->model = model;
 }
 
@@ -44,6 +40,10 @@ void eowu::ModelWrapper::assert_material() {
   }
 }
 
+void eowu::ModelWrapper::Draw() {
+  renderer->Queue(*model.get());
+}
+
 EOWU_VEC_GETTER(GetScale);
 EOWU_VEC_GETTER(GetPosition);
 EOWU_VEC_GETTER(GetRotation);
@@ -54,14 +54,7 @@ EOWU_VEC_SETTER(SetScale);
 
 void eowu::ModelWrapper::SetColor(double r, double b, double g) {
   assert_material();
-  
-  auto material_ = model->GetMaterial();
-  
-  auto setter = [=]() {
-    material_->SetFaceColor(glm::vec3(r, g, b));
-  };
-  
-  command_queue->Push(setter);
+  model->GetMaterial()->SetFaceColor(glm::vec3(r, g, b));
 }
 
 void eowu::ModelWrapper::CreateLuaSchema(lua_State *L) {
@@ -69,7 +62,10 @@ void eowu::ModelWrapper::CreateLuaSchema(lua_State *L) {
   .beginNamespace("eowu")
   .beginClass<eowu::ModelWrapper>("_Model")
   .addProperty("position", &eowu::ModelWrapper::GetPosition, &eowu::ModelWrapper::SetPosition)
+  .addProperty("scale", &eowu::ModelWrapper::GetScale, &eowu::ModelWrapper::SetScale)
+  .addProperty("rotation", &eowu::ModelWrapper::GetRotation, &eowu::ModelWrapper::SetRotation)
   .addFunction("Color", &eowu::ModelWrapper::SetColor)
+  .addFunction("Draw", &eowu::ModelWrapper::Draw)
   .endClass()
   .endNamespace();
 }

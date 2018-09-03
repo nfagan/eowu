@@ -27,13 +27,14 @@ include_directories(deps/stb)
 file(GLOB TEST_SRC
   test/*.cpp 
   test/*.h
-  test/*.hpp 
+  test/*.hpp
 )
 
 file(GLOB_RECURSE LIB_SRC 
   src/*.cpp
   src/*.h
   src/*.hpp
+  include/*.hpp
 )
 
 set(GLM_INCLUDE_DIR "${EOWU_GL_DEPDIR}/glm")

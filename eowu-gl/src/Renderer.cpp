@@ -41,6 +41,11 @@ void eowu::Renderer::Queue(const ModelAggregateType &models) {
   }
 }
 
+void eowu::Renderer::Queue(const eowu::Model &model) {
+  std::lock_guard<std::mutex> guard(models_mutex);
+  models.push_back(model);
+}
+
 void eowu::Renderer::draw(eowu::WindowType window) {
   std::lock_guard<std::mutex> guard(models_mutex);
   

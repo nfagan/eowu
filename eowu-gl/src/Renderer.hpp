@@ -31,6 +31,7 @@ public:
   
   void ClearQueue();
   void Queue(const ModelAggregateType &models);
+  void Queue(const eowu::Model &model);
   void Draw(eowu::WindowType window);
   void Draw(const eowu::WindowContainerType& windows);
   

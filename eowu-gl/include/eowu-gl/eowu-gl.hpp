@@ -16,6 +16,7 @@
 #include "../../src/MeshFactory.hpp"
 #include "../../src/Model.hpp"
 #include "../../src/Renderer.hpp"
+#include "../../src/RenderFunction.hpp"
 #include "../../src/ResourceManager.hpp"
 #include "../../src/Shader.hpp"
 #include "../../src/ShaderBuilder.hpp"
@@ -29,4 +30,3 @@
 #include "../../src/Uniform.hpp"
 #include "../../src/Vector.hpp"
 #include "../../src/Vertex.hpp"
-

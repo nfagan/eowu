@@ -6,28 +6,128 @@
 //
 
 #include "test-gl-script.hpp"
+#include "test-util.hpp"
+#include <Lua.hpp>
 #include <eowu-gl/eowu-gl.hpp>
+#include <eowu-state/eowu-state.hpp>
 #include <iostream>
+#include <thread>
 
-void test_gl_script_run_all() {
+void task_thread(std::shared_ptr<eowu::RenderFunction> render_func);
+void render_thread(std::shared_ptr<eowu::Renderer> renderer,
+                   std::shared_ptr<eowu::Window> window,
+                   std::shared_ptr<eowu::RenderFunction> render_func);
+
+static std::shared_ptr<eowu::RenderFunction> render_func;
+
+void main_create() {
+  using namespace eowu;
   
-  auto manager = eowu::ContextManager();
-  manager.Initialize();
+  auto context = std::make_shared<ContextManager>();
+  auto resource = std::make_shared<ResourceManager>();
+  auto renderer = std::make_shared<Renderer>(context);
+  render_func = std::make_shared<RenderFunction>();
   
-  auto win = manager.OpenWindow(600, 600);
-  auto win2 = manager.OpenWindow();
-  auto win3 = manager.OpenWindow();
+  context->Initialize();
   
-  auto t1 = std::chrono::high_resolution_clock::now();
+  auto mesh = resource->Create<Mesh>("first");
+  auto material = resource->Create<Material>("first");
+  auto model = resource->Create<Model>("first", mesh, material);
   
-  while (true) {
-    auto t2 = std::chrono::high_resolution_clock::now();
-    
-    std::chrono::duration<double> res = t2-t1;
-    
-    if (res.count() > 4) {
-      break;
-    }
+  auto win = context->OpenWindow(400, 400);
+  
+  model->GetTransform().SetUnits(units::normalized);
+  model->GetTransform().SetScreenDimensions(glm::vec2(400, 400));
+  model->GetTransform().SetPosition(glm::vec3(0.5, 0.5, 1.0));
+  
+  auto t1 = std::thread(task_thread, render_func);
+  render_thread(renderer, win, render_func);
+  
+  t1.join();
+}
+
+void render_loop_cb(lua_State *L) {
+  auto func = luabridge::LuaRef::fromStack(L, -1);
+  
+  if (!func.isFunction()) {
+    throw std::runtime_error("was not function");
   }
   
+  render_func->SetOnNextFrame([=]() {
+    func();
+  });
+}
+
+void task_thread(std::shared_ptr<eowu::RenderFunction> render_func) {
+  using namespace eowu;
+  using namespace luabridge;
+  
+  lua_State* L = luaL_newstate();
+  luaL_openlibs(L);
+  
+  getGlobalNamespace(L)
+  .beginNamespace("eowu")
+  .addFunction("test", render_loop_cb)
+  .endNamespace();
+  
+  auto file = util::get_lua_test_script_directory() + "test-parser-state.lua";
+  auto res = util::get_global_from_script_with_trap(L, file, "State1");
+  
+  if (res.isNil()) {
+    std::cout << "No state1 found" << std::endl;
+  }
+  
+  LuaRef lua_loop = res["Loop"];
+  LuaRef lua_entry = res["Entry"];
+  
+  if (!lua_loop.isFunction() || !lua_entry.isFunction()) {
+    std::cout << "No state1 loop function found" << std::endl;
+  }
+  
+  StateRunner runner;
+  StateManager manager;
+  
+  auto first = manager.CreateState("first");
+  first->SetDuration(std::chrono::milliseconds(1));
+  runner.Next(first);
+  
+  first->SetOnLoop([&](auto *state) {
+    render_func->Lock();
+    lua_loop();
+    render_func->Unlock();
+  });
+  
+  first->SetOnEntry([&](auto *state) {
+    std::cout << "Entering" << std::endl;
+    render_func->Lock();
+    lua_entry();
+    render_func->Unlock();
+    first->Next(first);
+  });
+  
+  first->SetOnExit([](auto *state) {
+    std::cout << "Exiting" << std::endl;
+    std::cout << state->GetTimer().Ellapsed().count() << std::endl;
+  });
+  
+  while (!runner.Update()) {
+    //
+  }
+  
+  
+}
+
+void render_thread(std::shared_ptr<eowu::Renderer> renderer,
+                   std::shared_ptr<eowu::Window> window,
+                   std::shared_ptr<eowu::RenderFunction> render_func) {
+  while (true) {
+    render_func->Call();
+    renderer->Draw(window);
+    renderer->ClearQueue();
+  }
+  
+}
+
+void test_gl_script_run_all() {
+  main_create();
 }
