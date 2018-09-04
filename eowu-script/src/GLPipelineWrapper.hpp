@@ -7,7 +7,10 @@
 
 #pragma once
 
+#include "ModelWrapper.hpp"
+#include "RendererWrapper.hpp"
 #include <memory>
+#include <string>
 
 struct lua_State;
 
