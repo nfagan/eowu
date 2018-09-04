@@ -1,11 +1,14 @@
 State1 = {}
 State2 = {}
+State3 = {}
 
 State1.ID = '1'
 State2.ID = '2'
+State3.ID = '3'
 
 State1.Duration = 1000
 State2.Duration = 1000
+State3.Duration = 1000
 
 local function state1_render()
   local stim = eowu.GL.Stimulus('first')
@@ -18,7 +21,6 @@ local function state1_render()
   stim:Color(1, 1, 1)
   stim:Units('normalized')
   stim:Draw()
-
 end
 
 local function state2_render()
@@ -36,6 +38,19 @@ local function state2_render()
   stim:Draw({1})
 end
 
+local function state3_render()
+  local stim = eowu.GL.Stimulus('first')
+  stim:Texture('first')
+
+  local pos = stim.position
+  pos.x = pos.x + 0.001
+  pos.y = pos.y + 0.001
+
+  stim.position = pos
+
+  stim:Draw()
+end
+
 function State1.Entry()
   print('State1!')
   local s = eowu.Task.State('1')
@@ -49,7 +64,8 @@ function State1.Exit()
   print(s:Ellapsed())
 end
 
-function State1.Loop()  
+function State1.Loop()
+  
 end
 
 function State1.Render()
@@ -59,7 +75,7 @@ end
 function State2.Entry()
   print('State2!')
   local s = eowu.Task.State('2')
-  s:Next('1')
+  s:Next('3')
   eowu.GL.Renderer():Render(state2_render)
 end
 
@@ -72,7 +88,23 @@ end
 function State2.Render()
 end
 
+function State3.Entry()
+  local a = eowu.Task.State('3')
+  a:Next('1')
+  eowu.GL.Renderer():Render(state3_render)
+end
+
+function State3.Exit()
+end
+
+function State3.Loop()
+end
+
+function State3.Render()
+end
+
 States = {
   State1 = State1,
-  State2 = State2
+  State2 = State2,
+  State3 = State3
 }

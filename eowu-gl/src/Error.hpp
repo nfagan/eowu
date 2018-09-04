@@ -28,4 +28,6 @@ namespace eowu {
   EOWU_GENERIC_ERROR(IncompleteModelError);
   
   EOWU_GENERIC_ERROR(NonexistentResourceError);
+  
+  EOWU_GENERIC_ERROR(InteralContextError);
 }

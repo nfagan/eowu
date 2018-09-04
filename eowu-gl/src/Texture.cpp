@@ -16,15 +16,13 @@ eowu::Texture::Texture() {
   index = 0;
 }
 
-eowu::Texture::~Texture() {
-  if (!is_empty) {
-//    glDeleteTextures(1, &id);
-  }
-}
-
 void eowu::Texture::Bind() const {
   glActiveTexture(GL_TEXTURE0 + index);
   glBindTexture(GL_TEXTURE_2D, id);
+}
+
+void eowu::Texture::Dispose() const {
+  glDeleteTextures(1, &id);
 }
 
 void eowu::Texture::SetId(unsigned int id) {

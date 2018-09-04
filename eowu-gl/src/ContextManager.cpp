@@ -51,108 +51,42 @@ const eowu::WindowContainerType& eowu::ContextManager::GetWindows() const {
   return windows;
 }
 
-eowu::WindowType eowu::ContextManager::OpenWindow() {
+eowu::WindowType eowu::ContextManager::OpenWindow(const eowu::WindowProperties &props) {
   if (!IsInitialized()) {
     throw ContextNotInitializedError("OpenGL context has not been initialized.");
   }
   
-  auto *primary = get_primary_monitor_with_trap();
-  const auto *mode = glfwGetVideoMode(primary);
-  
-  auto width = mode->width;
-  auto height = mode->height;
-  
-  GLFWwindow *other = nullptr;
-  
-  if (windows.size() > 0) {
-    other = windows[0]->window;
-  }
-  
-  GLFWwindow *window = glfwCreateWindow(width, height, "", nullptr, other);
-  
-  auto win = std::make_shared<eowu::Window>(primary, window, mode->width, mode->height);
-  
-  register_window(win);
-  
-  return win;
-}
-
-eowu::WindowType eowu::ContextManager::OpenWindow(unsigned int width, unsigned int height) {
-  if (!IsInitialized()) {
-    throw ContextNotInitializedError("OpenGL context has not been initialized.");
-  }
-  
-  GLFWwindow *other = nullptr;
-  
-  if (windows.size() > 0) {
-    other = windows[0]->window;
-  }
-  
-  auto *primary = get_primary_monitor_with_trap();
-  auto *window = glfwCreateWindow(width, height, "", nullptr, other);
-  
-  auto win = std::make_shared<eowu::Window>(primary, window, width, height);
-  
-  register_window(win);
-  
-  return win;
-}
-
-eowu::WindowType eowu::ContextManager::OpenWindow(unsigned int index) {
-  if (!IsInitialized()) {
-    throw ContextNotInitializedError("OpenGL context has not been initialized.");
-  }
-  
-  auto *monitor = get_monitor_with_trap(index);
+  auto *monitor = get_monitor_with_trap(props.index);
   const auto *mode = glfwGetVideoMode(monitor);
   
-  auto width = mode->width;
-  auto height = mode->height;
-  
   GLFWwindow *other = nullptr;
+  GLFWwindow *new_window = nullptr;
   
   if (windows.size() > 0) {
     other = windows[0]->window;
   }
   
-  GLFWwindow *window = glfwCreateWindow(width, height, "", monitor, other);
+  const char* const title = props.title.c_str();
   
-  auto win = std::make_shared<eowu::Window>(monitor, window, width, height);
+  if (props.is_fullscreen) {
+    new_window = glfwCreateWindow(mode->width, mode->height, title, monitor, other);
+  } else {
+    new_window = glfwCreateWindow(props.width, props.height, title, nullptr, other);
+  }
+  
+  assert(new_window);
+  
+  int client_width;
+  int client_height;
+  
+  glfwGetWindowSize(new_window, &client_width, &client_height);
+  
+  auto win = std::make_shared<eowu::Window>(monitor, new_window, client_width, client_height);
   
   register_window(win);
   
   return win;
-}
-
-eowu::WindowType eowu::ContextManager::OpenWindow(unsigned int index, unsigned int width, unsigned int height) {
-  if (!IsInitialized()) {
-    throw ContextNotInitializedError("OpenGL context has not been initialized.");
-  }
   
-  GLFWwindow *other = nullptr;
-  
-  if (windows.size() > 0) {
-    other = windows[0]->window;
-  }
-  
-  auto *monitor = get_monitor_with_trap(index);
-  auto *window = glfwCreateWindow(width, height, "", monitor, other);
-  
-  auto win = std::make_shared<eowu::Window>(monitor, window, width, height);
-  
-  register_window(win);
-  
-  return win;
-}
-
-GLFWmonitor* eowu::ContextManager::get_primary_monitor_with_trap() const {
-  GLFWmonitor *primary = glfwGetPrimaryMonitor();
-  
-  if (!primary) {
-    throw MonitorNotAvailableError("No monitors are available.");
-  }
-  
-  return primary;
 }
 
 GLFWmonitor* eowu::ContextManager::get_monitor_with_trap(unsigned int index) const {
@@ -167,6 +101,25 @@ GLFWmonitor* eowu::ContextManager::get_monitor_with_trap(unsigned int index) con
   return monitors[index];
 }
 
+std::size_t eowu::ContextManager::find_window_with_trap(GLFWwindow *win) {
+  std::size_t n_windows = windows.size();
+  
+  for (std::size_t i = 0; i < n_windows; i++) {
+    const auto *owned_window = windows[i].get();
+    
+    if (owned_window->window == win) {
+      return i;
+    }
+  }
+  
+  throw eowu::InteralContextError("Window was not found.");
+}
+
+eowu::WindowType eowu::ContextManager::get_window_with_trap(GLFWwindow *win) {
+  std::size_t index = find_window_with_trap(win);
+  return windows[index];
+}
+
 void eowu::ContextManager::register_window(eowu::WindowType win) {
   windows.push_back(win);
   
@@ -176,7 +129,35 @@ void eowu::ContextManager::register_window(eowu::WindowType win) {
     loaded_gl_pointers = true;
   }
   
+  configure_window_callbacks(win->window);
+  
   //  Seems to be necessary to enable window display
   //  in macOS :(
   PollEvents();
+}
+
+void eowu::ContextManager::configure_window_callbacks(GLFWwindow *win) {
+  glfwSetWindowUserPointer(win, (void*)this);
+  
+  glfwSetWindowSizeCallback(win, eowu::glfw::window_size_callback);
+}
+
+void eowu::glfw::window_close_callback(GLFWwindow *window) {
+  eowu::ContextManager* context = (eowu::ContextManager*)glfwGetWindowUserPointer(window);
+  
+  assert(context);
+  
+  //  TODO: Delete window from windows array.
+}
+
+void eowu::glfw::window_size_callback(GLFWwindow *window, int width, int height) {
+  eowu::ContextManager* context = (eowu::ContextManager*)glfwGetWindowUserPointer(window);
+  
+  assert(context);
+  
+  auto win = context->get_window_with_trap(window);
+  
+  win->SetWidth(width);
+  win->SetHeight(height);
+  win->MarkWasResized();
 }

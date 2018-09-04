@@ -25,9 +25,12 @@ eowu::VectorWrapper eowu::ModelWrapper::name() const { \
   return trans.name(); \
 }
 
-eowu::ModelWrapper::ModelWrapper(std::shared_ptr<eowu::Model> model, std::shared_ptr<eowu::Renderer> renderer) {
+eowu::ModelWrapper::ModelWrapper(std::shared_ptr<eowu::Model> model,
+                                 std::shared_ptr<eowu::Renderer> renderer,
+                                 std::shared_ptr<eowu::TextureManager> texture_manager) {
   this->renderer = renderer;
   this->model = model;
+  this->texture_manager = texture_manager;
 }
 
 void eowu::ModelWrapper::assert_mesh() {
@@ -56,7 +59,6 @@ EOWU_VEC_SETTER(SetRotation);
 EOWU_VEC_SETTER(SetScale);
 
 void eowu::ModelWrapper::SetUnits(const std::string &units) {
-  
   auto &trans = model->GetTransform();
   
   if (units == "normalized") {
@@ -66,12 +68,17 @@ void eowu::ModelWrapper::SetUnits(const std::string &units) {
   } else {
     throw eowu::InvalidParameterError("Unrecognized units id '" + units + "'");
   }
-  
 }
 
 void eowu::ModelWrapper::SetColor(double r, double b, double g) {
   assert_material();
   model->GetMaterial()->SetFaceColor(glm::vec3(r, g, b));
+}
+
+void eowu::ModelWrapper::SetTexture(const std::string &id) {
+  assert_material();
+  const auto tex = texture_manager->Get(id);
+  model->GetMaterial()->SetFaceColor(tex);
 }
 
 void eowu::ModelWrapper::CreateLuaSchema(lua_State *L) {
@@ -82,6 +89,7 @@ void eowu::ModelWrapper::CreateLuaSchema(lua_State *L) {
   .addProperty("scale", &eowu::ModelWrapper::GetScale, &eowu::ModelWrapper::SetScale)
   .addProperty("rotation", &eowu::ModelWrapper::GetRotation, &eowu::ModelWrapper::SetRotation)
   .addFunction("Color", &eowu::ModelWrapper::SetColor)
+  .addFunction("Texture", &eowu::ModelWrapper::SetTexture)
   .addFunction("Draw", &eowu::ModelWrapper::Draw)
   .addFunction("Units", &eowu::ModelWrapper::SetUnits)
   .endClass()

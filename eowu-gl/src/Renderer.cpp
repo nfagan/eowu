@@ -153,9 +153,10 @@ void eowu::Renderer::draw_one_model(const eowu::WindowType& window, const eowu::
   
   auto trans = transform.GetTransformationMatrix();
   auto proj = get_projection_matrix(window);
+  auto view = get_view_matrix();
   
   prog->SetUniform(eowu::uniforms::model, trans);
-  prog->SetUniform(eowu::uniforms::view, glm::mat4(1.0f));
+  prog->SetUniform(eowu::uniforms::view, view);
   prog->SetUniform(eowu::uniforms::projection, proj);
   
   bool mesh_need_bind = prog_need_bind || !last_mesh || last_mesh->GetIdentifier() != mesh_id;
@@ -172,6 +173,10 @@ void eowu::Renderer::draw_one_model(const eowu::WindowType& window, const eowu::
   
   last_program = prog;
   last_mesh = mesh;
+}
+
+glm::mat4 eowu::Renderer::get_view_matrix() const {
+  return glm::mat4(1.0);
 }
 
 glm::mat4 eowu::Renderer::get_projection_matrix(eowu::WindowType window) const {

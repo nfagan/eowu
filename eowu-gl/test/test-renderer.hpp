@@ -28,7 +28,7 @@ void test_many_models() {
   
   manager->Initialize();
   
-  auto win = manager->OpenWindow();
+  auto win = manager->OpenWindow(500, 500);
   
   win->MakeCurrent();
   

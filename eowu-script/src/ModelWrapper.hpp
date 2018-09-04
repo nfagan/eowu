@@ -15,6 +15,7 @@ struct lua_State;
 namespace eowu {
   class Model;
   class Renderer;
+  class TextureManager;
   
   class ModelWrapper;
   class VectorWrapper;
@@ -23,10 +24,14 @@ namespace eowu {
 class eowu::ModelWrapper {
   
 public:
-  ModelWrapper(std::shared_ptr<eowu::Model> model, std::shared_ptr<eowu::Renderer> renderer);
+  ModelWrapper(std::shared_ptr<eowu::Model> model,
+               std::shared_ptr<eowu::Renderer> renderer,
+               std::shared_ptr<eowu::TextureManager> texture_manager);
+  
   ~ModelWrapper() = default;
   
   void SetColor(double r, double b, double g);
+  void SetTexture(const std::string &id);
   
   void SetPosition(const eowu::VectorWrapper &vec);
   void SetRotation(const eowu::VectorWrapper &vec);
@@ -43,6 +48,7 @@ public:
 private:
   std::shared_ptr<eowu::Model> model;
   std::shared_ptr<eowu::Renderer> renderer;
+  std::shared_ptr<eowu::TextureManager> texture_manager;
   
   void assert_mesh();
   void assert_material();

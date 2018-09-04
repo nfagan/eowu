@@ -9,12 +9,14 @@
 #include "ContextManager.hpp"
 #include "Renderer.hpp"
 #include "ResourceManager.hpp"
+#include "TextureManager.hpp"
 #include <iostream>
 
 eowu::GLPipeline::GLPipeline() {
   context_manager = std::make_shared<eowu::ContextManager>();
   renderer = std::make_shared<eowu::Renderer>(context_manager);
   resource_manager = std::make_shared<eowu::ResourceManager>();
+  texture_manager = std::make_shared<eowu::TextureManager>();
 }
 
 std::shared_ptr<eowu::ContextManager> eowu::GLPipeline::GetContextManager() const {
@@ -27,6 +29,10 @@ std::shared_ptr<eowu::Renderer> eowu::GLPipeline::GetRenderer() const {
 
 std::shared_ptr<eowu::ResourceManager> eowu::GLPipeline::GetResourceManager() const {
   return resource_manager;
+}
+
+std::shared_ptr<eowu::TextureManager> eowu::GLPipeline::GetTextureManager() const {
+  return texture_manager;
 }
 
 std::shared_ptr<eowu::GLPipeline> eowu::GLPipeline::GetInstance() {

@@ -18,8 +18,12 @@ eowu::Window::Window(GLFWmonitor *monitor, GLFWwindow *window, unsigned int widt
   this->height = height;
   this->was_resized = false;
   this->is_open = true;
-  
-  configure_callbacks();
+}
+
+eowu::Window::~Window() {
+  if (window) {
+    Close();
+  }
 }
 
 const eowu::Identifier& eowu::Window::GetIdentifier() const {
@@ -73,6 +77,11 @@ void eowu::Window::ResetWasResized() {
   was_resized = false;
 }
 
+void eowu::Window::Close() {
+  glfwSetWindowShouldClose(window, true);
+  is_open = false;
+}
+
 bool eowu::Window::ShouldClose() const {
   return glfwWindowShouldClose(window);
 }
@@ -89,20 +98,29 @@ void eowu::Window::Show() const {
   glfwShowWindow(window);
 }
 
-void eowu::Window::configure_callbacks() {
-  glfwSetWindowUserPointer(window, (void*)this);
-  glfwSetWindowSizeCallback(window, eowu::glfw::window_size_callback);
+
+//
+//  window properties
+//
+
+eowu::WindowProperties::WindowProperties() :
+width(0), height(0), index(0), is_fullscreen(true) {
+  //
 }
 
-void eowu::glfw::window_size_callback(GLFWwindow *window, int width, int height) {
-  
-  eowu::Window* win = (eowu::Window*)glfwGetWindowUserPointer(window);
-  
-  assert(win);
-  
-  win->SetWidth(width);
-  win->SetHeight(height);
-  win->MarkWasResized();
+eowu::WindowProperties::WindowProperties(unsigned int width_, unsigned int height_) :
+width(width_), height(height_), index(0), is_fullscreen(false) {
+  //
+}
+
+eowu::WindowProperties::WindowProperties(unsigned int index_, unsigned int width_, unsigned int height_) :
+width(width_), height(height_), index(index_), is_fullscreen(false) {
+  //
+}
+
+eowu::WindowProperties::WindowProperties(unsigned int index_) :
+width(0), height(0), index(index_), is_fullscreen(true) {
+  //
 }
 
 

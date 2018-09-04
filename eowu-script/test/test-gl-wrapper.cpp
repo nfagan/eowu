@@ -25,6 +25,7 @@ namespace gltest {
   std::shared_ptr<eowu::LuaFunction> render_function = nullptr;
   std::shared_ptr<eowu::LuaContext> lua_context_manager = nullptr;
   std::atomic<bool> lua_setup_complete = false;
+  std::atomic<bool> threads_should_continue = true;
   //  end globals
   
   void main_create() {
@@ -35,15 +36,18 @@ namespace gltest {
     
     auto gl_context_manager = pipeline->GetContextManager();
     auto gl_resource_manager = pipeline->GetResourceManager();
+    auto gl_texture_manager = pipeline->GetTextureManager();
     
     gl_context_manager->Initialize();
-    auto win = gl_context_manager->OpenWindow();
+    auto win = gl_context_manager->OpenWindow(500, 500);
     
     const std::string stim_id = "first";
     
     auto mesh = gl_resource_manager->Create<Mesh>(stim_id);
     auto material = gl_resource_manager->Create<Material>(stim_id);
     auto stim1 = gl_resource_manager->Create<Model>(stim_id, mesh, material);
+    
+    gl_texture_manager->LoadImage("/Users/Nick/Desktop/eg.png", "first");
     
     material->SetFaceColor(glm::vec3(1.0f));
     
@@ -64,7 +68,7 @@ namespace gltest {
     auto renderer = pipeline->GetRenderer();
     auto context_manager = pipeline->GetContextManager();
     
-    while (true) {
+    while (threads_should_continue && !win->ShouldClose()) {
       if (lua_setup_complete) {
         lua_context_manager->Call(*render_function.get());
       }
@@ -74,6 +78,8 @@ namespace gltest {
       
       context_manager->PollEvents();
     }
+    
+    threads_should_continue = false;
   }
   
   void task_thread(std::shared_ptr<eowu::GLPipeline> pipeline) {
@@ -109,11 +115,11 @@ namespace gltest {
     
     runner.Next(state_manager.GetState("1"));
     
-    while (!runner.Update()) {
+    while (threads_should_continue && !runner.Update()) {
       //
     }
     
-    
+    threads_should_continue = false;
   }
   
   void test_gl_wrapper_run_all() {

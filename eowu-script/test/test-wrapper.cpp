@@ -17,12 +17,14 @@ private:
     resource_manager = std::make_shared<eowu::ResourceManager>();
     context_manager = std::make_shared<eowu::ContextManager>();
     renderer = std::make_shared<eowu::Renderer>(context_manager);
+    texture_manager = std::make_shared<eowu::TextureManager>();
   }
   
 public:
   std::shared_ptr<eowu::ResourceManager> resource_manager;
   std::shared_ptr<eowu::Renderer> renderer;
   std::shared_ptr<eowu::ContextManager> context_manager;
+  std::shared_ptr<eowu::TextureManager> texture_manager;
   
 public:
   static Resources* GetInstance() {
@@ -48,7 +50,7 @@ namespace detail {
     
     auto model = rsrc->Create<Model>(id, nullptr, mat);
     
-    return ModelWrapper(model, render);
+    return ModelWrapper(model, render, instance->texture_manager);
   }
   
   eowu::ModelWrapper get_model(const std::string &id) {
@@ -59,7 +61,7 @@ namespace detail {
     auto render = instance->renderer;
     auto model = rsrc->Get<Model>(id);
     
-    return ModelWrapper(model, render);
+    return ModelWrapper(model, render, instance->texture_manager);
   }
 }
 

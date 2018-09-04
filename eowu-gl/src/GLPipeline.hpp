@@ -14,6 +14,7 @@ namespace eowu {
   class Renderer;
   class ContextManager;
   class ResourceManager;
+  class TextureManager;
   
   class GLPipeline;
 }
@@ -27,9 +28,11 @@ public:
   std::shared_ptr<eowu::ContextManager> GetContextManager() const;
   std::shared_ptr<eowu::Renderer> GetRenderer() const;
   std::shared_ptr<eowu::ResourceManager> GetResourceManager() const;
+  std::shared_ptr<eowu::TextureManager> GetTextureManager() const;
   
 private:
   std::shared_ptr<eowu::ContextManager> context_manager;
   std::shared_ptr<eowu::Renderer> renderer;
   std::shared_ptr<eowu::ResourceManager> resource_manager;
+  std::shared_ptr<eowu::TextureManager> texture_manager;
 };

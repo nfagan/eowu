@@ -16,7 +16,7 @@ namespace eowu {
 class eowu::Texture {
 public:
   Texture();
-  ~Texture();
+  ~Texture() = default;
   
   void SetId(unsigned int id);
   void SetWidth(unsigned int width);
@@ -24,6 +24,7 @@ public:
   void SetIndex(unsigned int index);
   
   void Bind() const;
+  void Dispose() const;
   
   unsigned int GetIndex() const;
   unsigned int GetWidth() const;

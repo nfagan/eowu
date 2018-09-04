@@ -50,6 +50,7 @@ private:
   eowu::WindowType last_window;
   
   glm::mat4 get_projection_matrix(eowu::WindowType window) const;
+  glm::mat4 get_view_matrix() const;
   
   void next_frame();
   void draw(eowu::WindowType window);

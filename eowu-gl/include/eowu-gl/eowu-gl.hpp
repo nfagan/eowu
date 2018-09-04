@@ -24,6 +24,7 @@
 #include "../../src/ShaderLibrary.hpp"
 #include "../../src/Texture.hpp"
 #include "../../src/TextureLoader.hpp"
+#include "../../src/TextureManager.hpp"
 #include "../../src/Transform.hpp"
 #include "../../src/Program.hpp"
 #include "../../src/ProgramFactory.hpp"

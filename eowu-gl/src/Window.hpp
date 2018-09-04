@@ -10,6 +10,7 @@
 #include "Identifier.hpp"
 #include <eowu-common/types.hpp>
 #include <glm/glm.hpp>
+#include <string>
 
 struct GLFWwindow;
 struct GLFWmonitor;
@@ -18,9 +19,18 @@ namespace eowu {
   class Window;
   class ContextManager;
   
-  namespace glfw {
-    void window_size_callback(GLFWwindow *window, int width, int height);
-  }
+  struct WindowProperties {
+    unsigned int width;
+    unsigned int height;
+    unsigned int index;
+    bool is_fullscreen;
+    std::string title;
+    
+    WindowProperties();
+    WindowProperties(unsigned int width, unsigned int height);
+    WindowProperties(unsigned int index, unsigned int width, unsigned int height);
+    WindowProperties(unsigned int index);
+  };
 }
 
 class eowu::Window {
@@ -28,13 +38,15 @@ class eowu::Window {
   
 public:
   Window(GLFWmonitor *monitor, GLFWwindow *window, unsigned int width, unsigned int height);
-  ~Window() = default;
+  ~Window();
   
   glm::vec2 GetFramebufferSize() const;
   glm::vec2 GetDimensions() const;
   unsigned int GetWidth() const;
   unsigned int GetHeight() const;
   const eowu::Identifier& GetIdentifier() const;
+  
+  void Close();
   
   void SetHeight(unsigned int height);
   void SetWidth(unsigned int width);
@@ -60,6 +72,4 @@ private:
   
   bool is_open;
   bool was_resized;
-  
-  void configure_callbacks();
 };

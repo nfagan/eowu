@@ -10,14 +10,21 @@
 #include "Window.hpp"
 #include <memory>
 #include <vector>
+#include <cstddef>
 
 struct GLFWmonitor;
+struct GLFWwindow;
 
 namespace eowu {
   class ContextManager;
   
   using WindowType = std::shared_ptr<Window>;
   using WindowContainerType = std::vector<WindowType>;
+  
+  namespace glfw {
+    void window_size_callback(GLFWwindow *window, int width, int height);
+    void window_close_callback(GLFWwindow *window);
+  }
 }
 
 class eowu::ContextManager {
@@ -27,16 +34,18 @@ public:
   
   void Initialize();
   bool IsInitialized() const;
-  
   void PollEvents() const;
   
-  eowu::WindowType OpenWindow();
-  eowu::WindowType OpenWindow(unsigned int index);
-  eowu::WindowType OpenWindow(unsigned int index, unsigned int width, unsigned int height);
-  eowu::WindowType OpenWindow(unsigned int width, unsigned int height);
+  template<typename ...T>
+  eowu::WindowType OpenWindow(T... args);
+  eowu::WindowType OpenWindow(const eowu::WindowProperties &props);
+  
+  void CloseWindow(eowu::WindowType win);
   
   const WindowContainerType& GetWindows() const;
-  void CloseWindow(eowu::WindowType win);
+  
+  friend void eowu::glfw::window_size_callback(GLFWwindow *window, int width, int height);
+  friend void eowu::glfw::window_close_callback(GLFWwindow *window);
 private:
   bool is_initialized;
   bool loaded_gl_pointers;
@@ -46,5 +55,16 @@ private:
   
   WindowContainerType windows;
   
+  std::size_t find_window_with_trap(GLFWwindow *win);
+  eowu::WindowType get_window_with_trap(GLFWwindow *win);
+  
   void register_window(eowu::WindowType win);
+  void configure_window_callbacks(GLFWwindow *win);
 };
+
+template<typename ...T>
+eowu::WindowType eowu::ContextManager::OpenWindow(T... args) {
+  eowu::WindowProperties props(args...);
+  
+  return OpenWindow(props);
+}
