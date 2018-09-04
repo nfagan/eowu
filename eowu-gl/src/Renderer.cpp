@@ -51,6 +51,12 @@ void eowu::Renderer::draw(eowu::WindowType window) {
   
   window->MakeCurrent();
   
+  if (window->WasResized()) {
+    auto fb_size = window->GetFramebufferSize();
+    glViewport(0, 0, fb_size.x, fb_size.y);
+    window->ResetWasResized();
+  }
+  
   glClear(GL_COLOR_BUFFER_BIT);
   
   for (const auto& model : models) {

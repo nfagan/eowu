@@ -15,7 +15,7 @@ local function state1_render()
   pos.y = 0.5
   stim.position = pos
   -- Color
-  stim:Color(0, 1, 0)
+  stim:Color(1, 1, 1)
   stim:Units('normalized')
   stim:Draw()
 

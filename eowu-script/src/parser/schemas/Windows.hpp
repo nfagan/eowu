@@ -10,8 +10,6 @@
 #include <unordered_map>
 #include <string>
 
-struct lua_State;
-
 namespace eowu {
   namespace schema {
     

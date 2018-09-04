@@ -14,7 +14,7 @@ eowu::Shader::Shader() {
 }
 
 eowu::Shader::~Shader() {
-  Dispose();
+//  Dispose();
 }
 
 bool eowu::Shader::IsCreated() const {
