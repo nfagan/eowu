@@ -80,47 +80,6 @@ eowu::parser::MapTableType eowu::parser::get_string_map_from_table(const luabrid
 }
 #endif
 
-//std::vector<double> eowu::parser::get_numeric_vector_from_table(const luabridge::LuaRef &table) {
-//  using namespace luabridge;
-//
-//  std::vector<double> result;
-//
-//  if (!table.isTable()) {
-//    return result;
-//  }
-//
-//  auto L = table.state();
-//
-//  push(L, table);
-//
-//  lua_pushnil(L);
-//
-//  bool err = false;
-//
-//  while (lua_next(L, -2) != 0) {
-//
-//    if (!err && lua_isnumber(L, -2)) {
-//      auto numeric_ref = LuaRef::fromStack(L, -1);
-//
-//      if (!numeric_ref.isNumber()) {
-//        err = true;
-//      } else {
-//        result.push_back(numeric_ref.cast<double>());
-//      }
-//    }
-//
-//    lua_pop(L, 1);
-//  }
-//
-//  lua_pop(L, 1);
-//
-//  if (err) {
-//    throw eowu::ScriptParseError("Expected table to be a numeric-array like object.");
-//  }
-//
-//  return result;
-//}
-
 std::vector<double> eowu::parser::get_numeric_vector_from_table(const luabridge::LuaRef &table) {
   using namespace luabridge;
   

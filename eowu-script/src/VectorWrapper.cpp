@@ -7,9 +7,10 @@
 
 #include "VectorWrapper.hpp"
 #include "Lua.hpp"
+#include "Constants.hpp"
 
 eowu::VectorWrapper::VectorWrapper() {
-  value = glm::vec3(0.0);
+  value = glm::vec3(0.0, 0.0, 1.0);
 }
 
 eowu::VectorWrapper::VectorWrapper(const glm::vec3 &vec) {
@@ -46,7 +47,7 @@ void eowu::VectorWrapper::SetZ(double z) {
 
 void eowu::VectorWrapper::CreateLuaSchema(lua_State *L) {
   luabridge::getGlobalNamespace(L)
-  .beginNamespace("eowu")
+  .beginNamespace(eowu::constants::eowu_namespace)
   .beginClass<eowu::VectorWrapper>("Vector")
   .addConstructor<void(*) (void)>()
   .addProperty("x", &eowu::VectorWrapper::GetX, &eowu::VectorWrapper::SetX)

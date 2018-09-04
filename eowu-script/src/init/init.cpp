@@ -8,20 +8,37 @@
 #include "init.hpp"
 #include "Lua.hpp"
 #include "LuaContext.hpp"
-#include "StateWrapper.hpp"
-#include "TaskWrapper.hpp"
+#include "Wrappers.hpp"
 #include "../parser/Schemas.hpp"
 #include <eowu-state/eowu-state.hpp>
 #include <chrono>
+
+void eowu::init::init_render_pipeline(std::shared_ptr<eowu::LuaContext> lua_context,
+                                      std::shared_ptr<eowu::LuaFunction> lua_render_function,
+                                      std::shared_ptr<eowu::GLPipeline> pipeline) {
+  
+  lua_State *L = lua_context->GetState();
+  
+  eowu::GLPipelineWrapper::CreateLuaSchema(L);
+  eowu::RendererWrapper::CreateLuaSchema(L);
+  eowu::VectorWrapper::CreateLuaSchema(L);
+  eowu::ModelWrapper::CreateLuaSchema(L);
+  
+  eowu::GLPipelineWrapper::Pipeline = pipeline;
+  eowu::GLPipelineWrapper::LuaRenderFunction = lua_render_function;
+  
+}
 
 void eowu::init::init_states(std::shared_ptr<eowu::LuaContext> lua_context,
                              eowu::StateManager &state_manager,
                              const eowu::schema::States &state_schema) {
   
   lua_State *L = lua_context->GetState();
-  StateWrapper::CreateLuaSchema(L);
-  TaskWrapper::CreateLuaSchema(L);
-  TaskWrapper::States = init::get_states(state_schema, lua_context, state_manager);
+  
+  eowu::StateWrapper::CreateLuaSchema(L);
+  eowu::TaskWrapper::CreateLuaSchema(L);
+  
+  eowu::TaskWrapper::States = init::get_states(state_schema, lua_context, state_manager);
 }
 
 eowu::StateWrapperContainerType eowu::init::get_states(const eowu::schema::States &schemas,

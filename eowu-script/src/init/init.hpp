@@ -17,6 +17,8 @@ namespace luabridge {
 namespace eowu {
   
   class LuaContext;
+  class LuaFunction;
+  class GLPipeline;
   class StateWrapper;
   class StateManager;
   using StateWrapperMapType = std::unordered_map<std::string, std::shared_ptr<eowu::StateWrapper>>;
@@ -34,5 +36,9 @@ namespace eowu {
     void init_states(std::shared_ptr<eowu::LuaContext> lua_context,
                      eowu::StateManager &state_manager,
                      const eowu::schema::States &state_schema);
+    
+    void init_render_pipeline(std::shared_ptr<eowu::LuaContext> lua_context,
+                              std::shared_ptr<eowu::LuaFunction> lua_render_function,
+                              std::shared_ptr<eowu::GLPipeline> pipeline);
   }
 }

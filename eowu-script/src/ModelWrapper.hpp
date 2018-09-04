@@ -30,8 +30,9 @@ public:
   void SetPosition(const eowu::VectorWrapper &vec);
   void SetRotation(const eowu::VectorWrapper &vec);
   void SetScale(const eowu::VectorWrapper &vec);
+  void SetUnits(const std::string &units);
   
-  void Draw();
+  void Draw(lua_State *L);
   
   eowu::VectorWrapper GetPosition() const;
   eowu::VectorWrapper GetRotation() const;

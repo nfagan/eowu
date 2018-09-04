@@ -9,6 +9,52 @@
 #include "ParseUtil.hpp"
 #include "Lua.hpp"
 
+namespace util {
+  std::string get_setup_schema_missing_field_error(const std::string &key) {
+    return "Setup schema is missing required key: '" + key + "'";
+  }
+}
+
+#define EOWU_PARSER_EARLY_RETURN(id, id_value, param_id, function) \
+  const char* const id = param_id; \
+\
+  if (kv.count(id) == 0) { \
+    result.message = util::get_setup_schema_missing_field_error(id); \
+    return result; \
+  } \
+\
+  auto id_value = function(kv.at(id)); \
+ \
+  if (!id_value.success) { \
+    result.message = id_value.message; \
+    return result; \
+  } \
+  result.result.id = id_value.result;
+
+
+eowu::parser::ParseResult<eowu::schema::Setup> eowu::parser::setup(const luabridge::LuaRef &table) {
+  
+  using namespace eowu::parser;
+  using namespace eowu::schema;
+  
+  ParseResult<Setup> result;
+  
+  auto kv = get_string_map_from_table(table);
+  
+  //  Windows
+  EOWU_PARSER_EARLY_RETURN(windows, windows_, "Windows", eowu::parser::windows);
+  //  Geometry
+  EOWU_PARSER_EARLY_RETURN(geometry, geometry_, "Geometry", eowu::parser::geometry);
+  //  Textures
+  EOWU_PARSER_EARLY_RETURN(textures, textures_, "Textures", eowu::parser::textures);
+  //  Stimuli
+  EOWU_PARSER_EARLY_RETURN(stimuli, stim_, "Stimuli", eowu::parser::stimuli);
+  //  Target
+  EOWU_PARSER_EARLY_RETURN(targets, targets_, "Targets", eowu::parser::targets);
+  
+  return result;  
+}
+
 eowu::parser::ParseResult<eowu::schema::Windows> eowu::parser::windows(const luabridge::LuaRef &table) {
   using namespace eowu::parser;
   using namespace eowu::schema;

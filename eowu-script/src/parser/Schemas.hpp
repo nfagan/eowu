@@ -7,9 +7,4 @@
 
 #pragma once
 
-#include "schemas/Windows.hpp"
-#include "schemas/Textures.hpp"
-#include "schemas/Geometry.hpp"
-#include "schemas/Stimuli.hpp"
-#include "schemas/State.hpp"
-#include "schemas/Targets.hpp"
+#include "schemas/Setup.hpp"

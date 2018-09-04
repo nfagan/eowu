@@ -13,6 +13,7 @@
 #include "../../src/ModelWrapper.hpp"
 #include "../../src/VectorWrapper.hpp"
 #include "../../src/StateWrapper.hpp"
-#include "../../src/GLResourceWrapper.hpp"
+#include "../../src/GLPipelineWrapper.hpp"
+#include "../../src/RendererWrapper.hpp"
 #include "../../src/Init.hpp"
 #include "../../src/Parser.hpp"

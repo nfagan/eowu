@@ -2,7 +2,7 @@ Setup = {}
 
 Setup.States = {
   Fixation = {
-    Duration = 10,
+    Duration = 100,
     Entry = function() return 1; end,
     Loop = function() return 2; end,
     Exit = function() return 3; end,

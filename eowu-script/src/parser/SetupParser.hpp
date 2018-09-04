@@ -16,6 +16,8 @@ namespace luabridge {
 
 namespace eowu {
   namespace parser {
+    ParseResult<eowu::schema::Setup> setup(const luabridge::LuaRef &table);
+    
     ParseResult<eowu::schema::Windows> windows(const luabridge::LuaRef &table);
     ParseResult<eowu::schema::Geometry> geometry(const luabridge::LuaRef &table);
     ParseResult<eowu::schema::Textures> textures(const luabridge::LuaRef &table);

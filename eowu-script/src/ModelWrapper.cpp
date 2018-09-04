@@ -9,6 +9,8 @@
 #include "VectorWrapper.hpp"
 #include "Error.hpp"
 #include "Lua.hpp"
+#include "Constants.hpp"
+#include "parser/ParseUtil.hpp"
 #include <eowu-gl/eowu-gl.hpp>
 
 #define EOWU_VEC_SETTER(name) \
@@ -40,7 +42,8 @@ void eowu::ModelWrapper::assert_material() {
   }
 }
 
-void eowu::ModelWrapper::Draw() {
+void eowu::ModelWrapper::Draw(lua_State *L) {
+//  luabridge::LuaRef ref = luabridge::LuaRef::fromStack(L, -1);
   renderer->Queue(*model.get());
 }
 
@@ -52,6 +55,20 @@ EOWU_VEC_SETTER(SetPosition);
 EOWU_VEC_SETTER(SetRotation);
 EOWU_VEC_SETTER(SetScale);
 
+void eowu::ModelWrapper::SetUnits(const std::string &units) {
+  
+  auto &trans = model->GetTransform();
+  
+  if (units == "normalized") {
+    trans.SetUnits(eowu::units::normalized);
+  } else if (units == "pixels") {
+    trans.SetUnits(eowu::units::pixels);
+  } else {
+    throw eowu::InvalidParameterError("Unrecognized units id '" + units + "'");
+  }
+  
+}
+
 void eowu::ModelWrapper::SetColor(double r, double b, double g) {
   assert_material();
   model->GetMaterial()->SetFaceColor(glm::vec3(r, g, b));
@@ -59,13 +76,14 @@ void eowu::ModelWrapper::SetColor(double r, double b, double g) {
 
 void eowu::ModelWrapper::CreateLuaSchema(lua_State *L) {
   luabridge::getGlobalNamespace(L)
-  .beginNamespace("eowu")
+  .beginNamespace(eowu::constants::eowu_namespace)
   .beginClass<eowu::ModelWrapper>("_Model")
   .addProperty("position", &eowu::ModelWrapper::GetPosition, &eowu::ModelWrapper::SetPosition)
   .addProperty("scale", &eowu::ModelWrapper::GetScale, &eowu::ModelWrapper::SetScale)
   .addProperty("rotation", &eowu::ModelWrapper::GetRotation, &eowu::ModelWrapper::SetRotation)
   .addFunction("Color", &eowu::ModelWrapper::SetColor)
   .addFunction("Draw", &eowu::ModelWrapper::Draw)
+  .addFunction("Units", &eowu::ModelWrapper::SetUnits)
   .endClass()
   .endNamespace();
 }
