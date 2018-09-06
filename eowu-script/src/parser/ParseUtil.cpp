@@ -17,39 +17,16 @@
   template type eowu::parser::get_numeric_value_or_error(const eowu::parser::MapTableType &table, const std::string &key)
 
 #define EOWU_get_numeric_vector_or_type_error(type) \
-  template std::vector<type> eowu::parser::get_numeric_vector_or_type_error(const eowu::parser::MapTableType &table, const std::string &key, const std::vector<type> &dflt)
+  template std::vector<type> eowu::parser::get_numeric_vector_or_type_error(const eowu::parser::MapTableType &table, const std::string &key, const std::vector<type> &dflt, int size_spec)
 
 std::string eowu::parser::get_type_error_message(const std::string &key, const std::string &type) {
-  return "Key '" + key + "'" + " does not refer to the expected type '" + type + "'";
+  return "Key '" + key + "' does not refer to the expected type '" + type + "'.";
 }
 
-#if false
-eowu::parser::MapTableType eowu::parser::get_string_map_from_table(const luabridge::LuaRef &table) {
-  eowu::parser::MapTableType result;
-  
-  if (!table.isTable()) {
-    return result;
-  }
-  
-  auto L = table.state();
-  push(L, luabridge::Nil());
-  
-  while (lua_next(L, -2)) {
-    luabridge::LuaRef key = luabridge::LuaRef::fromStack(L, -2);
-    luabridge::LuaRef val = luabridge::LuaRef::fromStack(L, -1);
-    
-    std::string str_key = key.tostring();
-    
-    result.insert(std::make_pair(str_key, val));
-    
-    lua_pop(L, 1);
-  }
-  
-  return result;
+std::string eowu::parser::get_array_size_error_message(const std::string &key, int expected_size, int given_size) {
+  return "Key '" + key + "' refers to an array of " + std::to_string(given_size) + " elements; expected " + std::to_string(expected_size) + ".";
 }
-#endif
 
-#if true
 eowu::parser::MapTableType eowu::parser::get_string_map_from_table(const luabridge::LuaRef &table) {
   // https://eliasdaler.wordpress.com/2016/02/16/using-lua-with-c-iterating-over-lua-tables/
   
@@ -78,7 +55,6 @@ eowu::parser::MapTableType eowu::parser::get_string_map_from_table(const luabrid
   
   return result;
 }
-#endif
 
 std::vector<double> eowu::parser::get_numeric_vector_from_table(const luabridge::LuaRef &table) {
   using namespace luabridge;
@@ -185,8 +161,9 @@ EOWU_get_numeric_value_or_error(double);
 
 template<typename T>
 std::vector<T> eowu::parser::get_numeric_vector_or_type_error(const eowu::parser::MapTableType &table,
-                                                const std::string &key,
-                                                const std::vector<T> &dflt) {
+                                                              const std::string &key,
+                                                              const std::vector<T> &dflt,
+                                                              int size_spec) {
   
   if (table.count(key) == 0) {
     return dflt;
@@ -204,6 +181,10 @@ std::vector<T> eowu::parser::get_numeric_vector_or_type_error(const eowu::parser
   
   std::size_t n_els = dbl_vec.size();
   
+  if (size_spec >= 0 && n_els != size_spec) {
+    throw eowu::ScriptParseError(eowu::parser::get_array_size_error_message(key, size_spec, n_els));
+  }
+  
   for (std::size_t i = 0; i < n_els; i++) {
     res.push_back(static_cast<T>(dbl_vec[i]));
   }
@@ -214,7 +195,8 @@ std::vector<T> eowu::parser::get_numeric_vector_or_type_error(const eowu::parser
 template<>
 std::vector<double> eowu::parser::get_numeric_vector_or_type_error(const eowu::parser::MapTableType &table,
                                                                    const std::string &key,
-                                                                   const std::vector<double> &dflt) {
+                                                                   const std::vector<double> &dflt,
+                                                                   int size_spec) {
   
   if (table.count(key) == 0) {
     return dflt;
@@ -226,7 +208,13 @@ std::vector<double> eowu::parser::get_numeric_vector_or_type_error(const eowu::p
     throw eowu::ScriptParseError(eowu::parser::get_type_error_message(key, "table"));
   }
   
-  return eowu::parser::get_numeric_vector_from_table(ref);
+  auto vec = eowu::parser::get_numeric_vector_from_table(ref);
+  
+  if (size_spec >= 0 && vec.size() != size_spec) {
+    throw eowu::ScriptParseError(eowu::parser::get_array_size_error_message(key, size_spec, vec.size()));
+  }
+  
+  return vec;
 }
 
 EOWU_get_numeric_vector_or_type_error(int);

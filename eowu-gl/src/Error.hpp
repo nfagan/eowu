@@ -30,4 +30,5 @@ namespace eowu {
   EOWU_GENERIC_ERROR(NonexistentResourceError);
   
   EOWU_GENERIC_ERROR(InteralContextError);
+  EOWU_GENERIC_ERROR(UnrecognizedLabelError);
 }

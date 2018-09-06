@@ -24,6 +24,7 @@ namespace eowu {
     std::vector<std::string> get_string_vector_from_table(const luabridge::LuaRef &ref);
     
     std::string get_type_error_message(const std::string &key, const std::string &type);
+    std::string get_array_size_error_message(const std::string &key, int expected_size, int given_size);
     
     template<typename T>
     T get_numeric_value_or(const eowu::parser::MapTableType &table, const std::string &key, T deflt);
@@ -34,7 +35,8 @@ namespace eowu {
     template<typename T>
     std::vector<T> get_numeric_vector_or_type_error(const eowu::parser::MapTableType &table,
                                                     const std::string &key,
-                                                    const std::vector<T> &dflt);
+                                                    const std::vector<T> &dflt,
+                                                    int size_spec = -1);
     
     luabridge::LuaRef get_function_or_error(const eowu::parser::MapTableType &table,
                                             const std::string &key);

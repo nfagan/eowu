@@ -40,6 +40,7 @@ public:
   
   glm::mat4 GetTransformationMatrix() const;
   
+  static unsigned int GetUnitsFromStringLabel(const std::string &unit_id);
 private:
   mutable std::shared_mutex mut;
   

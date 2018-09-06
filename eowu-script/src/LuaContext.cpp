@@ -16,8 +16,12 @@ eowu::LuaContext::LuaContext(lua_State *state) {
   lua_state = state;
 }
 
-lua_State* eowu::LuaContext::GetState() {
+lua_State* eowu::LuaContext::GetState() const {
   return lua_state;
+}
+
+void eowu::LuaContext::SetState(lua_State *L) {
+  lua_state = L;
 }
 
 void eowu::LuaContext::Call(const eowu::LuaFunction &other) const {

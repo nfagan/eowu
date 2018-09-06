@@ -9,10 +9,42 @@
 #include "test-util.hpp"
 #include "Lua.hpp"
 #include <eowu-script/eowu-script.hpp>
+#include <eowu-common/test.hpp>
 #include <stdexcept>
 #include <vector>
 #include <string>
 #include <iostream>
+
+void test_valid_state_with_render_functions() {
+  using namespace luabridge;
+  
+  lua_State* L = luaL_newstate();
+  luaL_openlibs(L);
+  
+  luabridge::LuaRef valid_setup(L);
+  luabridge::LuaRef invalid_setup(L);
+  
+  auto dir = util::get_lua_test_script_directory();
+  auto valid_file = dir + "test-redone-render-functions.lua";
+  auto invalid_file = dir + "test-redone-render-functions-invalid.lua";
+  
+  try {
+    valid_setup = util::get_global_from_script_with_trap(L, valid_file, "State");
+    invalid_setup = util::get_global_from_script_with_trap(L, invalid_file, "State");
+  } catch (const std::runtime_error &e) {
+    std::cout << "Failed to get global with message: " << e.what() << std::endl;
+    return;
+  }
+  
+  auto res = eowu::parser::state(valid_setup);
+  
+  EOWU_ASSERT_TRUE(res.success, "Successfully parsed valid setup",
+                   "Failed to parse valid setup with message" << res.message);
+  
+  auto invalid_res = eowu::parser::state(invalid_setup);
+  
+  EOWU_ASSERT_TRUE(!invalid_res.success, "Failed to parse invalid setup", "Succesfully parsed invalid setup");  
+}
 
 void test_valid_state() {
   using namespace luabridge;
@@ -73,5 +105,6 @@ void test_valid_state() {
 void test_state_parse_run_all() {
   std::cout << "--------" << "state-parser" << std::endl;
   
+  test_valid_state_with_render_functions();
   test_valid_state();
 }

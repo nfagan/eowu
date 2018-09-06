@@ -13,9 +13,16 @@
 #include "Stimuli.hpp"
 #include "State.hpp"
 #include "Targets.hpp"
+#include "Source.hpp"
 
 namespace eowu {
   namespace schema {
+    struct EntryScript {
+      luabridge::LuaRef entry_table;
+      
+      EntryScript(lua_State *L) : entry_table(L) {}
+    };
+    
     struct Setup {
       eowu::schema::Windows windows;
       eowu::schema::Textures textures;
@@ -23,6 +30,7 @@ namespace eowu {
       eowu::schema::States states;
       eowu::schema::Targets targets;
       eowu::schema::Stimuli stimuli;
+      eowu::schema::Sources sources;
     };
   }
 }

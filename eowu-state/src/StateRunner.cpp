@@ -13,9 +13,9 @@ eowu::StateRunner::StateRunner() {
   active_state = nullptr;
 }
 
-void eowu::StateRunner::Next(eowu::State *state) {
-  this->active_state = state;
-  is_new_state = true;
+void eowu::StateRunner::Begin(eowu::State *state) {
+  timer.Reset();
+  next(state);
 }
 
 bool eowu::StateRunner::Update() {
@@ -30,7 +30,7 @@ bool eowu::StateRunner::Update() {
   
   if (active_state->ShouldExit()) {
     active_state->OnExit();
-    Next(active_state->GetNext());
+    next(active_state->GetNext());
   } else {
     active_state->OnLoop();
   }
@@ -40,4 +40,9 @@ bool eowu::StateRunner::Update() {
 
 bool eowu::StateRunner::IsNewState() const {
   return is_new_state;
+}
+
+void eowu::StateRunner::next(eowu::State *state) {
+  this->active_state = state;
+  is_new_state = true;
 }

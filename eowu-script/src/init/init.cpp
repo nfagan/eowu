@@ -13,32 +13,32 @@
 #include <eowu-state/eowu-state.hpp>
 #include <chrono>
 
-void eowu::init::init_render_pipeline(std::shared_ptr<eowu::LuaContext> lua_context,
-                                      std::shared_ptr<eowu::LuaFunction> lua_render_function,
-                                      std::shared_ptr<eowu::GLPipeline> pipeline) {
-  
-  lua_State *L = lua_context->GetState();
-  
+void eowu::init::init_render_schema(lua_State *L) {
   eowu::GLPipelineWrapper::CreateLuaSchema(L);
   eowu::RendererWrapper::CreateLuaSchema(L);
   eowu::VectorWrapper::CreateLuaSchema(L);
   eowu::ModelWrapper::CreateLuaSchema(L);
-  
-  eowu::GLPipelineWrapper::Pipeline = pipeline;
-  eowu::GLPipelineWrapper::LuaRenderFunction = lua_render_function;
-  
 }
 
-void eowu::init::init_states(std::shared_ptr<eowu::LuaContext> lua_context,
-                             eowu::StateManager &state_manager,
-                             const eowu::schema::States &state_schema) {
-  
-  lua_State *L = lua_context->GetState();
-  
+void eowu::init::init_state_schema(lua_State *L) { 
   eowu::StateWrapper::CreateLuaSchema(L);
   eowu::TaskWrapper::CreateLuaSchema(L);
+}
+
+eowu::RenderFunctionContainerType eowu::init::get_render_functions(const eowu::schema::States &schema) {
+  auto result = std::make_unique<eowu::RenderFunctionMapType>();
   
-  eowu::TaskWrapper::States = init::get_states(state_schema, lua_context, state_manager);
+  for (const auto &state_it : schema.mapping) {
+    for (const auto &func_it : state_it.second.render_functions) {
+      eowu::LuaReferenceContainer ref(func_it.second);
+      
+      eowu::LuaFunction func(ref);
+      
+      result->emplace(func_it.first, func);
+    }
+  }
+  
+  return result;
 }
 
 eowu::StateWrapperContainerType eowu::init::get_states(const eowu::schema::States &schemas,
@@ -46,10 +46,6 @@ eowu::StateWrapperContainerType eowu::init::get_states(const eowu::schema::State
                                                        eowu::StateManager &state_manager) {
   
   auto result = std::make_unique<eowu::StateWrapperMapType>();
-  
-  lua_State *L = lua_context->GetState();
-  
-  eowu::StateWrapper::CreateLuaSchema(L);
   
   for (const auto &it : schemas.mapping) {
     const auto &schema = it.second;

@@ -15,22 +15,24 @@ namespace util {
   }
 }
 
-#define EOWU_PARSER_EARLY_RETURN(id, id_value, param_id, function) \
+#define EOWU_PARSER_EARLY_RETURN(id, id_value, id_ref, param_id, function) \
   const char* const id = param_id; \
 \
   if (kv.count(id) == 0) { \
     result.message = util::get_setup_schema_missing_field_error(id); \
+    result.context = param_id; \
     return result; \
   } \
 \
-  auto id_value = function(kv.at(id)); \
+  const luabridge::LuaRef &id_ref = kv.at(id); \
+  const auto id_value = function(id_ref); \
  \
   if (!id_value.success) { \
     result.message = id_value.message; \
+    result.context = id_value.context; \
     return result; \
   } \
   result.result.id = id_value.result;
-
 
 eowu::parser::ParseResult<eowu::schema::Setup> eowu::parser::setup(const luabridge::LuaRef &table) {
   
@@ -42,18 +44,28 @@ eowu::parser::ParseResult<eowu::schema::Setup> eowu::parser::setup(const luabrid
   auto kv = get_string_map_from_table(table);
   
   //  Windows
-  EOWU_PARSER_EARLY_RETURN(windows, windows_, "Windows", eowu::parser::windows);
+  EOWU_PARSER_EARLY_RETURN(windows, windows_, wref, "Windows", eowu::parser::windows);
   //  Geometry
-  EOWU_PARSER_EARLY_RETURN(geometry, geometry_, "Geometry", eowu::parser::geometry);
+  EOWU_PARSER_EARLY_RETURN(geometry, geometry_, gref, "Geometry", eowu::parser::geometry);
   //  Textures
-  EOWU_PARSER_EARLY_RETURN(textures, textures_, "Textures", eowu::parser::textures);
+  EOWU_PARSER_EARLY_RETURN(textures, textures_, tref, "Textures", eowu::parser::textures);
   //  Stimuli
-  EOWU_PARSER_EARLY_RETURN(stimuli, stim_, "Stimuli", eowu::parser::stimuli);
+  EOWU_PARSER_EARLY_RETURN(stimuli, stim_, sref, "Stimuli", eowu::parser::stimuli);
   //  Target
-  EOWU_PARSER_EARLY_RETURN(targets, targets_, "Targets", eowu::parser::targets);
+  EOWU_PARSER_EARLY_RETURN(targets, targets_, targref, "Targets", eowu::parser::targets);
+  //  States
+  EOWU_PARSER_EARLY_RETURN(states, states_, ssref, "States", eowu::parser::states);
+  //  Sources
+  EOWU_PARSER_EARLY_RETURN(sources, sources_, source_ref, "Sources", eowu::parser::sources);
+  
+  result.success = true;
   
   return result;  
 }
+
+//
+//  windows
+//
 
 eowu::parser::ParseResult<eowu::schema::Windows> eowu::parser::windows(const luabridge::LuaRef &table) {
   using namespace eowu::parser;
@@ -78,6 +90,7 @@ eowu::parser::ParseResult<eowu::schema::Windows> eowu::parser::windows(const lua
     window.width = get_numeric_value_or<int>(subtable, "width", -1);
     window.height = get_numeric_value_or<int>(subtable, "height", -1);
     window.index = get_numeric_value_or<unsigned int>(subtable, "index", 0);
+    window.full_screen = get_numeric_value_or<unsigned int>(subtable, "fullscreen", 0);
     
     result.result.windows.emplace(it.first, window);
   }
@@ -86,6 +99,10 @@ eowu::parser::ParseResult<eowu::schema::Windows> eowu::parser::windows(const lua
   
   return result;
 }
+
+//
+//  textures
+//
 
 eowu::parser::ParseResult<eowu::schema::Textures> eowu::parser::textures(const luabridge::LuaRef &table) {
   using namespace eowu::parser;
@@ -101,6 +118,7 @@ eowu::parser::ParseResult<eowu::schema::Textures> eowu::parser::textures(const l
     
     if (!ref.isString()) {
       result.message = "Texture file path " + file + " must refer to a string value.";
+      result.context = "Textures";
       return result;
     }
     
@@ -111,6 +129,10 @@ eowu::parser::ParseResult<eowu::schema::Textures> eowu::parser::textures(const l
   
   return result;
 }
+
+//
+//  geometry
+//
 
 eowu::parser::ParseResult<eowu::schema::Geometry> eowu::parser::geometry(const luabridge::LuaRef &table) {
   using namespace eowu::parser;
@@ -123,18 +145,23 @@ eowu::parser::ParseResult<eowu::schema::Geometry> eowu::parser::geometry(const l
   bool has_builtin = kv.count("Builtin") > 0;
   
   if (has_builtin) {
-    auto builtin = get_string_map_from_table(kv.at("Builtin"));
+    const luabridge::LuaRef &builtin_table = kv.at("Builtin");
+    
+    auto builtin = get_string_map_from_table(builtin_table);
     
     for (const auto &it : builtin) {
       const auto &id = it.first;
-      const auto &ref = it.second;
+      const luabridge::LuaRef &ref = it.second;
       
       if (!ref.isString()) {
         result.message = "Built-in identifier " + id + " must refer to a string value.";
+        result.context = "Geometry::Builtin";
         return result;
       }
       
-      result.result.builtins.mapping.emplace(id, ref.tostring());
+      std::string val = ref.tostring();
+      
+      result.result.builtins.mapping.emplace(id, val);
     }
   }
   
@@ -142,6 +169,10 @@ eowu::parser::ParseResult<eowu::schema::Geometry> eowu::parser::geometry(const l
   
   return result;
 }
+
+//
+//  stimuli
+//
 
 eowu::parser::ParseResult<eowu::schema::Stimuli> eowu::parser::stimuli(const luabridge::LuaRef &table) {
   using namespace eowu::parser;
@@ -152,10 +183,11 @@ eowu::parser::ParseResult<eowu::schema::Stimuli> eowu::parser::stimuli(const lua
   auto kv = get_string_map_from_table(table);
   
   for (const auto &it : kv) {
-    auto stim_res = eowu::parser::stimulus(it.second);
+    auto stim_res = eowu::parser::stimulus(it.second, it.first);
     
     if (!stim_res.success) {
       result.message = stim_res.message;
+      result.context = stim_res.context;
       return result;
     }
     
@@ -167,7 +199,12 @@ eowu::parser::ParseResult<eowu::schema::Stimuli> eowu::parser::stimuli(const lua
   return result;
 }
 
-eowu::parser::ParseResult<eowu::schema::Stimulus> eowu::parser::stimulus(const luabridge::LuaRef &table) {
+//
+//  stimulus
+//
+
+eowu::parser::ParseResult<eowu::schema::Stimulus> eowu::parser::stimulus(const luabridge::LuaRef &table,
+                                                                         const std::string &stimulus_id) {
   using namespace eowu::parser;
   using namespace eowu::schema;
   
@@ -179,18 +216,23 @@ eowu::parser::ParseResult<eowu::schema::Stimulus> eowu::parser::stimulus(const l
   
   try {
     //  geometry is required
+    value.stimulus_id = stimulus_id;
     value.geometry_id = get_string_or_error(kv, "geometry");
     value.texture_id = get_string_or_type_error(kv, "texture", "");
-    value.units = get_string_or_type_error(kv, "units", "");
+    value.units = get_string_or_type_error(kv, "units", "normalized");
     value.size = get_numeric_vector_or_type_error<double>(kv, "size", value.size);
     value.position = get_numeric_vector_or_type_error<double>(kv, "position", value.position);
+    value.rotation = get_numeric_vector_or_type_error<double>(kv, "rotation", value.rotation);
     
     if (kv.count("targets") > 0) {
       value.target_ids = get_string_vector_from_table(kv.at("targets"));
     }
     
+    value.provided_texture_id = value.texture_id != "";
+    
   } catch (const std::exception &e) {
     result.message = e.what();
+    result.context = "Stimuli::" + stimulus_id;
     return result;
   }
   
@@ -199,20 +241,50 @@ eowu::parser::ParseResult<eowu::schema::Stimulus> eowu::parser::stimulus(const l
   return result;
 }
 
-eowu::parser::ParseResult<eowu::schema::Target> eowu::parser::target(const luabridge::LuaRef &table) {
+//
+//  source
+//
+
+eowu::parser::ParseResult<eowu::schema::Sources> eowu::parser::sources(const luabridge::LuaRef &table) {
   using namespace eowu::parser;
   using namespace eowu::schema;
   
-  ParseResult<Target> result;
+  ParseResult<Sources> result;
+  
+  auto kv = get_string_map_from_table(table);
+  
+  for (const auto &it : kv) {
+    auto source_res = eowu::parser::source(it.second, it.first);
+    
+    if (!source_res.success) {
+      result.message = source_res.message;
+      result.context = source_res.context;
+      return result;
+    }
+    
+    result.result.sources.emplace(it.first, source_res.result);
+  }
+  
+  result.success = true;
+  
+  return result;
+}
+
+eowu::parser::ParseResult<eowu::schema::Source> eowu::parser::source(const luabridge::LuaRef &table,
+                                                                     const std::string &source_id) {
+  using namespace eowu::parser;
+  using namespace eowu::schema;
+  
+  ParseResult<Source> result;
   
   auto kv = get_string_map_from_table(table);
   
   try {
-    result.result.kind = get_string_or_error(kv, "kind");
-    result.result.source_id = get_string_or_error(kv, "source");
-    result.result.padding = get_numeric_vector_or_type_error<double>(kv, "padding", result.result.padding);
+    result.result.source_id = source_id;
+    result.result.type = get_string_or_error(kv, "type");
   } catch (const std::exception &e) {
     result.message = e.what();
+    result.context = "Sources::" + source_id;
     
     return result;
   }
@@ -221,6 +293,40 @@ eowu::parser::ParseResult<eowu::schema::Target> eowu::parser::target(const luabr
   
   return result;
 }
+
+//
+//  target
+//
+
+eowu::parser::ParseResult<eowu::schema::Target> eowu::parser::target(const luabridge::LuaRef &table,
+                                                                     const std::string &target_id) {
+  using namespace eowu::parser;
+  using namespace eowu::schema;
+  
+  ParseResult<Target> result;
+  
+  auto kv = get_string_map_from_table(table);
+  
+  try {
+    result.result.target_id = target_id;
+    result.result.kind = get_string_or_error(kv, "kind");
+    result.result.source_id = get_string_or_error(kv, "source");
+    result.result.padding = get_numeric_vector_or_type_error<double>(kv, "padding", result.result.padding);
+  } catch (const std::exception &e) {
+    result.message = e.what();
+    result.context = "Targets::" + target_id;
+    
+    return result;
+  }
+  
+  result.success = true;
+  
+  return result;
+}
+
+//
+//  targets
+//
 
 eowu::parser::ParseResult<eowu::schema::Targets> eowu::parser::targets(const luabridge::LuaRef &table) {
   using namespace eowu::parser;
@@ -231,10 +337,11 @@ eowu::parser::ParseResult<eowu::schema::Targets> eowu::parser::targets(const lua
   auto kv = get_string_map_from_table(table);
   
   for (const auto &it : kv) {
-    auto targ_res = eowu::parser::target(it.second);
+    auto targ_res = eowu::parser::target(it.second, it.first);
     
     if (!targ_res.success) {
       result.message = targ_res.message;
+      result.context = targ_res.context;
       return result;
     }
     
@@ -248,7 +355,7 @@ eowu::parser::ParseResult<eowu::schema::Targets> eowu::parser::targets(const lua
 
 
 //
-//  State
+//  states
 //
 
 eowu::parser::ParseResult<eowu::schema::States> eowu::parser::states(const luabridge::LuaRef &table) {
@@ -264,6 +371,7 @@ eowu::parser::ParseResult<eowu::schema::States> eowu::parser::states(const luabr
     
     if (!state_res.success) {
       result.message = state_res.message;
+      result.context = state_res.context;
       return result;
     }
     
@@ -274,6 +382,10 @@ eowu::parser::ParseResult<eowu::schema::States> eowu::parser::states(const luabr
   
   return result;
 }
+
+//
+//  state
+//
 
 eowu::parser::ParseResult<eowu::schema::State> eowu::parser::state(const luabridge::LuaRef &table) {
   using namespace eowu::parser;
@@ -288,11 +400,32 @@ eowu::parser::ParseResult<eowu::schema::State> eowu::parser::state(const luabrid
     result.result.entry_function = eowu::parser::get_function_or_error(kv, "Entry");
     result.result.loop_function = eowu::parser::get_function_or_error(kv, "Loop");
     result.result.exit_function = eowu::parser::get_function_or_error(kv, "Exit");
-    result.result.render_function = eowu::parser::get_function_or_error(kv, "Render");
     result.result.state_id = eowu::parser::get_string_or_error(kv, "ID");
+    
+    if (kv.count("Render") > 0) {
+      const luabridge::LuaRef &render_function_refs = kv.at("Render");
+      
+      if (!render_function_refs.isTable()) {
+        result.message = eowu::parser::get_type_error_message("Render", "table");
+        result.context = "Render";
+        return result;
+      }
+      
+      auto render_func_result = eowu::parser::render_functions(render_function_refs);
+      
+      if (!render_func_result.success) {
+        result.message = render_func_result.message;
+        result.context = "Render";
+        
+        return result;
+      }
+      
+      result.result.render_functions = render_func_result.result;
+    }
     
   } catch (const std::exception &e) {
     result.message = e.what();
+    result.context = "States::" + result.result.state_id;
     
     return result;
   }
@@ -302,4 +435,41 @@ eowu::parser::ParseResult<eowu::schema::State> eowu::parser::state(const luabrid
   return result;
 }
 
+//
+//  render functions
+//
+
+eowu::parser::ParseResult<eowu::schema::RenderFunctionAggregateType> eowu::parser::render_functions(const luabridge::LuaRef &table) {
+  
+  using namespace eowu::parser;
+  using namespace eowu::schema;
+  
+  ParseResult<RenderFunctionAggregateType> result;
+  
+  auto kv = get_string_map_from_table(table);
+  
+  for (const auto &it : kv) {
+    try {
+      const auto &func = it.second;
+      
+      if (!func.isFunction()) {
+        result.message = eowu::parser::get_type_error_message(it.first, "function");
+        result.context = "Render";
+        return result;
+      }
+      
+      result.result.emplace(it.first, func);
+      
+    } catch (const std::exception &e) {
+      result.message = e.what();
+      result.context = "Render";
+      
+      return result;
+    }
+  }
+  
+  result.success = true;
+  
+  return result;
+}
 

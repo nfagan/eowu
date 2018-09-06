@@ -47,7 +47,7 @@ void test1() {
   auto state1 = state_manager.CreateState("first");
   state1->SetDuration(std::chrono::milliseconds(5000));
   
-  state_runner.Next(state1);
+  state_runner.Begin(state1);
   
   while (!state_runner.Update() && !win->ShouldClose()) {
     renderer.Queue({*model1.get()});

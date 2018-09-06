@@ -21,15 +21,14 @@ namespace eowu {
 template<typename T>
 struct eowu::parser::ParseResult {
   
-  ParseResult() {
-    success = false;
-  }
+  ParseResult() : success(false) {}
   
-  ParseResult(lua_State *L) : result(L) {}
+  ParseResult(lua_State *L) : success(false), result(L) {}
   
   ~ParseResult() = default;
   
   bool success;
   std::string message;
+  std::string context;
   T result;
 };

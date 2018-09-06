@@ -15,5 +15,7 @@
 #include "../../src/StateWrapper.hpp"
 #include "../../src/GLPipelineWrapper.hpp"
 #include "../../src/RendererWrapper.hpp"
+#include "../../src/ScriptWrapper.hpp"
 #include "../../src/Init.hpp"
 #include "../../src/Parser.hpp"
+#include "../../src/Validator.hpp"

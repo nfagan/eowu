@@ -30,7 +30,7 @@ void test_multiple_state() {
   state1->SetDuration(std::chrono::milliseconds(1000));
   state2->SetDuration(std::chrono::seconds(1));
   
-  runner.Next(state1);
+  runner.Begin(state1);
   
   bool should_quit = false;
   while (!should_quit) {
@@ -64,7 +64,7 @@ void test_exit_condition() {
   
   bool should_quit = false;
   
-  runner.Next(res);
+  runner.Begin(res);
   
   auto t1 = eowu::time::now();
   

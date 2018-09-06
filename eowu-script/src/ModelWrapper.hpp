@@ -30,7 +30,7 @@ public:
   
   ~ModelWrapper() = default;
   
-  void SetColor(double r, double b, double g);
+  void SetColor(double r, double g, double b);
   void SetTexture(const std::string &id);
   
   void SetPosition(const eowu::VectorWrapper &vec);

@@ -17,6 +17,10 @@ function_reference(other.function_reference) {
   //
 }
 
+void eowu::LuaFunction::Set(const eowu::LuaFunction &other) {
+  Set(other.function_reference);
+}
+
 void eowu::LuaFunction::Set(const eowu::LuaReferenceContainer &func) {
   std::unique_lock<std::recursive_mutex> lock(mut);
   

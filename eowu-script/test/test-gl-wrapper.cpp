@@ -28,6 +28,20 @@ namespace gltest {
   std::atomic<bool> threads_should_continue = true;
   //  end globals
   
+  void frame_summary(std::vector<double> frame_times) {
+    double mean = util::mean(frame_times);
+    double std = util::std(frame_times);
+    double max = util::max(frame_times);
+    double min = util::min(frame_times);
+    
+    std::cout << "single context" << std::endl;
+    std::cout << "MEAN: " << mean << std::endl;
+    std::cout << "STD: " << std << std::endl;
+    std::cout << "MIN: " << min << std::endl;
+    std::cout << "MAX: " << max << std::endl;
+    std::cout << "N: " << frame_times.size() << std::endl;
+  }
+  
   void main_create() {
     using namespace eowu;
     
@@ -46,6 +60,10 @@ namespace gltest {
     auto mesh = gl_resource_manager->Create<Mesh>(stim_id);
     auto material = gl_resource_manager->Create<Material>(stim_id);
     auto stim1 = gl_resource_manager->Create<Model>(stim_id, mesh, material);
+    
+    for (unsigned int i = 1; i < 1001; i++) {
+      auto stim = gl_resource_manager->Create<Model>("first" + std::to_string(i), mesh, material);
+    }
     
     gl_texture_manager->LoadImage("/Users/Nick/Desktop/eg.png", "first");
     
@@ -68,6 +86,11 @@ namespace gltest {
     auto renderer = pipeline->GetRenderer();
     auto context_manager = pipeline->GetContextManager();
     
+    auto t1 = eowu::time::now();
+    auto start = t1;
+    bool first_iter = true;
+    std::vector<double> frame_times;
+    
     while (threads_should_continue && !win->ShouldClose()) {
       if (lua_setup_complete) {
         lua_context_manager->Call(*render_function.get());
@@ -75,9 +98,27 @@ namespace gltest {
       
       renderer->Draw(win);
       renderer->ClearQueue();
-      
       context_manager->PollEvents();
+      
+      auto t2 = eowu::time::now();
+      
+      std::chrono::duration<double, std::milli> total = t2 - start;
+      
+      if (total.count() > 10000.0) {
+        threads_should_continue = false;
+      }
+      
+      if (!first_iter) {
+        std::chrono::duration<double, std::milli> fp_ms = t2 - t1;
+        frame_times.push_back(fp_ms.count());
+        t1 = t2;
+      } else {
+        first_iter = false;
+        t1 = eowu::time::now();
+      }
     }
+    
+    frame_summary(frame_times);
     
     threads_should_continue = false;
   }
@@ -100,20 +141,24 @@ namespace gltest {
     auto state_schemas = parser::states(states);
     
     if (!state_schemas.success) {
-      std::cout << "ERROR: Failed to parse schema." << std::endl;
+      std::cout << "ERROR: Failed to parse schema with message: " << state_schemas.message << std::endl;
       return;
     }
     
-    LuaRef render_func = state_schemas.result.mapping.at("State1").render_function;
+    LuaRef render_func = state_schemas.result.mapping.at("State1").entry_function;
     LuaReferenceContainer render_func_ref(render_func);
     render_function = std::make_shared<eowu::LuaFunction>(render_func_ref);
     
-    init::init_states(lua_context_manager, state_manager, state_schemas.result);
-    init::init_render_pipeline(lua_context_manager, render_function, pipeline);
+    eowu::TaskWrapper::States = init::get_states(state_schemas.result, lua_context_manager, state_manager);
+    eowu::GLPipelineWrapper::Pipeline = pipeline;
+    eowu::GLPipelineWrapper::LuaRenderFunction = render_function;
+    
+    init::init_state_schema(lua_context_manager->GetState());
+    init::init_render_schema(lua_context_manager->GetState());
     
     lua_setup_complete = true;
     
-    runner.Next(state_manager.GetState("1"));
+    runner.Begin(state_manager.GetState("1"));
     
     while (threads_should_continue && !runner.Update()) {
       //

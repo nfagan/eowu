@@ -15,6 +15,7 @@ namespace eowu {
     
     struct Window {
       unsigned int index;
+      unsigned int full_screen;
       int width;
       int height;
     };

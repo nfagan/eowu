@@ -15,6 +15,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <utility>
 #include <cstddef>
+#include <GLFW/glfw3.h>
 
 #ifdef EOWU_DEBUG
 #include <iostream>
@@ -50,6 +51,8 @@ void eowu::Renderer::draw(eowu::WindowType window) {
   std::lock_guard<std::mutex> guard(models_mutex);
   
   window->MakeCurrent();
+  
+  glfwSwapInterval(1);
   
   if (window->WasResized()) {
     auto fb_size = window->GetFramebufferSize();

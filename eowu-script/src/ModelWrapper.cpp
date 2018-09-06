@@ -70,7 +70,7 @@ void eowu::ModelWrapper::SetUnits(const std::string &units) {
   }
 }
 
-void eowu::ModelWrapper::SetColor(double r, double b, double g) {
+void eowu::ModelWrapper::SetColor(double r, double g, double b) {
   assert_material();
   model->GetMaterial()->SetFaceColor(glm::vec3(r, g, b));
 }

@@ -10,5 +10,6 @@
 namespace eowu {
   namespace constants {
     extern const char* const eowu_namespace;
+    extern const char* const eowu_script_name;
   }
 }

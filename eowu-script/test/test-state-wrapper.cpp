@@ -40,9 +40,11 @@ namespace test {
       return;
     }
     
-    init::init_states(lua_context, state_manager, state_schemas.result);
+    init::init_state_schema(lua_context->GetState());
     
-    runner.Next(state_manager.GetState("1"));
+    eowu::TaskWrapper::States = init::get_states(state_schemas.result, lua_context, state_manager);
+    
+    runner.Begin(state_manager.GetState("1"));
     
     while (!runner.Update()) {
       //
@@ -98,7 +100,7 @@ namespace test {
 //      state_manager.wrappers.emplace(schema.result.state_id, std::move(wrapper));
     }
     
-    runner.Next(states[0]);
+    runner.Begin(states[0]);
     
     while (!runner.Update()) {
       //

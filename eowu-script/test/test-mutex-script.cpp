@@ -122,7 +122,7 @@ void task_thread() {
   
   auto first = manager.CreateState("first");
   first->SetDuration(std::chrono::milliseconds(1));
-  runner.Next(first);
+  runner.Begin(first);
   
 #ifdef EOWU_IS_WRAPPED
   //  auto

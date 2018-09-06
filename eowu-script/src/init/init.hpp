@@ -10,6 +10,8 @@
 #include <memory>
 #include <unordered_map>
 
+struct lua_State;
+
 namespace luabridge {
   class LuaRef;
 }
@@ -23,6 +25,8 @@ namespace eowu {
   class StateManager;
   using StateWrapperMapType = std::unordered_map<std::string, std::shared_ptr<eowu::StateWrapper>>;
   using StateWrapperContainerType = std::unique_ptr<eowu::StateWrapperMapType>;
+  using RenderFunctionMapType = std::unordered_map<std::string, LuaFunction>;
+  using RenderFunctionContainerType = std::unique_ptr<RenderFunctionMapType>;
   
   namespace schema {
     struct States;
@@ -33,12 +37,9 @@ namespace eowu {
                                                std::shared_ptr<eowu::LuaContext> lua_context,
                                                eowu::StateManager &state_manager);
     
-    void init_states(std::shared_ptr<eowu::LuaContext> lua_context,
-                     eowu::StateManager &state_manager,
-                     const eowu::schema::States &state_schema);
+    eowu::RenderFunctionContainerType get_render_functions(const eowu::schema::States &schema);
     
-    void init_render_pipeline(std::shared_ptr<eowu::LuaContext> lua_context,
-                              std::shared_ptr<eowu::LuaFunction> lua_render_function,
-                              std::shared_ptr<eowu::GLPipeline> pipeline);
+    void init_state_schema(lua_State *L);
+    void init_render_schema(lua_State *L);
   }
 }

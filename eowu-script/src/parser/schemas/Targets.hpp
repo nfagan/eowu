@@ -12,9 +12,14 @@
 namespace eowu {
   namespace schema {
     struct Target {
+      std::string target_id;
       std::string kind;
       std::string source_id;
       std::vector<double> padding;
+      
+      Target() {
+        padding = { 0, 0, 0 };
+      }
     };
     
     struct Targets {

@@ -122,7 +122,7 @@ void task_thread(std::shared_ptr<eowu::RenderFunction> render_func) {
   
   auto first = manager.CreateState("first");
   first->SetDuration(std::chrono::milliseconds(1));
-  runner.Next(first);
+  runner.Begin(first);
   
   first->SetOnLoop([&](auto *state) {
 //    std::unique_lock<std::mutex> lock(lua_context_mutex);

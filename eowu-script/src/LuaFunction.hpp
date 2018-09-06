@@ -21,6 +21,7 @@ public:
   LuaFunction(const eowu::LuaReferenceContainer &func);
   LuaFunction(const eowu::LuaFunction &other);
   
+  void Set(const eowu::LuaFunction &other);
   void Set(const eowu::LuaReferenceContainer &func);
   void Call() const;
   

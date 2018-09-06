@@ -23,7 +23,9 @@ public:
   LuaContext(lua_State *L);
   ~LuaContext() = default;
   
-  lua_State* GetState();
+  lua_State* GetState() const;
+  void SetState(lua_State *L);
+  
   void Call(const eowu::LuaFunction &other) const;
 private:
   mutable std::mutex mut;
