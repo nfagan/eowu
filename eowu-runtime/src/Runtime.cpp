@@ -26,6 +26,7 @@ int eowu::Runtime::Main(const std::string &file) {
   auto gl_status = init::initialize_gl_pipeline(gl_pipeline, lua_runtime.setup_schema);
   
   if (!gl_status.success) {
+    gl_status.file = file;
     gl_status.print();
     return 1;
   }

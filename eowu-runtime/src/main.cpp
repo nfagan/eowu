@@ -12,14 +12,13 @@
 int main(int argc, char** argv) {
   eowu::Runtime runtime;
   
-//  if (argc < 2) {
-//    std::cout << "Specify a file." << std::endl;
-//    return 0;
-//  }
+  std::string file;
   
-//  std::string file(argv[1]);
-  
-  std::string file = "/Users/Nick/repositories/cpp/eowu/eowu-runtime/test/script/brief-valid-schema.lua";
+  if (argc < 2) {
+    file = "/Users/Nick/repositories/cpp/eowu/eowu-runtime/test/script/brief-valid-schema.lua";
+  } else {
+    file = argv[1];
+  }
   
   return runtime.Main(file);
 }

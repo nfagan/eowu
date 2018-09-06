@@ -28,6 +28,35 @@ std::string eowu::parser::get_array_size_error_message(const std::string &key, i
 }
 
 eowu::parser::MapTableType eowu::parser::get_string_map_from_table(const luabridge::LuaRef &table) {
+  //  https://stackoverflow.com/questions/6137684/iterate-through-lua-table
+  using namespace luabridge;
+  eowu::parser::MapTableType result;
+  
+  if (!table.isTable()) {
+    return result;
+  }
+  
+  auto L = table.state();
+  push(L, table);
+  
+  lua_pushnil(L);
+  while (lua_next(L, -2)) {
+    lua_pushvalue(L, -2);
+    const char *key = lua_tostring(L, -1);
+//    const char *value = lua_tostring(L, -2);
+    
+    result.emplace(std::string(key), LuaRef::fromStack(L, -2));
+    
+    lua_pop(L, 2);
+  }
+  
+  lua_pop(L, 1);
+  
+  return result;
+}
+
+#if false
+eowu::parser::MapTableType eowu::parser::get_string_map_from_table(const luabridge::LuaRef &table) {
   // https://eliasdaler.wordpress.com/2016/02/16/using-lua-with-c-iterating-over-lua-tables/
   
   using namespace luabridge;
@@ -55,6 +84,7 @@ eowu::parser::MapTableType eowu::parser::get_string_map_from_table(const luabrid
   
   return result;
 }
+#endif
 
 std::vector<double> eowu::parser::get_numeric_vector_from_table(const luabridge::LuaRef &table) {
   using namespace luabridge;
