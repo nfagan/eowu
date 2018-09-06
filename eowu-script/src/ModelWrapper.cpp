@@ -27,10 +27,12 @@ eowu::VectorWrapper eowu::ModelWrapper::name() const { \
 
 eowu::ModelWrapper::ModelWrapper(std::shared_ptr<eowu::Model> model,
                                  std::shared_ptr<eowu::Renderer> renderer,
+                                 std::shared_ptr<eowu::WindowContainerMap> window_container,
                                  std::shared_ptr<eowu::TextureManager> texture_manager) {
   this->renderer = renderer;
   this->model = model;
   this->texture_manager = texture_manager;
+  this->window_container = window_container;
 }
 
 void eowu::ModelWrapper::assert_mesh() {

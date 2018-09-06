@@ -30,8 +30,9 @@ eowu::ModelWrapper eowu::GLPipelineWrapper::GetModelWrapper(const std::string &i
   auto model = Pipeline->GetResourceManager()->Get<eowu::Model>(id);
   auto renderer = Pipeline->GetRenderer();
   auto texture_manager = Pipeline->GetTextureManager();
+  auto window_container = Pipeline->GetWindowContainer();
   
-  eowu::ModelWrapper model_wrapper(model, renderer, texture_manager);
+  eowu::ModelWrapper model_wrapper(model, renderer, window_container, texture_manager);
   
   return model_wrapper;
 }

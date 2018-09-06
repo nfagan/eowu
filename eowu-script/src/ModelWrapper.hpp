@@ -16,6 +16,7 @@ namespace eowu {
   class Model;
   class Renderer;
   class TextureManager;
+  class WindowContainerMap;
   
   class ModelWrapper;
   class VectorWrapper;
@@ -26,6 +27,7 @@ class eowu::ModelWrapper {
 public:
   ModelWrapper(std::shared_ptr<eowu::Model> model,
                std::shared_ptr<eowu::Renderer> renderer,
+               std::shared_ptr<eowu::WindowContainerMap> window_container,
                std::shared_ptr<eowu::TextureManager> texture_manager);
   
   ~ModelWrapper() = default;
@@ -49,6 +51,7 @@ private:
   std::shared_ptr<eowu::Model> model;
   std::shared_ptr<eowu::Renderer> renderer;
   std::shared_ptr<eowu::TextureManager> texture_manager;
+  std::shared_ptr<eowu::WindowContainerMap> window_container;
   
   void assert_mesh();
   void assert_material();

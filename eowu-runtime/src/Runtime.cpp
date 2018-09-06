@@ -35,11 +35,10 @@ int eowu::Runtime::Main(const std::string &file) {
   
   eowu::thread::SharedState thread_state;
   
-  auto task_thread = std::thread(eowu::thread::task, std::ref(thread_state), lua_runtime.state_manager.GetState("1"));
+  auto first_state = lua_runtime.GetFirstState();
+  auto task_thread = std::thread(eowu::thread::task, std::ref(thread_state), first_state);
   
-  auto win = gl_pipeline->GetContextManager()->GetWindows()[0];
-  
-  eowu::thread::render(thread_state, lua_runtime.lua_contexts.render, gl_pipeline, win);
+  eowu::thread::render(thread_state, lua_runtime.lua_contexts.render, gl_pipeline);
   
   task_thread.join();
   

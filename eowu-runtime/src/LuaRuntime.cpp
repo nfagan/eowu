@@ -109,6 +109,16 @@ void eowu::LuaRuntime::InitializeScriptWrapper(const std::string &file,
   script_wrapper.SetRenderFunctions(std::move(render_functions));
 }
 
+eowu::State* eowu::LuaRuntime::GetFirstState() {
+  const auto keys = state_manager.GetStateIds();
+  
+  if (keys.size() == 0) {
+    return nullptr;
+  }
+  
+  return state_manager.GetState(keys[0]);
+}
+
 std::shared_ptr<eowu::LuaContext> eowu::LuaRuntime::get_new_lua_context() {
   return std::make_shared<eowu::LuaContext>(get_new_lua_state());
 }

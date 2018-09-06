@@ -27,8 +27,11 @@ Setup.Targets = {}
 Setup.States = {
   State1 = {
     ID = '1',
-    Duration = -1,
-    Entry = function() end,
+    Duration = 1000,
+    Entry = (function() 
+      eowu_script():Render('hello')
+      eowu_script():State('1'):Next('1')
+    end),
     Loop = function() end,
     Exit = function() end,
     Render = {

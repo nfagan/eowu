@@ -179,10 +179,12 @@ eowu::SetupStatus eowu::init::open_windows(std::shared_ptr<eowu::GLPipeline> gl_
   eowu::SetupStatus result;
   
   auto context_manager = gl_pipeline->GetContextManager();
+  auto window_container = gl_pipeline->GetWindowContainer();
   
   const auto &window_mapping = schema.windows.windows;
   
   for (const auto &win : window_mapping) {
+    const std::string &win_id = win.first;
     const eowu::schema::Window &input_spec = win.second;
     eowu::WindowProperties open_spec;
     
@@ -190,14 +192,13 @@ eowu::SetupStatus eowu::init::open_windows(std::shared_ptr<eowu::GLPipeline> gl_
     
     open_spec.is_fullscreen = is_fullscreen;
     open_spec.index = input_spec.index;
-    
-    if (!is_fullscreen) {
-      open_spec.width = input_spec.width;
-      open_spec.height = input_spec.height;
-    }
+    open_spec.width = input_spec.width;
+    open_spec.height = input_spec.height;
     
     try {
       auto win = context_manager->OpenWindow(open_spec);
+      
+      window_container->Emplace(win_id, win);
     } catch (const std::exception &e) {
       result.message = e.what();
       result.context = eowu::contexts::gl_init + std::string("::OpenWindow");

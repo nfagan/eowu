@@ -71,6 +71,10 @@ std::shared_ptr<eowu::Mesh> eowu::Model::GetMesh() const {
   return mesh;
 }
 
+const eowu::Identifier& eowu::Model::GetIdentifier() const {
+  return resource_id;
+}
+
 void eowu::Model::NextFrame() {
   if (material) {
     material->NextFrame();

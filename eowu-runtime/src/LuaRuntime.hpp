@@ -17,7 +17,6 @@ struct lua_State;
 
 namespace eowu {
   class LuaRuntime;
-  class StateManager;
 }
 
 class eowu::LuaRuntime {
@@ -30,7 +29,8 @@ public:
   void InitializeScriptWrapper(const std::string &file,
                                std::shared_ptr<eowu::GLPipeline> gl_pipeline);
   
-  eowu::StateManager state_manager;
+  eowu::State* GetFirstState();
+  
   eowu::schema::Setup setup_schema;
   
   struct LuaContexts {
@@ -40,6 +40,7 @@ public:
   
 private:
   eowu::ScriptWrapper script_wrapper;
+  eowu::StateManager state_manager;
   
   void initialize_lua_contexts();
   

@@ -30,6 +30,17 @@ bool eowu::StateManager::HasState(const std::string &id) const {
   return states.count(id) > 0;
 }
 
+std::vector<std::string> eowu::StateManager::GetStateIds() const {
+  std::shared_lock<std::shared_mutex> lock(mut);
+  std::vector<std::string> res;
+  
+  for (const auto &it : states) {
+    res.push_back(it.first);
+  }
+  
+  return res;
+}
+
 eowu::State* eowu::StateManager::GetState(const std::string &id) const {
   std::shared_lock<std::shared_mutex> lock(mut);
   

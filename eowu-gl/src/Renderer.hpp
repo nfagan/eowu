@@ -14,6 +14,7 @@
 #include "Program.hpp"
 #include <memory>
 #include <mutex>
+#include <vector>
 #include <unordered_map>
 #include <cstddef>
 
@@ -44,6 +45,9 @@ private:
   
   std::unordered_map<std::size_t, std::shared_ptr<eowu::Program>> programs;
   std::unordered_map<eowu::Identifier, std::size_t> programs_by_material_id;
+  
+  std::unordered_map<eowu::Identifier, eowu::WindowType> windows;
+//  std::unordered_map<eowu::Identifier, std::vector<Model>> models;
   
   std::shared_ptr<eowu::Program> last_program;
   std::shared_ptr<eowu::Mesh> last_mesh;

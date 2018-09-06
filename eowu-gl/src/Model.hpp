@@ -10,6 +10,7 @@
 #include "Mesh.hpp"
 #include "Transform.hpp"
 #include "Program.hpp"
+#include "Identifier.hpp"
 #include <glm/glm.hpp>
 #include <memory>
 #include <shared_mutex>
@@ -39,10 +40,13 @@ public:
   const eowu::Transform& GetTransform() const;
   std::shared_ptr<eowu::Material> GetMaterial() const;
   std::shared_ptr<eowu::Mesh> GetMesh() const;
+  const eowu::Identifier& GetIdentifier() const;
   
   ~Model() = default;
 private:
   mutable std::shared_mutex mut;
+  
+  eowu::Identifier resource_id;
   
   std::shared_ptr<eowu::Mesh> mesh;
   std::shared_ptr<eowu::Material> material;

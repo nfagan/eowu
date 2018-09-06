@@ -32,3 +32,4 @@
 #include "../../src/Uniform.hpp"
 #include "../../src/Vector.hpp"
 #include "../../src/Vertex.hpp"
+#include "../../src/WindowContainerMap.hpp"

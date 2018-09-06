@@ -11,6 +11,7 @@
 #include <string>
 #include <memory>
 #include <shared_mutex>
+#include <vector>
 
 namespace eowu {
   class StateManager;
@@ -26,6 +27,7 @@ public:
   eowu::State* CreateState(const std::string &id);
   eowu::State* GetState(const std::string &id) const;
   bool HasState(const std::string &id) const;
+  std::vector<std::string> GetStateIds() const;
   
 private:
   mutable std::shared_mutex mut;

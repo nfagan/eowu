@@ -25,8 +25,7 @@ namespace eowu {
     
     void render(eowu::thread::SharedState &state,
                 std::shared_ptr<eowu::LuaContext> lua_context,
-                std::shared_ptr<eowu::GLPipeline> pipeline,
-                std::shared_ptr<eowu::Window> win);
+                std::shared_ptr<eowu::GLPipeline> pipeline);
     
     void task(eowu::thread::SharedState &state, eowu::State *first_state);
   }

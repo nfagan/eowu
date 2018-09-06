@@ -5,7 +5,6 @@
 //  Created by Nick Fagan on 8/29/18.
 //
 
-#include <glad/glad.h>
 #include "Renderer.hpp"
 #include "Error.hpp"
 #include "Material.hpp"
@@ -15,6 +14,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <utility>
 #include <cstddef>
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 #ifdef EOWU_DEBUG
