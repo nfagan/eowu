@@ -11,6 +11,8 @@
 #include <glm/glm.hpp>
 #include <shared_mutex>
 #include <atomic>
+#include <string>
+#include <vector>
 
 namespace eowu {
   class Transform;
@@ -41,6 +43,7 @@ public:
   glm::mat4 GetTransformationMatrix() const;
   
   static unsigned int GetUnitsFromStringLabel(const std::string &unit_id);
+  static std::vector<std::string> GetStringUnitLabels();
 private:
   mutable std::shared_mutex mut;
   

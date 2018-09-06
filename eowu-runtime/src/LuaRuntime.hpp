@@ -49,6 +49,7 @@ private:
   eowu::SetupStatus parse_schemas(const std::string &file);
   eowu::SetupStatus validate_schemas(const eowu::schema::Setup &schema, const std::string &file);
   
+  static std::shared_ptr<eowu::LuaContext> get_new_lua_context();
   static lua_State* get_new_lua_state();
   static void initialize_schemas(lua_State *L);
 };

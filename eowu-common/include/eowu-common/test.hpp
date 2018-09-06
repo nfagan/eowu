@@ -23,3 +23,14 @@
   } catch (const std::exception &e) { \
     std::cout << "OK: " << fail_message << e.what() << std::endl << std::endl; \
   }
+
+#define EOWU_ASSERT_NOTHROW(expr, success_message, fail_message) \
+  try { \
+    expr; \
+    std::cout << "OK: " << success_message << std::endl << std::endl; \
+  } catch (const std::exception &e) { \
+    std::cout << "FAIL: " << fail_message << e.what() << std::endl << std::endl; \
+  }
+
+#define EOWU_PRINT_TEST_BEGIN(name) \
+  std::cout << "-------- TEST: " << name << std::endl << std::endl;

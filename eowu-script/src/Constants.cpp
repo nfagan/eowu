@@ -9,3 +9,4 @@
 
 const char* const eowu::constants::eowu_namespace = "eowu";
 const char* const eowu::constants::eowu_script_name = "eowu_script";
+const char* const eowu::constants::eowu_noop_name = "EOWU_NOOP";

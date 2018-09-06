@@ -70,6 +70,7 @@ local function render_function_1()
   local eowu = eowu_script()
   local stim = eowu:Stimulus('fixation_square')
   stim:Draw()
+  stim:Texture('2')
 
   local scale = stim.scale
   scale.x = scale.x + 1

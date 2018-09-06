@@ -109,13 +109,19 @@ void eowu::LuaRuntime::initialize_state_functions() {
 }
 
 void eowu::LuaRuntime::initialize_render_functions() {
-  eowu::ScriptWrapper::LuaRenderFunction = std::make_shared<LuaFunction>(render_functions->at("hello"));
+  const auto &lua_noop = LuaFunction::get_no_op(lua_contexts.render->GetState());
+  
+  eowu::ScriptWrapper::LuaRenderFunction = std::make_shared<eowu::LuaFunction>(lua_noop);
   script_wrapper.SetRenderFunctions(std::move(render_functions));
 }
 
+std::shared_ptr<eowu::LuaContext> eowu::LuaRuntime::get_new_lua_context() {
+  return std::make_shared<eowu::LuaContext>(get_new_lua_state());
+}
+
 void eowu::LuaRuntime::initialize_lua_contexts() {
-  lua_contexts.task = std::make_shared<eowu::LuaContext>(get_new_lua_state());
-  lua_contexts.render = std::make_shared<eowu::LuaContext>(get_new_lua_state());
+  lua_contexts.task = get_new_lua_context();
+  lua_contexts.render = get_new_lua_context();
 }
 
 lua_State* eowu::LuaRuntime::get_new_lua_state() {

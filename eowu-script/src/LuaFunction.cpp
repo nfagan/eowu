@@ -6,6 +6,7 @@
 //
 
 #include "LuaFunction.hpp"
+#include "LuaNoop.hpp"
 #include "Error.hpp"
 
 eowu::LuaFunction::LuaFunction(const eowu::LuaReferenceContainer &ref) : function_reference(ref) {
@@ -41,3 +42,6 @@ void eowu::LuaFunction::Call() const {
   ref();
 }
 
+const eowu::LuaFunction& eowu::LuaFunction::get_no_op(lua_State *L) {
+  return eowu::LuaNoop::get_no_op(L);
+}

@@ -60,14 +60,7 @@ EOWU_VEC_SETTER(SetScale);
 
 void eowu::ModelWrapper::SetUnits(const std::string &units) {
   auto &trans = model->GetTransform();
-  
-  if (units == "normalized") {
-    trans.SetUnits(eowu::units::normalized);
-  } else if (units == "pixels") {
-    trans.SetUnits(eowu::units::pixels);
-  } else {
-    throw eowu::InvalidParameterError("Unrecognized units id '" + units + "'");
-  }
+  trans.SetUnits(trans.GetUnitsFromStringLabel(units));
 }
 
 void eowu::ModelWrapper::SetColor(double r, double g, double b) {

@@ -11,6 +11,7 @@
 #include "RendererWrapper.hpp"
 #include "Constants.hpp"
 #include "Lua.hpp"
+#include "Error.hpp"
 #include <eowu-gl/eowu-gl.hpp>
 #include <assert.h>
 
@@ -36,7 +37,13 @@ void eowu::ScriptWrapper::SetRenderFunctions(eowu::RenderFunctionContainerType r
 }
 
 void eowu::ScriptWrapper::SetActiveRenderFunction(const std::string &id) {
-  LuaRenderFunction->Set(render_functions->at(id));
+  const auto &it = render_functions->find(id);
+  
+  if (it == render_functions->end()) {
+    throw eowu::NonexistentResourceError("Render function: '" + id + "' does not exist.");
+  }
+  
+  LuaRenderFunction->Set(it->second);
 }
 
 eowu::ModelWrapper eowu::ScriptWrapper::GetModelWrapper(const std::string &id) const {

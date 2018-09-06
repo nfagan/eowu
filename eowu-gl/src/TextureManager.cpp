@@ -27,5 +27,11 @@ void eowu::TextureManager::LoadImage(const std::string &filename, const std::str
 eowu::Texture eowu::TextureManager::Get(const std::string &id) const {
   std::unique_lock<std::mutex> lock(mut);
   
-  return textures.at(id);
+  const auto &tex_it = textures.find(id);
+  
+  if (tex_it == textures.end()) {
+    throw eowu::NonexistentResourceError("Texture: '" + id + "' does not exist.");
+  }
+  
+  return tex_it->second;
 }

@@ -25,6 +25,7 @@ public:
   void Set(const eowu::LuaReferenceContainer &func);
   void Call() const;
   
+  static const LuaFunction& get_no_op(lua_State *L);
 private:
   mutable std::recursive_mutex mut;
   

@@ -13,7 +13,7 @@
 #include <eowu-common/test.hpp>
 
 void test::entry::run_all() {
-  EOWU_PRINT_TEST_BEGIN("entry script");
+  std::cout << "--------" << "entry script" << std::endl;
   
   test_valid_entry();
   test_invalid_entry();
