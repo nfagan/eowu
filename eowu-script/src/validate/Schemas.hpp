@@ -13,8 +13,6 @@
 #define EOWU_VALIDATION_NAMESPACE_BEGIN namespace eowu { namespace schema { namespace validate {
 #define EOWU_VALIDATION_NAMESPACE_END } } }
 
-#include <vector>
-
 EOWU_VALIDATION_NAMESPACE_BEGIN
 
 struct Geometry {
