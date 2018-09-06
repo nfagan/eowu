@@ -60,7 +60,7 @@ EOWU_VEC_SETTER(SetScale);
 
 void eowu::ModelWrapper::SetUnits(const std::string &units) {
   auto &trans = model->GetTransform();
-  trans.SetUnits(trans.GetUnitsFromStringLabel(units));
+  trans.SetUnits(eowu::units::get_units_from_string_label(units));
 }
 
 void eowu::ModelWrapper::SetColor(double r, double g, double b) {

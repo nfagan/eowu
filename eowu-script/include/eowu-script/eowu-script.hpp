@@ -9,6 +9,7 @@
 
 #include "../../src/LuaFunction.hpp"
 #include "../../src/LuaContext.hpp"
+#include "../../src/Constants.hpp"
 #include "../../src/TaskWrapper.hpp"
 #include "../../src/ModelWrapper.hpp"
 #include "../../src/VectorWrapper.hpp"

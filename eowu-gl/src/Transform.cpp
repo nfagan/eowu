@@ -137,19 +137,4 @@ glm::mat4 eowu::Transform::GetTransformationMatrix() const {
   return glm::scale(transform, scl);
 }
 
-std::vector<std::string> eowu::Transform::GetStringUnitLabels() {
-  return { "normalized", "pixels" };
-}
-
-unsigned int eowu::Transform::GetUnitsFromStringLabel(const std::string &unit_id) {
-  
-  if (unit_id == "normalized") {
-    return eowu::units::normalized;
-  } else if (unit_id == "pixels") {
-    return eowu::units::pixels;
-  } else {
-    throw eowu::UnrecognizedLabelError("No units matched '" + unit_id + "'");
-  }  
-}
-
 

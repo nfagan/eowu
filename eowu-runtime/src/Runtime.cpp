@@ -18,7 +18,7 @@
 
 int eowu::Runtime::Main(const std::string &file) {
   
-  if (!lua_runtime.Initialize(file)) {
+  if (!lua_runtime.InitializeSchema(file)) {
     return 1;
   }
   
@@ -31,7 +31,7 @@ int eowu::Runtime::Main(const std::string &file) {
     return 1;
   }
   
-  lua_runtime.script_wrapper.SetGLPipeline(gl_pipeline);
+  lua_runtime.InitializeScriptWrapper(file, gl_pipeline);
   
   eowu::thread::SharedState thread_state;
   

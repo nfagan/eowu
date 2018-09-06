@@ -32,6 +32,10 @@ void eowu::ScriptWrapper::SetGLPipeline(std::shared_ptr<eowu::GLPipeline> pipeli
   eowu::ScriptWrapper::pipeline = pipeline;
 }
 
+void eowu::ScriptWrapper::SetLuaRenderFunction(std::shared_ptr<eowu::LuaFunction> lua_render_function) {
+  eowu::ScriptWrapper::LuaRenderFunction = lua_render_function;
+}
+
 void eowu::ScriptWrapper::SetRenderFunctions(eowu::RenderFunctionContainerType render_functions) {
   eowu::ScriptWrapper::render_functions = std::move(render_functions);
 }

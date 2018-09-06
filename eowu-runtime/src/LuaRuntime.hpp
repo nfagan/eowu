@@ -23,15 +23,15 @@ namespace eowu {
 class eowu::LuaRuntime {
   
 public:
-  LuaRuntime();
+  LuaRuntime() = default;
   ~LuaRuntime() = default;
   
-  bool Initialize(const std::string &file);
+  bool InitializeSchema(const std::string &file);
+  void InitializeScriptWrapper(const std::string &file,
+                               std::shared_ptr<eowu::GLPipeline> gl_pipeline);
   
-  eowu::ScriptWrapper script_wrapper;
   eowu::StateManager state_manager;
   eowu::schema::Setup setup_schema;
-  eowu::RenderFunctionContainerType render_functions;
   
   struct LuaContexts {
     std::shared_ptr<eowu::LuaContext> task = nullptr;
@@ -39,11 +39,9 @@ public:
   } lua_contexts;
   
 private:
-  bool is_initialized;
+  eowu::ScriptWrapper script_wrapper;
   
   void initialize_lua_contexts();
-  void initialize_state_functions();
-  void initialize_render_functions();
   
   eowu::RenderFunctionContainerType get_render_functions(const std::string &file);
   eowu::SetupStatus parse_schemas(const std::string &file);

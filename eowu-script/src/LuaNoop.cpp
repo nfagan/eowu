@@ -35,7 +35,7 @@ const eowu::LuaFunction& eowu::LuaNoop::make_no_op(lua_State *L) {
   
   assert(no_op_global.isFunction());
   
-  auto func = std::make_unique<eowu::LuaFunction>(eowu::LuaReferenceContainer(no_op_global));
+  auto func = std::make_unique<eowu::LuaFunction>(no_op_global);
   
   eowu::LuaNoop::no_ops.emplace(L, std::move(func));
   

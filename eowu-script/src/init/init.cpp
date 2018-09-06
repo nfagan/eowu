@@ -30,9 +30,7 @@ eowu::RenderFunctionContainerType eowu::init::get_render_functions(const eowu::s
   
   for (const auto &state_it : schema.mapping) {
     for (const auto &func_it : state_it.second.render_functions) {
-      eowu::LuaReferenceContainer ref(func_it.second);
-      
-      eowu::LuaFunction func(ref);
+      eowu::LuaFunction func(func_it.second);
       
       result->emplace(func_it.first, func);
     }
@@ -56,13 +54,9 @@ eowu::StateWrapperContainerType eowu::init::get_states(const eowu::schema::State
       state->SetDuration(std::chrono::milliseconds((int)schema.duration));
     }
     
-    eowu::LuaReferenceContainer ref_entry(schema.entry_function);
-    eowu::LuaReferenceContainer ref_exit(schema.exit_function);
-    eowu::LuaReferenceContainer ref_loop(schema.loop_function);
-    
-    eowu::LuaFunction entry(ref_entry);
-    eowu::LuaFunction exit(ref_exit);
-    eowu::LuaFunction loop(ref_loop);
+    eowu::LuaFunction entry(schema.entry_function);
+    eowu::LuaFunction exit(schema.exit_function);
+    eowu::LuaFunction loop(schema.loop_function);
     
     auto state_functions = std::make_unique<eowu::LuaStateFunctions>(entry, loop, exit);
     auto wrapper = std::make_shared<eowu::StateWrapper>(state, lua_context, std::move(state_functions));

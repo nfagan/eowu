@@ -118,7 +118,7 @@ eowu::SetupStatus eowu::init::create_models(std::shared_ptr<eowu::GLPipeline> gl
     unsigned int units;
     
     try {
-      units = eowu::Transform::GetUnitsFromStringLabel(stim_schema.units);
+      units = eowu::units::get_units_from_string_label(stim_schema.units);
     } catch (const std::exception &e) {
       result.message = e.what();
       result.context = eowu::contexts::gl_init + std::string("::GetUnits");

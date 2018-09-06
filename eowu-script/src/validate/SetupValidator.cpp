@@ -8,6 +8,7 @@
 #include "SetupValidator.hpp"
 #include "validate/Util.hpp"
 #include <algorithm>
+#include <eowu-gl/eowu-gl.hpp>
 
 #define EOWU_RESULT_EARLY_RETURN(val) \
   if (!val.success) { \
@@ -62,7 +63,7 @@ eowu::schema::validate::Stimulus eowu::validate::make_stimulus(const eowu::schem
   stimulus_validator.geometry_ids = geom_ids;
   stimulus_validator.target_ids = targ_ids;
   stimulus_validator.texture_ids = tex_ids;
-  stimulus_validator.units = { "normalized", "pixels" };
+  stimulus_validator.units = eowu::units::get_string_unit_labels();
   
   return stimulus_validator;
 }

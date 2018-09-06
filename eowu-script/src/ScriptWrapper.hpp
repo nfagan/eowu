@@ -35,6 +35,7 @@ public:
   void SetStateWrapperContainer(eowu::StateWrapperContainerType states);
   void SetGLPipeline(std::shared_ptr<eowu::GLPipeline> pipeline);
   void SetRenderFunctions(eowu::RenderFunctionContainerType render_functions);
+  void SetLuaRenderFunction(std::shared_ptr<eowu::LuaFunction> lua_render_function);
   
   bool IsComplete() const;
   

@@ -9,7 +9,6 @@
 #include "Lua.hpp"
 #include "Constants.hpp"
 #include "LuaFunction.hpp"
-#include "LuaReferenceContainer.hpp"
 #include <eowu-gl/eowu-gl.hpp>
 #include <assert.h>
 
@@ -23,8 +22,7 @@ int eowu::RendererWrapper::SetRenderFunction(lua_State *L) {
   assert(lua_render_function);
   
   luabridge::LuaRef func = luabridge::LuaRef::fromStack(L, -1);
-  eowu::LuaReferenceContainer ref(func);
-  lua_render_function->Set(ref);
+  lua_render_function->Set(func);
   
   return 0;
 }

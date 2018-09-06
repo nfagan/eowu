@@ -41,9 +41,6 @@ public:
   glm::vec2 GetScreenDimensions() const;
   
   glm::mat4 GetTransformationMatrix() const;
-  
-  static unsigned int GetUnitsFromStringLabel(const std::string &unit_id);
-  static std::vector<std::string> GetStringUnitLabels();
 private:
   mutable std::shared_mutex mut;
   
