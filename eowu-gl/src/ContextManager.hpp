@@ -40,7 +40,9 @@ public:
   eowu::WindowType OpenWindow(T... args);
   eowu::WindowType OpenWindow(const eowu::WindowProperties &props);
   
-  void CloseWindow(eowu::WindowType win);
+  void CloseWindows();
+  bool AnyShouldClose() const;
+  bool AllShouldClose() const;
   
   const WindowContainerType& GetWindows() const;
   

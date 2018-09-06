@@ -81,6 +81,7 @@ eowu::parser::ParseResult<eowu::schema::Windows> eowu::parser::windows(const lua
   }
   
   for (const auto &it : kv) {
+    const auto &id = it.first;
     const auto &ref = it.second;
     
     auto subtable = get_string_map_from_table(ref);
@@ -91,6 +92,7 @@ eowu::parser::ParseResult<eowu::schema::Windows> eowu::parser::windows(const lua
     window.height = get_numeric_value_or<int>(subtable, "height", -1);
     window.index = get_numeric_value_or<unsigned int>(subtable, "index", 0);
     window.full_screen = get_numeric_value_or<unsigned int>(subtable, "fullscreen", 0);
+    window.title = get_string_or_type_error(subtable, "title", id);
     
     result.result.windows.emplace(it.first, window);
   }
@@ -401,6 +403,7 @@ eowu::parser::ParseResult<eowu::schema::State> eowu::parser::state(const luabrid
     result.result.loop_function = eowu::parser::get_function_or_error(kv, "Loop");
     result.result.exit_function = eowu::parser::get_function_or_error(kv, "Exit");
     result.result.state_id = eowu::parser::get_string_or_error(kv, "ID");
+    result.result.is_first = eowu::parser::get_numeric_value_or<int>(kv, "First", 0);
     
     if (kv.count("Render") > 0) {
       const luabridge::LuaRef &render_function_refs = kv.at("Render");

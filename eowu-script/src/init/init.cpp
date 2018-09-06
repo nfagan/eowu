@@ -14,7 +14,6 @@
 #include <chrono>
 
 void eowu::init::init_render_schema(lua_State *L) {
-  eowu::GLPipelineWrapper::CreateLuaSchema(L);
   eowu::RendererWrapper::CreateLuaSchema(L);
   eowu::VectorWrapper::CreateLuaSchema(L);
   eowu::ModelWrapper::CreateLuaSchema(L);
@@ -22,7 +21,6 @@ void eowu::init::init_render_schema(lua_State *L) {
 
 void eowu::init::init_state_schema(lua_State *L) { 
   eowu::StateWrapper::CreateLuaSchema(L);
-  eowu::TaskWrapper::CreateLuaSchema(L);
 }
 
 eowu::RenderFunctionContainerType eowu::init::get_render_functions(const eowu::schema::States &schema) {

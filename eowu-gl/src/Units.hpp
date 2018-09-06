@@ -15,6 +15,7 @@ namespace eowu {
   namespace units {
     static constexpr unsigned int normalized = 0;
     static constexpr unsigned int pixels = 1;
+    static constexpr unsigned int mixed = 2;
     
     std::vector<std::string> get_string_unit_labels();
     unsigned int get_units_from_string_label(const std::string &unit_id);

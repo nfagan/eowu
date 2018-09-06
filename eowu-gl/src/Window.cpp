@@ -18,12 +18,11 @@ eowu::Window::Window(GLFWmonitor *monitor, GLFWwindow *window, unsigned int widt
   this->height = height;
   this->was_resized = false;
   this->is_open = true;
+  this->is_valid = true;
 }
 
 eowu::Window::~Window() {
-  if (window) {
-    Close();
-  }
+  Close();
 }
 
 const eowu::Identifier& eowu::Window::GetIdentifier() const {
@@ -50,7 +49,7 @@ glm::vec2 eowu::Window::GetFramebufferSize() const {
 }
 
 glm::vec2 eowu::Window::GetDimensions() const {
-  return glm::vec2(width, height);
+  return glm::vec2(width.load(), height.load());
 }
 
 unsigned int eowu::Window::GetWidth() const {
@@ -62,7 +61,7 @@ unsigned int eowu::Window::GetHeight() const {
 }
 
 bool eowu::Window::IsOpen() const {
-  return is_open;
+  return is_open && is_valid;
 }
 
 bool eowu::Window::WasResized() const {
@@ -78,12 +77,22 @@ void eowu::Window::ResetWasResized() {
 }
 
 void eowu::Window::Close() {
+  if (!is_open || !is_valid) {
+    return;
+  }
+  
+  mark_closed();
+  
   glfwSetWindowShouldClose(window, true);
+}
+
+void eowu::Window::mark_closed() {
   is_open = false;
+  is_valid = false;
 }
 
 bool eowu::Window::ShouldClose() const {
-  return glfwWindowShouldClose(window);
+  return !is_open || !is_valid || glfwWindowShouldClose(window);
 }
 
 void eowu::Window::SwapBuffers() const {

@@ -11,6 +11,7 @@
 #include <eowu-common/types.hpp>
 #include <glm/glm.hpp>
 #include <string>
+#include <atomic>
 
 struct GLFWwindow;
 struct GLFWmonitor;
@@ -18,6 +19,10 @@ struct GLFWmonitor;
 namespace eowu {
   class Window;
   class ContextManager;
+  
+  namespace glfw {
+    void window_close_callback(GLFWwindow *window);
+  }
   
   struct WindowProperties {
     unsigned int width;
@@ -61,15 +66,20 @@ public:
   void MakeCurrent() const;
   void Show() const;
   
+  friend void eowu::glfw::window_close_callback(GLFWwindow *window);
+  
 private:
   eowu::Identifier id;
   
   GLFWwindow *window;
   GLFWmonitor *monitor;
   
-  unsigned int width;
-  unsigned int height;
+  std::atomic<unsigned int> width;
+  std::atomic<unsigned int> height;
   
-  bool is_open;
-  bool was_resized;
+  std::atomic<bool> is_open;
+  std::atomic<bool> was_resized;
+  std::atomic<bool> is_valid;
+  
+  void mark_closed();
 };

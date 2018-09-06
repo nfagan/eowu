@@ -7,10 +7,9 @@
 
 #pragma once
 
+#include "Lua.hpp"
 #include <memory>
 #include <string>
-
-struct lua_State;
 
 namespace eowu {
   class Model;
@@ -40,7 +39,7 @@ public:
   void SetScale(const eowu::VectorWrapper &vec);
   void SetUnits(const std::string &units);
   
-  void Draw(lua_State *L);
+  int Draw(lua_State *L);
   
   eowu::VectorWrapper GetPosition() const;
   eowu::VectorWrapper GetRotation() const;

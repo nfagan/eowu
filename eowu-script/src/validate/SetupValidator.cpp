@@ -75,7 +75,7 @@ eowu::schema::validate::Stimulus eowu::validate::make_stimulus(const eowu::schem
 eowu::schema::validate::Geometry eowu::validate::make_geometry(const eowu::schema::Setup &schema) {
   eowu::schema::validate::Geometry geometry_validator;
   
-  geometry_validator.builtin_ids = { "Rectangle", "Circle" };
+  geometry_validator.builtin_ids = { "Rectangle", "Circle", "Triangle" };
   
   return geometry_validator;
 }

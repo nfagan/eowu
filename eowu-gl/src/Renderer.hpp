@@ -31,23 +31,21 @@ public:
   Renderer(ContextContainerType context_manager);
   
   void ClearQueue();
-  void Queue(const ModelAggregateType &models);
-  void Queue(const eowu::Model &model);
-  void Draw(eowu::WindowType window);
-  void Draw(const eowu::WindowContainerType& windows);
+  void Queue(const ModelAggregateType &models, eowu::WindowType window);
+  void Queue(const eowu::Model &model, eowu::WindowType window);
+  void Draw();
   
 private:
   std::mutex models_mutex;
 
   ContextContainerType context_manager;
-  ModelAggregateType models;
   eowu::projection_types::Types projection_type;
+  
+  std::unordered_map<eowu::Identifier, eowu::WindowType> windows;
+  std::unordered_map<eowu::Identifier, std::vector<Model>> models;
   
   std::unordered_map<std::size_t, std::shared_ptr<eowu::Program>> programs;
   std::unordered_map<eowu::Identifier, std::size_t> programs_by_material_id;
-  
-  std::unordered_map<eowu::Identifier, eowu::WindowType> windows;
-//  std::unordered_map<eowu::Identifier, std::vector<Model>> models;
   
   std::shared_ptr<eowu::Program> last_program;
   std::shared_ptr<eowu::Mesh> last_mesh;
@@ -55,6 +53,8 @@ private:
   
   glm::mat4 get_projection_matrix(eowu::WindowType window) const;
   glm::mat4 get_view_matrix() const;
+  
+  std::vector<eowu::Model>& get_models_container(const eowu::WindowType &window);
   
   void next_frame();
   void draw(eowu::WindowType window);

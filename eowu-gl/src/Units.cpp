@@ -9,7 +9,7 @@
 #include "Error.hpp"
 
 std::vector<std::string> eowu::units::get_string_unit_labels() {
-  return { "normalized", "pixels" };
+  return { "normalized", "pixels", "mixed" };
 }
 
 unsigned int eowu::units::get_units_from_string_label(const std::string &unit_id) {
@@ -17,6 +17,8 @@ unsigned int eowu::units::get_units_from_string_label(const std::string &unit_id
     return eowu::units::normalized;
   } else if (unit_id == "pixels") {
     return eowu::units::pixels;
+  } else if (unit_id == "mixed") {
+    return eowu::units::mixed;
   } else {
     throw eowu::UnrecognizedLabelError("No units matched '" + unit_id + "'");
   }

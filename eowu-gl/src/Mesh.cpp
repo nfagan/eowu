@@ -113,6 +113,7 @@ unsigned int eowu::Mesh::get_gl_topology(unsigned int topology) {
     case eowu::topologies::triangle_strip:
       return GL_TRIANGLE_STRIP;
     default:
+      EOWU_LOG_WARN("Mesh::get_gl_topology: Unrecognized topology. Using 'GL_TRIANGLES'.");
       return GL_TRIANGLES;
   }
 }

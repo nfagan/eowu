@@ -103,7 +103,9 @@ glm::vec2 eowu::Transform::GetScreenDimensions() const {
 glm::vec3 eowu::Transform::get_units_position() const {
   auto pos = GetPosition();
   
-  if (units.load() == eowu::units::normalized) {
+  auto un = units.load();
+  
+  if (un == eowu::units::normalized || un == eowu::units::mixed) {
     pos.x *= screen_dimensions.x;
     pos.y *= screen_dimensions.y;
   }
@@ -136,5 +138,3 @@ glm::mat4 eowu::Transform::GetTransformationMatrix() const {
   
   return glm::scale(transform, scl);
 }
-
-

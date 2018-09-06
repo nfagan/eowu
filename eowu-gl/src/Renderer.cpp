@@ -31,24 +31,34 @@ eowu::Renderer::Renderer(ContextContainerType context_manager) {
 void eowu::Renderer::ClearQueue() {
   std::lock_guard<std::mutex> guard(models_mutex);
   
-  models.clear();
-}
-
-void eowu::Renderer::Queue(const ModelAggregateType &models) {
-  std::lock_guard<std::mutex> guard(models_mutex);
-  
-  for (const auto& model : models) {
-    this->models.push_back(model);
+  for (auto &it : models) {
+    it.second.clear();
   }
 }
 
-void eowu::Renderer::Queue(const eowu::Model &model) {
+void eowu::Renderer::Queue(const ModelAggregateType &models, eowu::WindowType window) {
   std::lock_guard<std::mutex> guard(models_mutex);
-  models.push_back(model);
+  
+  auto &models_container = get_models_container(window);
+  
+  for (const auto& model : models) {
+    models_container.push_back(model);
+  }
+}
+
+void eowu::Renderer::Queue(const eowu::Model &model, eowu::WindowType window) {
+  std::lock_guard<std::mutex> guard(models_mutex);
+  
+  std::vector<eowu::Model> &models_container = get_models_container(window);
+  models_container.push_back(model);
 }
 
 void eowu::Renderer::draw(eowu::WindowType window) {
   std::lock_guard<std::mutex> guard(models_mutex);
+  
+  if (!window->IsOpen()) {
+    return;
+  }
   
   window->MakeCurrent();
   
@@ -62,7 +72,9 @@ void eowu::Renderer::draw(eowu::WindowType window) {
   
   glClear(GL_COLOR_BUFFER_BIT);
   
-  for (const auto& model : models) {
+  auto &models_container = get_models_container(window);
+  
+  for (const auto& model : models_container) {
     draw_one_model(window, model);
   }
   
@@ -72,20 +84,20 @@ void eowu::Renderer::draw(eowu::WindowType window) {
 }
 
 void eowu::Renderer::next_frame() {
-  for (auto &model : models) {
-    model.NextFrame();
+  for (const auto &it : windows) {
+    auto &models_container = get_models_container(it.second);
+    
+    for (auto &model : models_container) {
+      model.NextFrame();
+    }
   }
 }
 
-void eowu::Renderer::Draw(eowu::WindowType window) {
-  draw(window);
-  next_frame();
-}
-
-void eowu::Renderer::Draw(const eowu::WindowContainerType& windows) {
-  for (const auto win : windows) {
-    draw(win);
+void eowu::Renderer::Draw() {
+  for (const auto &it : windows) {
+    draw(it.second);
   }
+  
   next_frame();
 }
 
@@ -178,16 +190,27 @@ void eowu::Renderer::draw_one_model(const eowu::WindowType& window, const eowu::
   last_mesh = mesh;
 }
 
+std::vector<eowu::Model>& eowu::Renderer::get_models_container(const eowu::WindowType &win) {
+  
+  const auto& win_id = win->GetIdentifier();
+  const auto& window_it = windows.find(win_id);
+  
+  if (window_it == windows.end()) {
+    windows.emplace(win_id, win);
+    models.emplace(win_id, std::vector<eowu::Model>());
+  }
+  
+  return models.at(win_id);
+}
+
 glm::mat4 eowu::Renderer::get_view_matrix() const {
   return glm::mat4(1.0);
 }
 
 glm::mat4 eowu::Renderer::get_projection_matrix(eowu::WindowType window) const {
-  
   if (projection_type == eowu::projection_types::orthographic) {
     return glm::ortho(0.0f, (float)window->GetWidth(), 0.0f, (float)window->GetHeight());
   } else {
     throw eowu::NotImplementedError("Non-orthographic projections not yet implemented.");
   }
-  
 }

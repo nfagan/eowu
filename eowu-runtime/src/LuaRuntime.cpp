@@ -7,6 +7,7 @@
 
 #include "LuaRuntime.hpp"
 #include <iostream>
+#include <eowu-common/logging.hpp>
 
 eowu::SetupStatus eowu::LuaRuntime::parse_schemas(const std::string &file) {
   eowu::SetupStatus result;
@@ -110,11 +111,22 @@ void eowu::LuaRuntime::InitializeScriptWrapper(const std::string &file,
 }
 
 eowu::State* eowu::LuaRuntime::GetFirstState() {
+  for (const auto &it : setup_schema.states.mapping) {
+    const auto &state = it.second;
+    
+    if (state.is_first > 0) {
+      return state_manager.GetState(state.state_id);
+    }
+  }
+  
   const auto keys = state_manager.GetStateIds();
   
   if (keys.size() == 0) {
+    EOWU_LOG_WARN("LuaRuntime::GetFirstState: No states were present.");
     return nullptr;
   }
+  
+  EOWU_LOG_WARN("LuaRuntime::GetFirstState: No state was marked as first.");
   
   return state_manager.GetState(keys[0]);
 }

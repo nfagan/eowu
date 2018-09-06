@@ -18,6 +18,7 @@ namespace eowu {
       unsigned int full_screen;
       int width;
       int height;
+      std::string title;
     };
     
     struct Windows {

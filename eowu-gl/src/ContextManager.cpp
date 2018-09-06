@@ -35,16 +35,38 @@ void eowu::ContextManager::Initialize() {
   is_initialized = true;
 }
 
+void eowu::ContextManager::CloseWindows() {
+  for (auto &win : windows) {
+    win->Close();
+  }
+}
+
+bool eowu::ContextManager::AllShouldClose() const {
+  for (const auto &win : windows) {
+    if (!win->ShouldClose()) {
+      return false;
+    }
+  }
+  
+  return true;
+}
+
+bool eowu::ContextManager::AnyShouldClose() const {
+  for (const auto &win : windows) {
+    if (win->ShouldClose()) {
+      return true;
+    }
+  }
+  
+  return false;
+}
+
 void eowu::ContextManager::PollEvents() const {
   glfwPollEvents();
 }
 
 bool eowu::ContextManager::IsInitialized() const {
   return is_initialized;
-}
-
-void eowu::ContextManager::CloseWindow(eowu::WindowType win) {
-  glfwWindowShouldClose(win->window);
 }
 
 const eowu::WindowContainerType& eowu::ContextManager::GetWindows() const {
@@ -140,6 +162,7 @@ void eowu::ContextManager::configure_window_callbacks(GLFWwindow *win) {
   glfwSetWindowUserPointer(win, (void*)this);
   
   glfwSetWindowSizeCallback(win, eowu::glfw::window_size_callback);
+  glfwSetWindowCloseCallback(win, eowu::glfw::window_close_callback);
 }
 
 void eowu::glfw::window_close_callback(GLFWwindow *window) {
@@ -147,7 +170,10 @@ void eowu::glfw::window_close_callback(GLFWwindow *window) {
   
   assert(context);
   
-  //  TODO: Delete window from windows array.
+  auto win = context->get_window_with_trap(window);
+  win->mark_closed();
+  
+  glfwDestroyWindow(win->window);
 }
 
 void eowu::glfw::window_size_callback(GLFWwindow *window, int width, int height) {

@@ -50,8 +50,8 @@ void test1() {
   state_runner.Begin(state1);
   
   while (!state_runner.Update() && !win->ShouldClose()) {
-    renderer.Queue({*model1.get()});
-    renderer.Draw(win);
+    renderer.Queue({*model1.get()}, win);
+    renderer.Draw();
     renderer.ClearQueue();
     
     context_manager->PollEvents();

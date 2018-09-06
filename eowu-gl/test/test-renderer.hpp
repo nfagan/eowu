@@ -65,8 +65,8 @@ void test_many_models() {
       transform.SetPosition(glm::vec3(x, y, 1.0f));
     }
     
-    renderer.Queue(models);
-    renderer.Draw(win);
+    renderer.Queue(models, win);
+    renderer.Draw();
     renderer.ClearQueue();
     glfwPollEvents();
   }
@@ -119,8 +119,12 @@ void test_renderer_instantiation() {
   bool did_set2 = false;
   
   while (!any_should_close(windows)) {
-    renderer.Queue({model, model2});
-    renderer.Draw(windows);
+    
+    for (const auto &win : windows) {
+      renderer.Queue({model, model2}, win);
+    }
+    
+    renderer.Draw();
     renderer.ClearQueue();
     
     auto current_time = std::chrono::high_resolution_clock::now();

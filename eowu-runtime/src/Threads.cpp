@@ -40,7 +40,8 @@ void eowu::thread::task(eowu::thread::SharedState &state, eowu::State *first_sta
     try {
       should_proceed = !state_runner.Update();
     } catch (const std::exception &e) {
-      std::cout << e.what() << std::endl;
+      std::cout << "ERROR: Task: " << e.what() << std::endl;
+      
       should_proceed = false;
     }
   }
@@ -54,37 +55,37 @@ void eowu::thread::render(eowu::thread::SharedState &state,
   
   auto renderer = pipeline->GetRenderer();
   auto gl_context_manager = pipeline->GetContextManager();
-  auto win = gl_context_manager->GetWindows()[0];
+  auto gl_windows = gl_context_manager->GetWindows();
   
   state.render_thread_initialized = true;
   
   while (!state.task_thread_initialized) {
-    EOWU_LOG_INFO("Render thread: Awaiting task thread initialization.");
+    //
   }
   
   const auto &lua_render_function = *eowu::ScriptWrapper::LuaRenderFunction.get();
   
-  while (state.threads_should_continue && !win->ShouldClose()) {
-    bool should_draw = true;
+  while (state.threads_should_continue) {
+    if (gl_context_manager->AllShouldClose()) {
+      break;
+    }
     
     try {
       lua_context->Call(lua_render_function);
       
     } catch (const std::exception &e) {
-      std::cout << e.what() << std::endl;
+      std::cout << "ERROR: Render: " << e.what() << std::endl;
       
       state.threads_should_continue = false;
-      should_draw = false;
+      break;
     }
     
-    if (should_draw) {
-      renderer->Draw(win);
-      renderer->ClearQueue();
-      gl_context_manager->PollEvents();
-    }
+    renderer->Draw();
+    renderer->ClearQueue();
+    gl_context_manager->PollEvents();
   }
   
-  win->Close();
+  gl_context_manager->CloseWindows();
   
   state.threads_should_continue = false;
 }

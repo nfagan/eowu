@@ -12,11 +12,26 @@
 void eowu::WindowContainerMap::Emplace(const std::string &id, std::shared_ptr<eowu::Window> window) {
   std::unique_lock<std::mutex> lock(mut);
   windows.emplace(id, window);
+  keys.push_back(id);
 }
 
 bool eowu::WindowContainerMap::Has(const std::string &id) const {
   std::unique_lock<std::mutex> lock(mut);
   return windows.count(id) > 0;
+}
+
+std::vector<std::string> eowu::WindowContainerMap::Keys() const {
+  return keys;
+}
+
+std::shared_ptr<eowu::Window> eowu::WindowContainerMap::Get() const {
+  std::unique_lock<std::mutex> lock(mut);
+  
+  if (windows.size() == 0) {
+    throw eowu::NonexistentResourceError("No windows are present.");
+  }
+  
+  return windows.begin()->second;
 }
 
 std::shared_ptr<eowu::Window> eowu::WindowContainerMap::Get(const std::string &id) const {

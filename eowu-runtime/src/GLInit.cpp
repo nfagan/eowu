@@ -93,6 +93,10 @@ eowu::SetupStatus eowu::init::create_models(std::shared_ptr<eowu::GLPipeline> gl
       
       if (mesh_type == "Rectangle") {
         eowu::mesh_factory::make_quad(mesh.get());
+      } else if (mesh_type == "Circle") {
+        eowu::mesh_factory::make_sphere(mesh.get());
+      } else if (mesh_type == "Triangle") {
+        eowu::mesh_factory::make_triangle(mesh.get());
       } else {
         //  TODO: Add other mesh types
         assert(false);
@@ -194,6 +198,7 @@ eowu::SetupStatus eowu::init::open_windows(std::shared_ptr<eowu::GLPipeline> gl_
     open_spec.index = input_spec.index;
     open_spec.width = input_spec.width;
     open_spec.height = input_spec.height;
+    open_spec.title = input_spec.title;
     
     try {
       auto win = context_manager->OpenWindow(open_spec);

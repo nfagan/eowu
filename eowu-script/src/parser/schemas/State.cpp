@@ -8,6 +8,6 @@
 #include "State.hpp"
 
 eowu::schema::State::State(lua_State *L) :
-entry_function(L), loop_function(L), exit_function(L) {
+entry_function(L), loop_function(L), exit_function(L), is_first(false) {
   //
 }

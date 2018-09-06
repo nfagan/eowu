@@ -47,9 +47,32 @@ void eowu::ModelWrapper::assert_material() {
   }
 }
 
-void eowu::ModelWrapper::Draw(lua_State *L) {
-//  luabridge::LuaRef ref = luabridge::LuaRef::fromStack(L, -1);
-  renderer->Queue(*model.get());
+int eowu::ModelWrapper::Draw(lua_State *L) {
+  int inputs = lua_gettop(L);
+  
+  std::vector<std::string> window_ids;
+  
+  //  1, because user data is first input
+  if (inputs == 1) {
+    window_ids = window_container->Keys();
+  } else {
+    if (inputs != 2) {
+      const std::string arg = std::to_string(inputs-1);
+      throw eowu::LuaError("Invalid arguments to 'Draw()': Expected 1 or 0 inputs, got " + arg);
+    }
+    
+    if (!lua_istable(L, -1)) {
+      throw eowu::LuaError("Invalid argument to 'Draw()': Expected table.");
+    }
+    
+    window_ids = eowu::parser::get_string_vector_from_state(L, -1);
+  }
+  
+  for (const auto &win_id : window_ids) {
+    renderer->Queue(*model.get(), window_container->Get(win_id));
+  }
+  
+  return 0;
 }
 
 EOWU_VEC_GETTER(GetScale);
@@ -85,7 +108,7 @@ void eowu::ModelWrapper::CreateLuaSchema(lua_State *L) {
   .addProperty("rotation", &eowu::ModelWrapper::GetRotation, &eowu::ModelWrapper::SetRotation)
   .addFunction("Color", &eowu::ModelWrapper::SetColor)
   .addFunction("Texture", &eowu::ModelWrapper::SetTexture)
-  .addFunction("Draw", &eowu::ModelWrapper::Draw)
+  .addCFunction("Draw", &eowu::ModelWrapper::Draw)
   .addFunction("Units", &eowu::ModelWrapper::SetUnits)
   .endClass()
   .endNamespace();

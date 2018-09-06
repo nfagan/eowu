@@ -25,6 +25,7 @@ namespace eowu {
       
       std::string state_id;
       
+      int is_first;
       double duration;
       
       State(lua_State *L);
@@ -32,7 +33,7 @@ namespace eowu {
     };
     
     struct States {
-      std::unordered_map<std::string, State> mapping;
+      std::unordered_map<std::string, eowu::schema::State> mapping;
     };
   }
 }

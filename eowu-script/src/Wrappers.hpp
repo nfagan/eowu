@@ -8,8 +8,6 @@
 #pragma once
 
 #include "StateWrapper.hpp"
-#include "TaskWrapper.hpp"
 #include "ModelWrapper.hpp"
-#include "GLPipelineWrapper.hpp"
 #include "RendererWrapper.hpp"
 #include "VectorWrapper.hpp"
