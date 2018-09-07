@@ -5,6 +5,8 @@
 //  Created by Nick Fagan on 9/5/18.
 //
 
+#pragma once
+
 #include <atomic>
 #include <memory>
 

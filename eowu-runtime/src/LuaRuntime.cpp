@@ -126,9 +126,11 @@ eowu::State* eowu::LuaRuntime::GetFirstState() {
     return nullptr;
   }
   
-  EOWU_LOG_WARN("LuaRuntime::GetFirstState: No state was marked as first.");
+  const auto &state_id = keys[0];
   
-  return state_manager.GetState(keys[0]);
+  EOWU_LOG_WARN("LuaRuntime::GetFirstState: No state was marked as first; using " + state_id);
+  
+  return state_manager.GetState(state_id);
 }
 
 std::shared_ptr<eowu::LuaContext> eowu::LuaRuntime::get_new_lua_context() {
