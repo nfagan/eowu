@@ -9,6 +9,7 @@
 #include "VectorWrapper.hpp"
 #include "Error.hpp"
 #include "Lua.hpp"
+#include "Util.hpp"
 #include "Constants.hpp"
 #include "parser/ParseUtil.hpp"
 #include <eowu-gl/eowu-gl.hpp>
@@ -24,6 +25,22 @@ eowu::VectorWrapper eowu::ModelWrapper::name() const { \
   const auto &trans = model->GetTransform(); \
   return trans.name(); \
 }
+
+#define EOWU_VEC_FUNC_SETTER(name, setter, context) \
+int eowu::ModelWrapper::name(lua_State *L) { \
+  std::vector<double> nums; \
+  try { \
+    nums = eowu::parser::get_numeric_vector_from_state(L, -1); \
+  } catch (const std::exception &e) { \
+    throw eowu::LuaError(std::string(context) + "(): " + e.what()); \
+  } \
+  auto vec = eowu::util::require_vec3(nums); \
+  auto &trans = model->GetTransform(); \
+  trans.setter(vec); \
+  return 0; \
+}
+
+
 
 eowu::ModelWrapper::ModelWrapper(std::shared_ptr<eowu::Model> model,
                                  std::shared_ptr<eowu::Renderer> renderer,
@@ -61,10 +78,6 @@ int eowu::ModelWrapper::Draw(lua_State *L) {
       throw eowu::LuaError("Invalid arguments to 'Draw()': Expected 1 or 0 inputs, got " + arg);
     }
     
-    if (!lua_istable(L, -1)) {
-      throw eowu::LuaError("Invalid argument to 'Draw()': Expected table.");
-    }
-    
     window_ids = eowu::parser::get_string_vector_from_state(L, -1);
   }
   
@@ -74,6 +87,10 @@ int eowu::ModelWrapper::Draw(lua_State *L) {
   
   return 0;
 }
+
+EOWU_VEC_FUNC_SETTER(SetPositionVector, SetPosition, "Position");
+EOWU_VEC_FUNC_SETTER(SetRotationVector, SetRotation, "Rotation");
+EOWU_VEC_FUNC_SETTER(SetScaleVector, SetScale, "Scale");
 
 EOWU_VEC_GETTER(GetScale);
 EOWU_VEC_GETTER(GetPosition);
@@ -88,9 +105,13 @@ void eowu::ModelWrapper::SetUnits(const std::string &units) {
   trans.SetUnits(eowu::units::get_units_from_string_label(units));
 }
 
-void eowu::ModelWrapper::SetColor(double r, double g, double b) {
+int eowu::ModelWrapper::SetColor(lua_State *L) {
   assert_material();
-  model->GetMaterial()->SetFaceColor(glm::vec3(r, g, b));
+  auto nums = eowu::parser::get_numeric_vector_from_state(L, -1);
+  auto vec = eowu::util::require_vec3(nums);
+  model->GetMaterial()->SetFaceColor(vec);
+  
+  return 0;
 }
 
 void eowu::ModelWrapper::SetTexture(const std::string &id) {
@@ -106,10 +127,13 @@ void eowu::ModelWrapper::CreateLuaSchema(lua_State *L) {
   .addProperty("position", &eowu::ModelWrapper::GetPosition, &eowu::ModelWrapper::SetPosition)
   .addProperty("scale", &eowu::ModelWrapper::GetScale, &eowu::ModelWrapper::SetScale)
   .addProperty("rotation", &eowu::ModelWrapper::GetRotation, &eowu::ModelWrapper::SetRotation)
-  .addFunction("Color", &eowu::ModelWrapper::SetColor)
   .addFunction("Texture", &eowu::ModelWrapper::SetTexture)
-  .addCFunction("Draw", &eowu::ModelWrapper::Draw)
   .addFunction("Units", &eowu::ModelWrapper::SetUnits)
+  .addCFunction("Draw", &eowu::ModelWrapper::Draw)
+  .addCFunction("Position", &eowu::ModelWrapper::SetPositionVector)
+  .addCFunction("Rotation", &eowu::ModelWrapper::SetRotationVector)
+  .addCFunction("Scale", &eowu::ModelWrapper::SetScaleVector)
+  .addCFunction("Color", &eowu::ModelWrapper::SetColor)
   .endClass()
   .endNamespace();
 }

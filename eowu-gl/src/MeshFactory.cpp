@@ -72,8 +72,8 @@ void eowu::mesh_factory::make_sphere(Mesh *mesh, int vertex_count) {
   
   static const float PI = 3.14159265359;
   
-  for (unsigned int i=0; i<vertex_count; i++) {
-    for (unsigned int j=0; j<vertex_count; j++) {
+  for (unsigned int i = 0; i<vertex_count; i++) {
+    for (unsigned int j = 0; j<vertex_count; j++) {
       
       float x_segment = float(j)/float(vertex_count-1);
       float y_segment = float(i)/float(vertex_count-1);

@@ -31,8 +31,12 @@ public:
   
   ~ModelWrapper() = default;
   
-  void SetColor(double r, double g, double b);
+  int SetColor(lua_State *L);
   void SetTexture(const std::string &id);
+  
+  int SetPositionVector(lua_State *L);
+  int SetRotationVector(lua_State *L);
+  int SetScaleVector(lua_State *L);
   
   void SetPosition(const eowu::VectorWrapper &vec);
   void SetRotation(const eowu::VectorWrapper &vec);

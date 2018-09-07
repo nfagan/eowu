@@ -5,10 +5,7 @@ Setup = {}
 
 Setup.Windows = {
   main = {
-    width = 400, height = 400
-  },
-  secondary = {
-    width = 400, height = 400
+    width = 400, height = 400, fullscreen = true, index = 0
   }
 }
 
@@ -26,9 +23,14 @@ Setup.Textures = {
 }
 
 Setup.Stimuli = {
-  sq = { geometry = 'rect' },
-  circ = { geometry = 'rect' }
+  sq = { geometry = 'circ' },
+  circ = { geometry = 'circ' }
 }
+
+for i = 1, 1000 do
+  local stim = { geometry = 'circ' }
+  Setup.Stimuli['sq' .. i] = stim
+end
 
 Setup.Targets = {}
 

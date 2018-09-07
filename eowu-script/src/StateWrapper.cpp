@@ -6,6 +6,7 @@
 //
 
 #include "StateWrapper.hpp"
+#include "Constants.hpp"
 #include <eowu-state/eowu-state.hpp>
 #include <chrono>
 
@@ -28,8 +29,12 @@ state(state_), lua_context(context), state_functions(std::move(state_functions_)
   setup_state_callbacks();
 }
 
-double eowu::StateWrapper::EllapsedSeconds() const {
+double eowu::StateWrapper::Ellapsed() const {
   return state->GetTimer().Ellapsed().count();
+}
+
+void eowu::StateWrapper::Exit() {
+  state->Exit();
 }
 
 void eowu::StateWrapper::SetDuration(int duration) {
@@ -59,11 +64,12 @@ void eowu::StateWrapper::setup_state_callbacks() {
 
 void eowu::StateWrapper::CreateLuaSchema(lua_State *L) {
   luabridge::getGlobalNamespace(L)
-  .beginNamespace("eowu")
+  .beginNamespace(eowu::constants::eowu_namespace)
   .beginClass<eowu::StateWrapper>("_State")
   .addFunction("Duration", &eowu::StateWrapper::SetDuration)
   .addFunction("Next", &eowu::StateWrapper::SetNextState)
-  .addFunction("Ellapsed", &eowu::StateWrapper::EllapsedSeconds)
+  .addFunction("Exit", &eowu::StateWrapper::Exit)
+  .addFunction("Ellapsed", &eowu::StateWrapper::Ellapsed)
   .endClass()
   .endNamespace();
 }

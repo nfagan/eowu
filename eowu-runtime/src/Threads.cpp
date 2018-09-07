@@ -71,8 +71,7 @@ void eowu::thread::render(eowu::thread::SharedState &state,
     }
     
     try {
-      lua_context->Call(lua_render_function);
-      
+      lua_context->Call(lua_render_function);      
     } catch (const std::exception &e) {
       std::cout << "ERROR: Render: " << e.what() << std::endl;
       

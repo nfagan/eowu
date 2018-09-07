@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "Timer.hpp"
+#include <eowu-common/Timer.hpp>
 #include <functional>
 #include <mutex>
 #include <string>
@@ -62,7 +62,7 @@ private:
   
   std::string id;
   
-  std::vector<eowu::ExitConditionType> exit_conditions;
+  std::vector<eowu::ExitConditionType> persistent_exit_conditions;
   
   StateCallbackType on_entry;
   StateCallbackType on_loop;

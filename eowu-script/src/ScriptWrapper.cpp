@@ -12,6 +12,7 @@
 #include "Constants.hpp"
 #include "Lua.hpp"
 #include "Error.hpp"
+#include <eowu-common/config.hpp>
 #include <eowu-gl/eowu-gl.hpp>
 #include <assert.h>
 
@@ -21,7 +22,16 @@ eowu::RenderFunctionContainerType eowu::ScriptWrapper::render_functions = nullpt
 std::shared_ptr<eowu::LuaFunction> eowu::ScriptWrapper::LuaRenderFunction = nullptr;
 
 bool eowu::ScriptWrapper::IsComplete() const {
-  return states != nullptr && pipeline != nullptr && render_functions != nullptr;
+#ifdef EOWU_DEBUG
+  bool sc = states != nullptr;
+  bool pc = pipeline != nullptr;
+  bool rc = render_functions != nullptr;
+  bool lc = LuaRenderFunction != nullptr;
+  
+  return sc && pc && rc && lc;
+#else
+  return true;
+#endif
 }
 
 void eowu::ScriptWrapper::SetStateWrapperContainer(eowu::StateWrapperContainerType states) {
@@ -69,6 +79,15 @@ eowu::StateWrapper* eowu::ScriptWrapper::GetStateWrapper(const std::string &id) 
   return states->at(id).get();
 }
 
+eowu::RendererWrapper eowu::ScriptWrapper::GetRendererWrapper() const {
+  assert(IsComplete());
+  
+  auto renderer = pipeline->GetRenderer();
+  eowu::RendererWrapper render_wrapper(renderer);
+  
+  return render_wrapper;
+}
+
 void eowu::ScriptWrapper::CreateLuaSchema(lua_State *L) {
   luabridge::getGlobalNamespace(L)
   .beginClass<eowu::ScriptWrapper>(eowu::constants::eowu_script_name)
@@ -76,5 +95,6 @@ void eowu::ScriptWrapper::CreateLuaSchema(lua_State *L) {
   .addFunction("Stimulus", &eowu::ScriptWrapper::GetModelWrapper)
   .addFunction("State", &eowu::ScriptWrapper::GetStateWrapper)
   .addFunction("Render", &eowu::ScriptWrapper::SetActiveRenderFunction)
+  .addFunction("Renderer", &eowu::ScriptWrapper::GetRendererWrapper)
   .endClass();
 }

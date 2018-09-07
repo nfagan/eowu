@@ -10,4 +10,3 @@
 #include "../../src/State.hpp"
 #include "../../src/StateManager.hpp"
 #include "../../src/StateRunner.hpp"
-#include "../../src/Timer.hpp"

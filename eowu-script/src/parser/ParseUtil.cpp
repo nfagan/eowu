@@ -110,11 +110,40 @@ std::vector<double> eowu::parser::get_numeric_vector_from_table(const luabridge:
   return result;
 }
 
+std::vector<double> eowu::parser::get_numeric_vector_from_state(lua_State *L, int index) {
+  std::vector<double> result;
+  
+  if (!lua_istable(L, index)) {
+    throw eowu::LuaError("Expected table to be a numeric-array like object.");
+  }
+  
+  lua_pushvalue(L, index);
+  lua_pushnil(L);
+  
+  while (lua_next(L, -2)) {
+    lua_pushvalue(L, -2);
+    
+    if (!lua_isnumber(L, -2)) {
+      throw eowu::LuaError("Expected table to be a numeric-array like object.");
+    }
+    
+    double value = lua_tonumber(L, -2);
+    
+    result.push_back(value);
+    
+    lua_pop(L, 2);
+  }
+  
+  lua_pop(L, 1);
+  
+  return result;
+}
+
 std::vector<std::string> eowu::parser::get_string_vector_from_state(lua_State *L, int index) {
   std::vector<std::string> result;
   
   if (!lua_istable(L, index)) {
-    return result;
+    throw eowu::LuaError("Expected table to be a string-array like object.");
   }
   
   lua_pushvalue(L, index);
@@ -124,7 +153,7 @@ std::vector<std::string> eowu::parser::get_string_vector_from_state(lua_State *L
     lua_pushvalue(L, -2);
     
     if (!lua_isstring(L, -2)) {
-      throw eowu::ScriptParseError("Expected table to be a string-array like object.");
+      throw eowu::LuaError("Expected table to be a string-array like object.");
     }
     
     const char *value = lua_tostring(L, -2);

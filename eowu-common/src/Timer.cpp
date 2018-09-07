@@ -5,7 +5,7 @@
 //  Created by Nick Fagan on 9/1/18.
 //
 
-#include "Timer.hpp"
+#include <eowu-common/Timer.hpp>
 
 eowu::Timer::Timer() : current_time(eowu::time::now()), last_time(eowu::time::now()) {
   //

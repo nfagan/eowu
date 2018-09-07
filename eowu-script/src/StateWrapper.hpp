@@ -37,7 +37,8 @@ public:
   
   void SetDuration(int duration);
   void SetNextState(const std::string &next);
-  double EllapsedSeconds() const;
+  double Ellapsed() const;
+  void Exit();
   
   static void CreateLuaSchema(lua_State *L);
 private:

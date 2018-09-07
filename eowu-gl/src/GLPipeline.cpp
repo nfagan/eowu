@@ -15,7 +15,7 @@
 
 eowu::GLPipeline::GLPipeline() {
   context_manager = std::make_shared<eowu::ContextManager>();
-  renderer = std::make_shared<eowu::Renderer>(context_manager);
+  renderer = std::make_shared<eowu::Renderer>();
   resource_manager = std::make_shared<eowu::ResourceManager>();
   texture_manager = std::make_shared<eowu::TextureManager>();
   window_container = std::make_shared<eowu::WindowContainerMap>();

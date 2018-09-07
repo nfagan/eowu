@@ -7,31 +7,38 @@
 
 #include "RendererWrapper.hpp"
 #include "Lua.hpp"
+#include "Util.hpp"
+#include "parser/ParseUtil.hpp"
 #include "Constants.hpp"
 #include "LuaFunction.hpp"
 #include <eowu-gl/eowu-gl.hpp>
 #include <assert.h>
 
-eowu::RendererWrapper::RendererWrapper(std::shared_ptr<eowu::Renderer> renderer_,
-                                       std::shared_ptr<eowu::LuaFunction> lua_render_function_) :
-renderer(renderer_), lua_render_function(lua_render_function_) {
+eowu::RendererWrapper::RendererWrapper(std::shared_ptr<eowu::Renderer> renderer_) :
+renderer(renderer_) {
   //
 }
 
-int eowu::RendererWrapper::SetRenderFunction(lua_State *L) {
-  assert(lua_render_function);
+int eowu::RendererWrapper::SetClearColor(lua_State *L) {
+  auto nums = eowu::parser::get_numeric_vector_from_state(L, -1);
+  auto vec = eowu::util::require_vec3(nums);
   
-  luabridge::LuaRef func = luabridge::LuaRef::fromStack(L, -1);
-  lua_render_function->Set(func);
+  renderer->SetClearColor(vec);
   
   return 0;
+}
+
+double eowu::RendererWrapper::Delta() {
+  auto delta = renderer->Delta();
+  return delta.count();
 }
 
 void eowu::RendererWrapper::CreateLuaSchema(lua_State *L) {
   luabridge::getGlobalNamespace(L)
   .beginNamespace(eowu::constants::eowu_namespace)
   .beginClass<eowu::RendererWrapper>("_Renderer")
-  .addCFunction("Render", &eowu::RendererWrapper::SetRenderFunction)
+  .addFunction("Delta", &eowu::RendererWrapper::Delta)
+  .addCFunction("Color", &eowu::RendererWrapper::SetClearColor)
   .endClass()
   .endNamespace();
 }

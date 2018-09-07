@@ -9,7 +9,7 @@
 
 #include <atomic>
 #include <chrono>
-#include <eowu-common/time.hpp>
+#include "time.hpp"
 
 namespace eowu {
   class Timer;

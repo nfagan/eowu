@@ -117,7 +117,7 @@ GLFWmonitor* eowu::ContextManager::get_monitor_with_trap(unsigned int index) con
   auto **monitors = glfwGetMonitors(&count);
   
   if (index >= count) {
-    throw MonitorNotAvailableError("The requested monitor index is out of bounds.");
+    throw MonitorNotAvailableError("The requested monitor index (" + std::to_string(index) + ") is out of bounds.");
   }
   
   return monitors[index];

@@ -18,29 +18,71 @@ function state.Loop()
 end
 
 local idx = 1
+local start_offset = 100
+local mean_iter = 1
+local N = 500
+local frame_times = {}
+
+local function mean(times)
+  local sum = 0
+  for i = 1, #times do
+    sum = sum + times[i]
+  end
+  return sum / #times
+end
+
+local function std(times)
+  local mn = mean(times)
+  local sum = 0
+  for i = 1, #times do
+    local v = times[i] - mn
+    sum = sum + (v*v)
+  end
+
+  local mean_sum = sum / (#times-1)
+  return math.sqrt(mean_sum)
+end
 
 local function render_default()
+  local renderer = eowu_script():Renderer()
+  local delta = renderer:Delta() * 1000
+
+  local state = eowu_script():State('fixation')
+
+  if idx > start_offset then
+    frame_times[mean_iter] = delta
+    mean_iter = mean_iter + 1
+  end
+
+  idx = idx + 1
+
+  if mean_iter > N then
+    print('MEAN: ', mean(frame_times))
+    print('DEV: ', std(frame_times))
+    state:Exit()
+  end
+
   local stim = eowu_script():Stimulus('sq')
   stim:Units('normalized')
-  stim:Color(1, 0, 0)
+  stim:Color({1, 1, 1})
+  stim:Position({0.5, 0.5})
+  stim:Scale({0.3, 0.3})
 
-  local scale = stim.scale
-  local pos = stim.position
   local rot = stim.rotation
 
-  rot.z = rot.z + 0.01
+  -- stim:Rotation({0, 0, rot.z + 0.001})
 
-  scale.x = 0.5
-  scale.y = 0.5
+  -- stim:Draw({'main'})
 
-  pos.x = 0.5
-  pos.y = 0.5
+  local eowu = eowu_script()
 
-  stim.position = pos
-  stim.scale = scale
-  stim.rotation = rot
-
-  stim:Draw()
+  for i = 1, 100 do
+    local stim = eowu:Stimulus('sq' .. i)
+    stim:Position({math.random(), math.random()})
+    stim:Scale({0.05, 0.05})
+    stim:Texture('first')
+    stim:Draw()
+  end
 end
 
 state.Render = {

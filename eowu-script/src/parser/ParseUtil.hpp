@@ -23,6 +23,7 @@ namespace eowu {
     
     eowu::parser::MapTableType get_string_map_from_table(const luabridge::LuaRef &ref);
     std::vector<double> get_numeric_vector_from_table(const luabridge::LuaRef &ref);
+    std::vector<double> get_numeric_vector_from_state(lua_State *L, int index);
     std::vector<std::string> get_string_vector_from_table(const luabridge::LuaRef &ref);
     std::vector<std::string> get_string_vector_from_state(lua_State *L, int index);
     

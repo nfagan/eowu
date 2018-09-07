@@ -12,10 +12,12 @@
 #include "ProjectionTypes.hpp"
 #include "Identifier.hpp"
 #include "Program.hpp"
+#include <eowu-common/Timer.hpp>
 #include <memory>
 #include <mutex>
 #include <vector>
 #include <unordered_map>
+#include <unordered_set>
 #include <cstddef>
 
 namespace eowu {
@@ -28,24 +30,31 @@ namespace eowu {
 class eowu::Renderer {
   
 public:
-  Renderer(ContextContainerType context_manager);
+  Renderer();
   
   void ClearQueue();
   void Queue(const ModelAggregateType &models, eowu::WindowType window);
   void Queue(const eowu::Model &model, eowu::WindowType window);
   void Draw();
+  void SetClearColor(const glm::vec3 &color);
+  eowu::time::DurationType Delta();
   
 private:
-  std::mutex models_mutex;
+  mutable std::mutex mut;
 
-  ContextContainerType context_manager;
   eowu::projection_types::Types projection_type;
+  glm::vec3 clear_color;
+  
+  struct FrameTime {
+    eowu::Timer timer;
+  } frame_timing;
   
   std::unordered_map<eowu::Identifier, eowu::WindowType> windows;
   std::unordered_map<eowu::Identifier, std::vector<Model>> models;
   
   std::unordered_map<std::size_t, std::shared_ptr<eowu::Program>> programs;
   std::unordered_map<eowu::Identifier, std::size_t> programs_by_material_id;
+  std::unordered_set<eowu::Identifier> analyzed_material_ids;
   
   std::shared_ptr<eowu::Program> last_program;
   std::shared_ptr<eowu::Mesh> last_mesh;

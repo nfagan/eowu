@@ -7,6 +7,7 @@
 
 #include "GLInit.hpp"
 #include "Contexts.hpp"
+#include "Util.hpp"
 #include <eowu-gl/eowu-gl.hpp>
 #include <stdexcept>
 #include <unordered_map>
@@ -128,9 +129,9 @@ eowu::SetupStatus eowu::init::create_models(std::shared_ptr<eowu::GLPipeline> gl
       result.context = eowu::contexts::gl_init + std::string("::GetUnits");
     }
     
-    auto pos = eowu::init::require_vec3(stim_schema.position);
-    auto rot = eowu::init::require_vec3(stim_schema.rotation);
-    auto scl = eowu::init::require_vec3(stim_schema.size);
+    auto pos = eowu::util::require_vec3(stim_schema.position);
+    auto rot = eowu::util::require_vec3(stim_schema.rotation);
+    auto scl = eowu::util::require_vec3(stim_schema.size);
     
     trans.SetPosition(pos);
     trans.SetScale(scl);

@@ -20,13 +20,12 @@ namespace eowu {
 class eowu::RendererWrapper {
   
 public:
-  RendererWrapper(std::shared_ptr<eowu::Renderer> renderer,
-                  std::shared_ptr<eowu::LuaFunction> lua_render_function);
+  RendererWrapper(std::shared_ptr<eowu::Renderer> renderer);
   
-  int SetRenderFunction(lua_State *L);
+  int SetClearColor(lua_State *L);
+  double Delta();
   
   static void CreateLuaSchema(lua_State *L);
 private:
   std::shared_ptr<eowu::Renderer> renderer;
-  std::shared_ptr<eowu::LuaFunction> lua_render_function;
 };

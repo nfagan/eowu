@@ -54,7 +54,7 @@ void eowu::State::OnLoop() {
 }
 
 void eowu::State::AddExitCondition(const eowu::ExitConditionType &condition) {
-  exit_conditions.push_back(condition);
+  persistent_exit_conditions.push_back(condition);
 }
 
 void eowu::State::SetDuration(eowu::time::DurationType duration) {
@@ -117,7 +117,7 @@ void eowu::State::loop() {
 }
 
 bool eowu::State::check_exit_conditions() const {
-  for (const auto &cnd : exit_conditions) {
+  for (const auto &cnd : persistent_exit_conditions) {
     if (cnd(this)) {
       return true;
     }

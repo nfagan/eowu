@@ -21,15 +21,15 @@
 #include <iostream>
 #endif
 
-eowu::Renderer::Renderer(ContextContainerType context_manager) {
-  this->context_manager = context_manager;
+eowu::Renderer::Renderer() {
   this->projection_type = eowu::projection_types::orthographic;
   this->last_program = nullptr;
   this->last_mesh = nullptr;
+  this->clear_color = glm::vec3(0.0);
 }
 
 void eowu::Renderer::ClearQueue() {
-  std::lock_guard<std::mutex> guard(models_mutex);
+  std::lock_guard<std::mutex> guard(mut);
   
   for (auto &it : models) {
     it.second.clear();
@@ -37,7 +37,7 @@ void eowu::Renderer::ClearQueue() {
 }
 
 void eowu::Renderer::Queue(const ModelAggregateType &models, eowu::WindowType window) {
-  std::lock_guard<std::mutex> guard(models_mutex);
+  std::lock_guard<std::mutex> guard(mut);
   
   auto &models_container = get_models_container(window);
   
@@ -47,14 +47,29 @@ void eowu::Renderer::Queue(const ModelAggregateType &models, eowu::WindowType wi
 }
 
 void eowu::Renderer::Queue(const eowu::Model &model, eowu::WindowType window) {
-  std::lock_guard<std::mutex> guard(models_mutex);
+  std::lock_guard<std::mutex> guard(mut);
   
   std::vector<eowu::Model> &models_container = get_models_container(window);
   models_container.push_back(model);
 }
 
+void eowu::Renderer::SetClearColor(const glm::vec3 &color) {
+  std::lock_guard<std::mutex> lock(mut);
+  
+  clear_color = color;
+}
+
+eowu::time::DurationType eowu::Renderer::Delta() {
+  std::lock_guard<std::mutex> guard(mut);
+  
+  auto ellapsed = frame_timing.timer.Ellapsed();
+  frame_timing.timer.Reset();
+  
+  return ellapsed;
+}
+
 void eowu::Renderer::draw(eowu::WindowType window) {
-  std::lock_guard<std::mutex> guard(models_mutex);
+  std::lock_guard<std::mutex> guard(mut);
   
   if (!window->IsOpen()) {
     return;
@@ -70,6 +85,7 @@ void eowu::Renderer::draw(eowu::WindowType window) {
     window->ResetWasResized();
   }
   
+  glClearColor(clear_color.x, clear_color.y, clear_color.z, 1.0);
   glClear(GL_COLOR_BUFFER_BIT);
   
   auto &models_container = get_models_container(window);
@@ -91,6 +107,9 @@ void eowu::Renderer::next_frame() {
       model.NextFrame();
     }
   }
+  
+  analyzed_material_ids.clear();
+  frame_timing.timer.Update();
 }
 
 void eowu::Renderer::Draw() {
@@ -119,14 +138,16 @@ void eowu::Renderer::draw_one_model(const eowu::WindowType& window, const eowu::
   auto mesh_id = mesh->GetIdentifier();
   bool has_program_for_material = programs_by_material_id.count(material_id) > 0;
   bool material_schema_changed = material->SchemaChanged();
+  bool material_analyzed = analyzed_material_ids.count(material_id) > 0;
   bool prog_need_bind = false;
+  bool material_needs_check = !material_analyzed && (!has_program_for_material || material_schema_changed);
   
   std::shared_ptr<eowu::Program> prog = nullptr;
   
-  if (!has_program_for_material || material_schema_changed) {
+  if (material_needs_check) {
     //  analyze material to see whether we need to make
     //  a new shader
-    EOWU_LOG_INFO("Renderer::draw_one_model: Analyzing material.");
+//    EOWU_LOG_INFO("Renderer::draw_one_model: Analyzing material.");
     
     const eowu::Mesh &ref_mesh = *(mesh.get());
     const eowu::Material &ref_mat = *(material.get());
@@ -141,7 +162,7 @@ void eowu::Renderer::draw_one_model(const eowu::WindowType& window, const eowu::
     
     if (prog_exists) {
       prog = programs.at(hash_code);
-      EOWU_LOG_INFO("Renderer::draw_one_model: Using cached shader.");
+//      EOWU_LOG_INFO("Renderer::draw_one_model: Using cached shader.");
     } else {
       EOWU_LOG_INFO("Renderer::draw_one_model: Generating new program.");
       prog = eowu::builder::from_source(v_src, f_src);
@@ -149,6 +170,7 @@ void eowu::Renderer::draw_one_model(const eowu::WindowType& window, const eowu::
     
     programs[hash_code] = prog;
     programs_by_material_id[material_id] = hash_code;
+    analyzed_material_ids.emplace(material_id);
     
     prog_need_bind = true;
   } else {

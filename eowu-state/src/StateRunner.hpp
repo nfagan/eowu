@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "Timer.hpp"
+#include <eowu-common/Timer.hpp>
 #include <unordered_map>
 #include <string>
 #include <memory>
@@ -15,8 +15,6 @@
 namespace eowu {
   class StateRunner;
   class State;
-  
-  
 }
 
 class eowu::StateRunner {

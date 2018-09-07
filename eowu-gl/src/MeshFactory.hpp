@@ -17,6 +17,6 @@ namespace eowu {
   namespace mesh_factory {
     void make_quad(eowu::Mesh *mesh);
     void make_triangle(eowu::Mesh *mesh);
-    void make_sphere(eowu::Mesh *mesh, int vertex_count = 64);
+    void make_sphere(eowu::Mesh *mesh, int vertex_count = 32);
   }
 }

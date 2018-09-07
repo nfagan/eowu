@@ -17,7 +17,7 @@ void test1() {
   
   auto context_manager = std::make_shared<ContextManager>();
   ResourceManager resource_manager;
-  Renderer renderer(context_manager);
+  Renderer renderer;
   
   //  gl initialization
   context_manager->Initialize();
