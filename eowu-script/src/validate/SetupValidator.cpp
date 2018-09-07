@@ -9,6 +9,7 @@
 #include "validate/Util.hpp"
 #include <algorithm>
 #include <eowu-gl/eowu-gl.hpp>
+#include <unordered_set>
 
 #define EOWU_RESULT_EARLY_RETURN(val) \
   if (!val.success) { \
@@ -100,6 +101,42 @@ eowu::ValidationResult eowu::validate::setup(const eowu::schema::Setup &schema,
   //  stimuli
   auto stim_res = validate::stimuli(schema.stimuli, validation.stimulus);
   EOWU_RESULT_EARLY_RETURN(stim_res);
+  
+  //  states
+  auto state_res = validate::states(schema.states);
+  EOWU_RESULT_EARLY_RETURN(state_res);
+  
+  result.success = true;
+  
+  return result;
+}
+
+//
+//  State
+//
+
+eowu::ValidationResult eowu::validate::states(const eowu::schema::States &schema) {
+  eowu::ValidationResult result;
+  
+  std::unordered_set<std::string> visited;
+  
+  //  ensure render functions don't contain duplicates
+  for (const auto &it : schema.mapping) {
+    const auto &state = it.second;
+    const auto &render_functions = state.render_functions;
+    
+    for (const auto &func_it : render_functions) {
+      const auto &func_id = func_it.first;
+      
+      if (visited.count(func_id) > 0) {
+        result.message = "Duplicate render function: '" + func_id + "'.";
+        result.context = "State::" + state.state_id;
+        return result;
+      }
+      
+      visited.emplace(func_id);
+    }
+  }
   
   result.success = true;
   

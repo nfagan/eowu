@@ -21,6 +21,8 @@ namespace eowu {
     eowu::ValidationResult target(const eowu::schema::Target &schema, const eowu::schema::validate::Target &validation);
     eowu::ValidationResult targets(const eowu::schema::Targets &schema, const eowu::schema::validate::Target &validation);
     
+    eowu::ValidationResult states(const eowu::schema::States &schema);
+    
     eowu::schema::validate::Setup make_setup(const eowu::schema::Setup &schema);
     eowu::schema::validate::Target make_target(const eowu::schema::Setup &schema);
     eowu::schema::validate::Stimulus make_stimulus(const eowu::schema::Setup &schema);
