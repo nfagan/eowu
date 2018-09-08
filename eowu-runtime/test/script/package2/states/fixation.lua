@@ -63,23 +63,24 @@ local function render_default()
   end
 
   local stim = eowu_script():Stimulus('sq')
-  stim:Units('normalized')
-  stim:Color({1, 1, 1})
+  stim:Units('mixed')
+  stim:Color({1, 0, 0})
   stim:Position({0.5, 0.5})
-  stim:Scale({0.3, 0.3})
+  stim:Scale({100, 100})
 
   local rot = stim.rotation
 
-  -- stim:Rotation({0, 0, rot.z + 0.001})
+  stim:Rotation({0, 0, rot.z + 0.001})
 
-  -- stim:Draw({'main'})
+  stim:Draw({'main'})
 
   local eowu = eowu_script()
 
   for i = 1, 100 do
     local stim = eowu:Stimulus('sq' .. i)
+    stim:Units('mixed')
     stim:Position({math.random(), math.random()})
-    stim:Scale({0.05, 0.05})
+    stim:Scale({10, 10})
     stim:Texture('first')
     stim:Draw()
   end

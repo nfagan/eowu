@@ -55,6 +55,7 @@ public:
   
   void SetHeight(unsigned int height);
   void SetWidth(unsigned int width);
+  void SetPosition(unsigned int x, unsigned int y);
   
   bool IsOpen() const;
   bool WasResized() const;

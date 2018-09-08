@@ -10,6 +10,7 @@
 #include <eowu-script/eowu-script.hpp>
 #include <eowu-state/eowu-state.hpp>
 #include <eowu-common/logging.hpp>
+#include <eowu-common/config.hpp>
 #include <stdexcept>
 
 #ifdef EOWU_DEBUG

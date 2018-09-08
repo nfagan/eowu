@@ -104,6 +104,7 @@ eowu::WindowType eowu::ContextManager::OpenWindow(const eowu::WindowProperties &
   glfwGetWindowSize(new_window, &client_width, &client_height);
   
   auto win = std::make_shared<eowu::Window>(monitor, new_window, client_width, client_height);
+  win->SetPosition(0, 0);
   
   register_window(win);
   

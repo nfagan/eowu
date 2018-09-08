@@ -5,7 +5,7 @@ Setup = {}
 
 Setup.Windows = {
   main = {
-    width = 400, height = 400, fullscreen = true, index = 0
+    width = 300, height = 300, fullscreen = false, index = 0
   }
 }
 
@@ -16,14 +16,18 @@ Setup.Geometry = {
   }
 }
 
-Setup.Sources = {}
+Setup.Sources = {
+  mouse = {
+    type = 'Mouse'
+  }
+}
 
 Setup.Textures = {
   first = '/Users/Nick/Desktop/eg.png'
 }
 
 Setup.Stimuli = {
-  sq = { geometry = 'circ' },
+  sq = { geometry = 'rect' },
   circ = { geometry = 'circ' }
 }
 

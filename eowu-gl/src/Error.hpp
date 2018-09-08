@@ -23,6 +23,7 @@ namespace eowu {
   EOWU_GENERIC_ERROR(ContextFailedToInitializeError);
   EOWU_GENERIC_ERROR(ContextNotInitializedError);
   EOWU_GENERIC_ERROR(MonitorNotAvailableError);
+  EOWU_GENERIC_ERROR(WindowError);
   
   EOWU_GENERIC_ERROR(TextureLoadError);
   EOWU_GENERIC_ERROR(IncompleteModelError);

@@ -6,6 +6,7 @@
 //
 
 #include "Window.hpp"
+#include "Error.hpp"
 #include <GLFW/glfw3.h>
 #include <memory>
 #include <functional>
@@ -105,6 +106,14 @@ void eowu::Window::MakeCurrent() const {
 
 void eowu::Window::Show() const {
   glfwShowWindow(window);
+}
+
+void eowu::Window::SetPosition(unsigned int x, unsigned int y) {
+  if (!IsOpen()) {
+    throw eowu::WindowError("Attempted to position a closed window.");
+  }
+  
+  glfwSetWindowPos(window, x, y);
 }
 
 
