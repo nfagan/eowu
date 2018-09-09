@@ -10,7 +10,7 @@
 #include <iostream>
 
 #define EOWU_ASSERT_TRUE(cond, success_message, fail_message) \
-  if (!cond) { \
+  if (!(cond)) { \
     std::cout << "FAILED: " << fail_message << std::endl << std::endl; \
   } else { \
     std::cout << "OK: " << success_message << std::endl << std::endl; \

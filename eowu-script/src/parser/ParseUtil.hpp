@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <eowu-data.hpp>
 #include <unordered_map>
 #include <string>
 #include <vector>
@@ -20,12 +21,21 @@ namespace luabridge {
 namespace eowu {
   namespace parser {
     using MapTableType = std::unordered_map<std::string, luabridge::LuaRef>;
+    using VariableMapType = std::unordered_map<std::string, eowu::data::Struct>;
+    using CommitableMapType = std::unordered_map<std::string, eowu::data::Commitable>;
     
     eowu::parser::MapTableType get_string_map_from_table(const luabridge::LuaRef &ref);
     std::vector<double> get_numeric_vector_from_table(const luabridge::LuaRef &ref);
     std::vector<double> get_numeric_vector_from_state(lua_State *L, int index);
     std::vector<std::string> get_string_vector_from_table(const luabridge::LuaRef &ref);
     std::vector<std::string> get_string_vector_from_state(lua_State *L, int index);
+    
+    eowu::parser::VariableMapType get_variables(const luabridge::LuaRef &ref);
+    
+    bool is_homogeneous_array(const luabridge::LuaRef &table);
+    bool is_typed_array(const luabridge::LuaRef &table, int type, bool check_if_array = true);
+    bool is_string_array(const luabridge::LuaRef &table, bool check_if_array = true);
+    bool is_numeric_array(const luabridge::LuaRef &table, bool check_if_array = true);
     
     std::string get_type_error_message(const std::string &key, const std::string &type);
     std::string get_array_size_error_message(const std::string &key, int expected_size, int given_size);

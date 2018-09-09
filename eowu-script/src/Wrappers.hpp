@@ -8,6 +8,9 @@
 #pragma once
 
 #include "StateWrapper.hpp"
+#include "MathWrapper.hpp"
 #include "ModelWrapper.hpp"
 #include "RendererWrapper.hpp"
+#include "VariableWrapper.hpp"
+#include "VariablesWrapper.hpp"
 #include "VectorWrapper.hpp"

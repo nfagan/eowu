@@ -8,6 +8,7 @@
 #include "SetupParser.hpp"
 #include "ParseUtil.hpp"
 #include "Lua.hpp"
+#include "../data/conversion.hpp"
 
 namespace util {
   std::string get_setup_schema_missing_field_error(const std::string &key) {
@@ -402,8 +403,13 @@ eowu::parser::ParseResult<eowu::schema::State> eowu::parser::state(const luabrid
     result.result.entry_function = eowu::parser::get_function_or_error(kv, "Entry");
     result.result.loop_function = eowu::parser::get_function_or_error(kv, "Loop");
     result.result.exit_function = eowu::parser::get_function_or_error(kv, "Exit");
-    result.result.state_id = eowu::parser::get_string_or_error(kv, "ID");
+    result.result.state_id = eowu::parser::get_string_or_error(kv, "Name");
     result.result.is_first = eowu::parser::get_numeric_value_or<int>(kv, "First", 0);
+    
+    if (kv.count("Variables") > 0) {
+      const luabridge::LuaRef &var_ref = kv.at("Variables");
+      result.result.variables = eowu::parser::get_variables(var_ref);
+    }
     
     if (kv.count("Render") > 0) {
       const luabridge::LuaRef &render_function_refs = kv.at("Render");

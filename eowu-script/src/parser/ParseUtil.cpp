@@ -8,6 +8,7 @@
 #include "ParseUtil.hpp"
 #include "Lua.hpp"
 #include "Error.hpp"
+#include "../data/conversion.hpp"
 #include <cstddef>
 
 #define EOWU_get_numeric_value_or(type) \
@@ -43,7 +44,6 @@ eowu::parser::MapTableType eowu::parser::get_string_map_from_table(const luabrid
   while (lua_next(L, -2)) {
     lua_pushvalue(L, -2);
     const char *key = lua_tostring(L, -1);
-//    const char *value = lua_tostring(L, -2);
     
     result.emplace(std::string(key), LuaRef::fromStack(L, -2));
     
@@ -51,6 +51,79 @@ eowu::parser::MapTableType eowu::parser::get_string_map_from_table(const luabrid
   }
   
   lua_pop(L, 1);
+  
+  return result;
+}
+
+//
+//  array handling
+//
+
+bool eowu::parser::is_homogeneous_array(const luabridge::LuaRef &table) {
+  if (!table.isTable()) {
+    return false;
+  }
+  
+  auto L = table.state();
+  push(L, table);
+  
+  bool result = true;
+  bool first_type = true;
+  int last_value_type;
+  
+  lua_pushnil(L);
+  while (lua_next(L, -2)) {
+    lua_pushvalue(L, -2);
+    
+    int key_type = lua_type(L, -1);
+    int value_type = lua_type(L, -2);
+    
+    bool wrong_key_type = key_type != LUA_TNUMBER;
+    bool nonmatching_value_types = !first_type && (value_type != last_value_type);
+    
+    first_type = false;
+    
+    if (result) {
+      result = !wrong_key_type && !nonmatching_value_types;
+    }
+    
+    last_value_type = value_type;
+    
+    lua_pop(L, 2);
+  }
+  
+  lua_pop(L, 1);
+  
+  return result;
+}
+
+bool eowu::parser::is_string_array(const luabridge::LuaRef &table, bool check_if_array) {
+  return eowu::parser::is_typed_array(table, LUA_TSTRING, check_if_array);
+}
+
+bool eowu::parser::is_numeric_array(const luabridge::LuaRef &table, bool check_if_array) {
+  return eowu::parser::is_typed_array(table, LUA_TNUMBER, check_if_array);
+}
+
+bool eowu::parser::is_typed_array(const luabridge::LuaRef &table, int type, bool check_if_array) {
+  if (check_if_array && !is_homogeneous_array(table)) {
+    return false;
+  }
+  
+  auto length = table.length();
+  
+  if (length == 0) {
+    return true;
+  }
+  
+  lua_State *L = table.state();
+  push(L, table);
+  lua_rawgeti(L, -1, 1);
+  
+  int value_type = lua_type(L, -1);
+  bool result = value_type == type;
+  
+  lua_pop(L, 2);
   
   return result;
 }
@@ -228,6 +301,27 @@ std::vector<std::string> eowu::parser::get_string_vector_from_table(const luabri
   return result;
 }
 #endif
+
+//
+//  get variables
+//
+
+eowu::parser::VariableMapType eowu::parser::get_variables(const luabridge::LuaRef &ref) {
+  eowu::parser::VariableMapType result;
+  
+  auto kv = eowu::parser::get_string_map_from_table(ref);
+  
+  for (const auto &it : kv) {
+    const std::string &name = it.first;
+    const luabridge::LuaRef &ref = it.second;
+    
+    auto parsed_struct = eowu::data::from_lua(name, ref);
+    
+    result.emplace(name, parsed_struct);
+  }
+  
+  return result;
+}
 
 //
 //  get_numeric_value_or

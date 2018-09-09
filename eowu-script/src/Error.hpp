@@ -15,4 +15,6 @@ namespace eowu {
   
   EOWU_GENERIC_ERROR(ScriptParseError);
   EOWU_GENERIC_ERROR(LuaError);
+  
+  EOWU_GENERIC_ERROR(DataConversionError);
 }

@@ -9,10 +9,13 @@
 
 #include "LuaFunction.hpp"
 #include "LuaContext.hpp"
+#include <eowu-data.hpp>
 #include <memory>
+#include <unordered_map>
 
 namespace eowu {
   class StateWrapper;
+  class VariableWrapper;
   class State;
   struct LuaStateFunctions;
 }
@@ -32,8 +35,11 @@ struct eowu::LuaStateFunctions {
 class eowu::StateWrapper {
 public:
   StateWrapper(eowu::State *state,
+               const std::unordered_map<std::string, eowu::data::Commitable> &variables,
                std::shared_ptr<eowu::LuaContext> context,
                std::unique_ptr<eowu::LuaStateFunctions> state_functions);
+  
+  eowu::VariableWrapper GetVariable(const std::string &name);
   
   void SetDuration(int duration);
   void SetNextState(const std::string &next);
@@ -44,6 +50,7 @@ public:
 private:
   
   eowu::State *state;
+  std::unordered_map<std::string, eowu::data::Commitable> variables;
   std::shared_ptr<eowu::LuaContext> lua_context;
   std::unique_ptr<eowu::LuaStateFunctions> state_functions;
   

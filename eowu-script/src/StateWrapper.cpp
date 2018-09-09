@@ -6,7 +6,9 @@
 //
 
 #include "StateWrapper.hpp"
+#include "VariableWrapper.hpp"
 #include "Constants.hpp"
+#include "Error.hpp"
 #include <eowu-state/eowu-state.hpp>
 #include <chrono>
 
@@ -23,10 +25,24 @@ on_entry(other.on_entry), on_loop(other.on_loop), on_exit(other.on_exit) {
 }
 
 eowu::StateWrapper::StateWrapper(eowu::State *state_,
+                                 const std::unordered_map<std::string, eowu::data::Commitable> &variables_,
                                  std::shared_ptr<eowu::LuaContext> context,
                                  std::unique_ptr<eowu::LuaStateFunctions> state_functions_) :
-state(state_), lua_context(context), state_functions(std::move(state_functions_)) {
+state(state_), variables(variables_), lua_context(context), state_functions(std::move(state_functions_)) {
   setup_state_callbacks();
+}
+
+eowu::VariableWrapper eowu::StateWrapper::GetVariable(const std::string &name) {
+  auto it = variables.find(name);
+  
+  if (it == variables.end()) {
+    throw eowu::LuaError("Reference to non-existent variable: '" + name + "'.");
+  }
+  
+  eowu::data::Commitable* variable = &it->second;
+  eowu::VariableWrapper wrapper(variable);
+  
+  return wrapper;
 }
 
 double eowu::StateWrapper::Ellapsed() const {
@@ -66,6 +82,7 @@ void eowu::StateWrapper::CreateLuaSchema(lua_State *L) {
   luabridge::getGlobalNamespace(L)
   .beginNamespace(eowu::constants::eowu_namespace)
   .beginClass<eowu::StateWrapper>("_State")
+  .addFunction("Variable", &eowu::StateWrapper::GetVariable)
   .addFunction("Duration", &eowu::StateWrapper::SetDuration)
   .addFunction("Next", &eowu::StateWrapper::SetNextState)
   .addFunction("Exit", &eowu::StateWrapper::Exit)

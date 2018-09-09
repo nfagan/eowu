@@ -8,6 +8,7 @@
 #pragma once
 
 #include "Lua.hpp"
+#include <eowu-data.hpp>
 #include <unordered_map>
 #include <string>
 
@@ -17,6 +18,8 @@ namespace eowu {
     using RenderFunctionAggregateType = std::unordered_map<std::string, luabridge::LuaRef>;
     
     struct State {
+      std::unordered_map<std::string, eowu::data::Struct> variables;
+      
       luabridge::LuaRef entry_function;
       luabridge::LuaRef loop_function;
       luabridge::LuaRef exit_function;

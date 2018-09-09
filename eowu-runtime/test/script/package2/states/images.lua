@@ -1,7 +1,9 @@
 local state = {}
 
-state.ID = 'images'
+state.Name = 'images'
 state.Duration = 1000
+
+-- state.Variables = {}
 
 function state.Entry()
   print('Entered images!')

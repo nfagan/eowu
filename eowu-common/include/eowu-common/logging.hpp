@@ -10,6 +10,10 @@
 #include "config.hpp"
 
 #ifdef EOWU_DEBUG
+#include <iostream>
+#endif
+
+#ifdef EOWU_DEBUG
 #define EOWU_LOG_WARN(value) std::cout << "WARN: " << value << std::endl
 #else
 #define EOWU_LOG_WARN(value)

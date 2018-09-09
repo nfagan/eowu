@@ -1,17 +1,34 @@
 local state = {}
 
-state.ID = 'fixation'
+state.Name = 'fixation'
 state.Duration = 1000
 state.First = true
 
+state.Variables = {
+  first = 'hi',
+  second = {
+    a = 0/0,
+    b = 11,
+    c = {
+      d = {'hello'},
+      e = true
+    }
+  }
+}
+
 function state.Entry()
-  print('Entered fixation!')
-  eowu_script():State('fixation'):Next('fixation')
+  local state = eowu_script():State('fixation')
+  state:Next('fixation')
   eowu_script():Render('fixation')
+
+  local first = state:Variable('first')
+  local second = state:Variable('second')
+
+  first:Set({'hi', 'hello', 'sup'})
 end
 
 function state.Exit()
-  print(eowu_script():State('fixation'):Ellapsed())
+  print(eowu_script():State('fixation'):Ellapsed()*1000)
 end
 
 function state.Loop()
@@ -44,6 +61,7 @@ local function std(times)
 end
 
 local function render_default()
+
   local renderer = eowu_script():Renderer()
   local delta = renderer:Delta() * 1000
 
@@ -72,11 +90,11 @@ local function render_default()
 
   stim:Rotation({0, 0, rot.z + 0.001})
 
-  stim:Draw({'main'})
+  stim:Draw()
 
   local eowu = eowu_script()
 
-  for i = 1, 100 do
+  for i = 1, 10 do
     local stim = eowu:Stimulus('sq' .. i)
     stim:Units('mixed')
     stim:Position({math.random(), math.random()})

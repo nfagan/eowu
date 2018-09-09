@@ -21,6 +21,9 @@ void eowu::init::init_render_schema(lua_State *L) {
 
 void eowu::init::init_state_schema(lua_State *L) { 
   eowu::StateWrapper::CreateLuaSchema(L);
+  eowu::VariableWrapper::CreateLuaSchema(L);
+  eowu::VariablesWrapper::CreateLuaSchema(L);
+  eowu::MathWrapper::CreateLuaSchema(L);
 }
 
 eowu::RenderFunctionContainerType eowu::init::get_render_functions(const eowu::schema::States &schema) {
@@ -48,7 +51,7 @@ eowu::StateWrapperContainerType eowu::init::get_states(const eowu::schema::State
     
     auto state = state_manager.CreateState(schema.state_id);
     
-    if (schema.duration > 0) {
+    if (schema.duration >= 0) {
       state->SetDuration(std::chrono::milliseconds((int)schema.duration));
     }
     
@@ -56,8 +59,18 @@ eowu::StateWrapperContainerType eowu::init::get_states(const eowu::schema::State
     eowu::LuaFunction exit(schema.exit_function);
     eowu::LuaFunction loop(schema.loop_function);
     
+    std::unordered_map<std::string, eowu::data::Commitable> variables;
+    
+    for (const auto &it : schema.variables) {
+      eowu::data::Commitable commitable;
+      
+      commitable.Set(it.second);
+      
+      variables.emplace(it.first, commitable);
+    }
+    
     auto state_functions = std::make_unique<eowu::LuaStateFunctions>(entry, loop, exit);
-    auto wrapper = std::make_shared<eowu::StateWrapper>(state, lua_context, std::move(state_functions));
+    auto wrapper = std::make_shared<eowu::StateWrapper>(state, variables, lua_context, std::move(state_functions));
     
     result->emplace(schema.state_id, std::move(wrapper));
   }
