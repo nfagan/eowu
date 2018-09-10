@@ -11,6 +11,7 @@ file(GLOB TEST_SRC
 file(GLOB_RECURSE LIB_SRC 
   src/*.cpp
   src/*.h
+  src/*.hh
   src/*.hpp
   include/*.hpp
 )

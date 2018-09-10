@@ -23,7 +23,7 @@ void eowu::serialize::serialize(double value, eowu::serialize::ByteArrayType &in
 }
 
 void eowu::serialize::serialize(bool value, eowu::serialize::ByteArrayType &into, eowu::u32 flag) {
-  priv::scalar<bool>(value, into, flag);
+  priv::scalar<eowu::u8>((eowu::u8)value, into, flag);
 }
 
 void eowu::serialize::serialize(const std::string &value, eowu::serialize::ByteArrayType &into, eowu::u32 flag) {

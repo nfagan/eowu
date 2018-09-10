@@ -19,6 +19,8 @@ void eowu::StateRunner::Begin(eowu::State *state) {
 }
 
 bool eowu::StateRunner::Update() {
+  timer.Update();
+  
   if (active_state == nullptr) {
     return true;
   }
@@ -36,6 +38,10 @@ bool eowu::StateRunner::Update() {
   }
   
   return false;
+}
+
+const eowu::Timer& eowu::StateRunner::GetTimer() const {
+  return timer;
 }
 
 bool eowu::StateRunner::IsNewState() const {

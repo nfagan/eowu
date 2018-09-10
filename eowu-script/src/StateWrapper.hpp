@@ -41,6 +41,8 @@ public:
   
   eowu::VariableWrapper GetVariable(const std::string &name);
   
+  void Write(eowu::serialize::ByteArrayType &into) const;
+  
   void SetDuration(int duration);
   void SetNextState(const std::string &next);
   double Ellapsed() const;
@@ -50,7 +52,8 @@ public:
 private:
   
   eowu::State *state;
-  std::unordered_map<std::string, eowu::data::Commitable> variables;
+  std::unordered_map<std::string, eowu::data::Commitable> active_variables;
+  std::unordered_map<std::string, eowu::data::Commitable> default_variables;
   std::shared_ptr<eowu::LuaContext> lua_context;
   std::unique_ptr<eowu::LuaStateFunctions> state_functions;
   

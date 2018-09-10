@@ -12,12 +12,12 @@
 #include <eowu-script/eowu-script.hpp>
 #include <eowu-gl/eowu-gl.hpp>
 #include <eowu-state/eowu-state.hpp>
+#include <eowu-data.hpp>
 #include <Lua.hpp>
 #include <iostream>
 #include <thread>
 
-int eowu::Runtime::Main(const std::string &file) {
-  
+int eowu::Runtime::Main(const std::string &file) {  
   if (!lua_runtime.InitializeSchema(file)) {
     return 1;
   }
@@ -31,6 +31,15 @@ int eowu::Runtime::Main(const std::string &file) {
     return 1;
   }
   
+  
+  //  task data store
+  auto task_data_store = std::make_shared<eowu::data::Store>();
+  eowu::ScriptWrapper::task_data_store = task_data_store;
+  
+  const auto &data_file = lua_runtime.setup_schema.paths.data + "task.dat";
+  task_data_store->Open(data_file);
+  //  end task data store
+  
   lua_runtime.InitializeScriptWrapper(file, gl_pipeline);
   
   eowu::thread::SharedState thread_state;
@@ -38,7 +47,11 @@ int eowu::Runtime::Main(const std::string &file) {
   auto first_state = lua_runtime.GetFirstState();
   auto task_thread = std::thread(eowu::thread::task, std::ref(thread_state), first_state);
   
-  eowu::thread::render(thread_state, lua_runtime.lua_contexts.render, gl_pipeline);
+  auto &lua_render_function = *eowu::ScriptWrapper::LuaRenderFunction.get();
+  auto &lua_flip_function = *eowu::ScriptWrapper::LuaFlipFunction.get();
+  const auto &render_context = lua_runtime.lua_contexts.render;
+  
+  eowu::thread::render(thread_state, render_context, lua_render_function, lua_flip_function, gl_pipeline);
   
   task_thread.join();
   

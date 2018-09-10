@@ -26,11 +26,25 @@ void eowu::init::init_state_schema(lua_State *L) {
   eowu::MathWrapper::CreateLuaSchema(L);
 }
 
-eowu::RenderFunctionContainerType eowu::init::get_render_functions(const eowu::schema::States &schema) {
-  auto result = std::make_unique<eowu::RenderFunctionMapType>();
+eowu::LuaFunctionContainerType eowu::init::get_render_functions(const eowu::schema::States &schema) {
+  auto result = std::make_unique<eowu::LuaFunctionMapType>();
   
   for (const auto &state_it : schema.mapping) {
     for (const auto &func_it : state_it.second.render_functions) {
+      eowu::LuaFunction func(func_it.second);
+      
+      result->emplace(func_it.first, func);
+    }
+  }
+  
+  return result;
+}
+
+eowu::LuaFunctionContainerType eowu::init::get_flip_functions(const eowu::schema::States &schema) {
+  auto result = std::make_unique<eowu::LuaFunctionMapType>();
+  
+  for (const auto &state_it : schema.mapping) {
+    for (const auto &func_it : state_it.second.flip_functions) {
       eowu::LuaFunction func(func_it.second);
       
       result->emplace(func_it.first, func);

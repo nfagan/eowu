@@ -10,14 +10,17 @@
 #include "Constants.hpp"
 #include "Lua.hpp"
 
-eowu::VariablesWrapper::VariablesWrapper(eowu::parser::CommitableMapType *variables_) :
-variables(variables_) {
+eowu::VariablesWrapper::VariablesWrapper(eowu::parser::CommitableMapType *variables_,
+                                         eowu::parser::CommitableMapType *defaults_) :
+variables(variables_), defaults(defaults_) {
   //
 }
 
 eowu::VariableWrapper eowu::VariablesWrapper::GetVariable(const std::string &name) const {
   auto var = &variables->at(name);
-  eowu::VariableWrapper wrapper(var);
+  auto dflt = &defaults->at(name);
+  
+  eowu::VariableWrapper wrapper(var, dflt);
   
   return wrapper;
 }

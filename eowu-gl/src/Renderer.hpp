@@ -23,8 +23,9 @@
 namespace eowu {
   class Renderer;
   
-  using ContextContainerType = std::shared_ptr<eowu::ContextManager>;
   using ModelAggregateType = std::vector<eowu::Model>;
+  
+  using BufferSwapCallbackType = std::function<void(const eowu::WindowType&)>;
 }
 
 class eowu::Renderer {
@@ -35,12 +36,18 @@ public:
   void ClearQueue();
   void Queue(const ModelAggregateType &models, eowu::WindowType window);
   void Queue(const eowu::Model &model, eowu::WindowType window);
-  void Draw();
-  void SetClearColor(const glm::vec3 &color);
-  eowu::time::DurationType Delta();
   
+  void Draw();
+  
+  void SetClearColor(const glm::vec3 &color);
+  
+  void SetOnBufferSwap(const eowu::BufferSwapCallbackType &cb);
+  
+  eowu::time::DurationType Delta();
 private:
   mutable std::mutex mut;
+  
+  eowu::BufferSwapCallbackType on_buffer_swap;
 
   eowu::projection_types::Types projection_type;
   glm::vec3 clear_color;

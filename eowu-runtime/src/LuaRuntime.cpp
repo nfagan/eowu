@@ -51,17 +51,21 @@ eowu::SetupStatus eowu::LuaRuntime::validate_schemas(const eowu::schema::Setup &
   return result;
 }
 
-eowu::RenderFunctionContainerType eowu::LuaRuntime::get_render_functions(const std::string &file) {
+eowu::parser::ParseResult<eowu::schema::States> eowu::LuaRuntime::get_render_state_schema(const std::string &file) {
   auto render_parse_result = eowu::parser::entry_script(lua_contexts.render->GetState(), file);
   
   const luabridge::LuaRef &render_entry_table = render_parse_result.result.entry_table;
   const luabridge::LuaRef &states = render_entry_table[eowu::constants::eowu_states_table_name];
   
-  const auto render_state_schema = eowu::parser::states(states);
-  
-  assert(render_state_schema.success);
-  
-  return init::get_render_functions(render_state_schema.result);
+  return eowu::parser::states(states);
+}
+
+eowu::LuaFunctionContainerType eowu::LuaRuntime::get_render_functions(const eowu::schema::States &schema) {
+  return init::get_render_functions(schema);
+}
+
+eowu::LuaFunctionContainerType eowu::LuaRuntime::get_flip_functions(const eowu::schema::States &schema) {
+  return init::get_flip_functions(schema);
 }
 
 bool eowu::LuaRuntime::InitializeSchema(const std::string &file) {
@@ -98,16 +102,25 @@ void eowu::LuaRuntime::InitializeScriptWrapper(const std::string &file,
   //  extract render functions
   //
   
-  const auto &lua_noop = LuaFunction::get_no_op(lua_contexts.render->GetState());
+  const auto lua_state = lua_contexts.render->GetState();
+  const auto &lua_noop = LuaFunction::get_no_op(lua_state);
+  
+  const auto render_state_schema = get_render_state_schema(file);
+  assert(render_state_schema.success);
   
   auto default_render_function = std::make_shared<eowu::LuaFunction>(lua_noop);
-  auto render_functions = get_render_functions(file);
+  auto default_flip_function = std::make_shared<eowu::LuaFunction>(lua_noop);
+  
+  auto render_functions = get_render_functions(render_state_schema.result);
+  auto flip_functions = get_flip_functions(render_state_schema.result);
   auto states = init::get_states(setup_schema.states, lua_contexts.task, state_manager);
   
   script_wrapper.SetStateWrapperContainer(std::move(states));
   script_wrapper.SetGLPipeline(gl_pipeline);
   script_wrapper.SetLuaRenderFunction(default_render_function);
+  script_wrapper.SetLuaFlipFunction(default_flip_function);
   script_wrapper.SetRenderFunctions(std::move(render_functions));
+  script_wrapper.SetFlipFunctions(std::move(flip_functions));
 }
 
 eowu::State* eowu::LuaRuntime::GetFirstState() {

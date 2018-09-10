@@ -41,6 +41,10 @@ void eowu::data::Commitable::Set(const eowu::data::Struct &value) {
   this->value = value;
 }
 
+void eowu::data::Commitable::Uncommit() {
+  is_committed = false;
+}
+
 void eowu::data::Commitable::Commit() {
   std::unique_lock<std::recursive_mutex> lock(mut);
   

@@ -18,11 +18,13 @@ namespace eowu {
 
 class eowu::VariablesWrapper {
 public:
-  VariablesWrapper(eowu::parser::CommitableMapType *variables);
+  VariablesWrapper(eowu::parser::CommitableMapType *variables,
+                   eowu::parser::CommitableMapType *defaults);
   
   eowu::VariableWrapper GetVariable(const std::string &name) const;
   
   static void CreateLuaSchema(lua_State *L);
 private:
   eowu::parser::CommitableMapType *variables;
+  eowu::parser::CommitableMapType *defaults;
 };

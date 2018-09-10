@@ -515,5 +515,21 @@ luabridge::LuaRef eowu::parser::get_function_or_error(const eowu::parser::MapTab
   return ref;
 }
 
+luabridge::LuaRef eowu::parser::get_function_or_type_error(const eowu::parser::MapTableType &table,
+                                                           const std::string &key,
+                                                           const luabridge::LuaRef &dflt) {
+  if (table.count(key) == 0) {
+    return dflt;
+  }
+  
+  const auto &ref = table.at(key);
+  
+  if (!ref.isFunction()) {
+    throw eowu::ScriptParseError(eowu::parser::get_type_error_message(key, "function"));
+  }
+  
+  return ref;
+}
+
 
 

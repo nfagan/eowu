@@ -8,12 +8,12 @@
 #pragma once
 
 #include <mutex>
+#include "LuaFunction.hpp"
 
 struct lua_State;
 
 namespace eowu {
   class LuaContext;
-  class LuaFunction;
 }
 
 class eowu::LuaContext {
@@ -26,9 +26,12 @@ public:
   lua_State* GetState() const;
   void SetState(lua_State *L);
   
-  void Call(const eowu::LuaFunction &other) const;
+  template<typename ...Args>
+  void Call(eowu::LuaFunction &other, Args... args) const;
 private:
   mutable std::mutex mut;
   
   lua_State *lua_state;
 };
+
+#include "LuaContext.hh"

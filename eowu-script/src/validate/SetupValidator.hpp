@@ -8,6 +8,9 @@
 #include "Schemas.hpp"
 #include "Util.hpp"
 #include "../parser/Schemas.hpp"
+#include <unordered_set>
+#include <unordered_map>
+#include <string>
 
 namespace eowu {
   namespace validate {
@@ -27,5 +30,13 @@ namespace eowu {
     eowu::schema::validate::Target make_target(const eowu::schema::Setup &schema);
     eowu::schema::validate::Stimulus make_stimulus(const eowu::schema::Setup &schema);
     eowu::schema::validate::Geometry make_geometry(const eowu::schema::Setup &schema);
+    
+    template<typename T>
+    eowu::ValidationResult map_check_duplicates(std::unordered_set<std::string> &visited,
+                                                const std::unordered_map<std::string, T> &to_check,
+                                                const std::string &kind,
+                                                const std::string &context);
   }
 }
+
+#include "SetupValidator.hh"

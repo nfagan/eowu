@@ -28,21 +28,40 @@ eowu::StateWrapper::StateWrapper(eowu::State *state_,
                                  const std::unordered_map<std::string, eowu::data::Commitable> &variables_,
                                  std::shared_ptr<eowu::LuaContext> context,
                                  std::unique_ptr<eowu::LuaStateFunctions> state_functions_) :
-state(state_), variables(variables_), lua_context(context), state_functions(std::move(state_functions_)) {
+state(state_), active_variables(variables_), default_variables(variables_),
+lua_context(context), state_functions(std::move(state_functions_)) {
   setup_state_callbacks();
 }
 
 eowu::VariableWrapper eowu::StateWrapper::GetVariable(const std::string &name) {
-  auto it = variables.find(name);
+  auto it = active_variables.find(name);
   
-  if (it == variables.end()) {
+  if (it == active_variables.end()) {
     throw eowu::LuaError("Reference to non-existent variable: '" + name + "'.");
   }
   
   eowu::data::Commitable* variable = &it->second;
-  eowu::VariableWrapper wrapper(variable);
+  eowu::data::Commitable* default_value = &default_variables.at(name);
+  eowu::VariableWrapper wrapper(variable, default_value);
   
   return wrapper;
+}
+
+void eowu::StateWrapper::Write(eowu::serialize::ByteArrayType &into) const {
+  for (const auto &it : active_variables) {
+    const auto &var = it.second;
+    
+    //  only insert data if it has been committed.
+    if (!var.IsCommitted()) {
+      continue;
+    }
+    
+    const auto inserter = [&](const auto &data) -> void {
+      eowu::serialize::serialize(data, into);
+    };
+    
+    var.Use(inserter);
+  }
 }
 
 double eowu::StateWrapper::Ellapsed() const {

@@ -28,6 +28,7 @@ public:
   Commitable();
   ~Commitable() = default;
   
+  void Uncommit();
   void Commit();
   void Reset();
   void Serialize(eowu::serialize::ByteArrayType &into);

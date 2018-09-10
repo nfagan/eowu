@@ -1,8 +1,8 @@
 local state = {}
 
 state.Name = 'fixation'
-state.Duration = 1000
-state.First = true
+state.Duration = 2000
+state.First = false
 
 state.Variables = {
   first = 'hi',
@@ -18,7 +18,7 @@ state.Variables = {
 
 function state.Entry()
   local state = eowu_script():State('fixation')
-  state:Next('fixation')
+  state:Next('images')
   eowu_script():Render('fixation')
 
   local first = state:Variable('first')
@@ -84,7 +84,7 @@ local function render_default()
   stim:Units('mixed')
   stim:Color({1, 0, 0})
   stim:Position({0.5, 0.5})
-  stim:Scale({100, 100})
+  stim:Size({100, 100})
 
   local rot = stim.rotation
 
@@ -98,7 +98,7 @@ local function render_default()
     local stim = eowu:Stimulus('sq' .. i)
     stim:Units('mixed')
     stim:Position({math.random(), math.random()})
-    stim:Scale({10, 10})
+    stim:Size({10, 10})
     stim:Texture('first')
     stim:Draw()
   end

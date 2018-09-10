@@ -84,7 +84,7 @@ std::shared_ptr<Resource> eowu::ResourceManagerImpl<T...>::Get(const std::string
   const auto it = resource_container.find(id);
   
   if (it == resource_container.end()) {
-    throw eowu::NonexistentResourceError("No resource with id " + id);
+    throw eowu::NonexistentResourceError("No resource with id '" + id + "'.");
   }
   
   return it->second;

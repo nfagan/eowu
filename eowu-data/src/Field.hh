@@ -17,6 +17,9 @@ void eowu::serialize::serialize(const eowu::data::Field<T...> &field, eowu::seri
 
 template<typename ...T>
 void eowu::serialize::serialize(const std::vector<eowu::data::Field<T...>> &fields, eowu::serialize::ByteArrayType &into, eowu::u32 flag) {
+  
+  eowu::serialize::priv::nd_array(fields.size(), into, flag | eowu::serialize::constants::aggregate);
+  
   for (const auto &field : fields) {
     eowu::serialize::serialize(field, into, flag);
   }

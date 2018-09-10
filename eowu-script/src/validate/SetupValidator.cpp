@@ -9,7 +9,6 @@
 #include "validate/Util.hpp"
 #include <algorithm>
 #include <eowu-gl/eowu-gl.hpp>
-#include <unordered_set>
 
 #define EOWU_RESULT_EARLY_RETURN(val) \
   if (!val.success) { \
@@ -20,6 +19,13 @@
   if (!val.success) { \
     val.context = context; \
     return val; \
+  }
+
+#define EOWU_RESULT_ASSIGN_EARLY_RETURN(in, out) \
+  if (!in.success) { \
+    out.message = in.message; \
+    out.context = in.context; \
+    return out; \
   }
 
 //
@@ -118,24 +124,40 @@ eowu::ValidationResult eowu::validate::setup(const eowu::schema::Setup &schema,
 eowu::ValidationResult eowu::validate::states(const eowu::schema::States &schema) {
   eowu::ValidationResult result;
   
-  std::unordered_set<std::string> visited;
+  std::unordered_set<std::string> visited_render_functions;
+  std::unordered_set<std::string> visited_flip_functions;
+  std::unordered_set<std::string> visited_state_ids;
   
-  //  ensure render functions don't contain duplicates
+  //  ensure render functions + flip functions don't contain duplicates
   for (const auto &it : schema.mapping) {
     const auto &state = it.second;
     const auto &render_functions = state.render_functions;
+    const auto &flip_functions = state.flip_functions;
     
-    for (const auto &func_it : render_functions) {
-      const auto &func_id = func_it.first;
+    const auto context = "State::" + state.state_id;
+    
+    auto render_res = map_check_duplicates(visited_render_functions, render_functions, "render function", context);
+    auto flip_res = map_check_duplicates(visited_flip_functions, flip_functions, "flip function", context);
+    
+    EOWU_RESULT_ASSIGN_EARLY_RETURN(render_res, result);
+    EOWU_RESULT_ASSIGN_EARLY_RETURN(flip_res, result);
+  }
+  
+  //  ensure state ids are unique
+  for (const auto &it : schema.mapping) {
+    const auto &state = it.second;
+    const auto &state_id = state.state_id;
+    
+    const auto context = "State::" + state.state_id;
+    
+    if (visited_state_ids.count(state_id) > 0) {
+      result.message = "Duplicate state id: '" + state_id + "'.";
+      result.context = context;
       
-      if (visited.count(func_id) > 0) {
-        result.message = "Duplicate render function: '" + func_id + "'.";
-        result.context = "State::" + state.state_id;
-        return result;
-      }
-      
-      visited.emplace(func_id);
+      return result;
     }
+    
+    visited_state_ids.emplace(state_id);
   }
   
   result.success = true;

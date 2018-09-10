@@ -44,7 +44,9 @@ private:
   
   void initialize_lua_contexts();
   
-  eowu::RenderFunctionContainerType get_render_functions(const std::string &file);
+  eowu::parser::ParseResult<eowu::schema::States> get_render_state_schema(const std::string &file);
+  eowu::LuaFunctionContainerType get_render_functions(const eowu::schema::States &schema);
+  eowu::LuaFunctionContainerType get_flip_functions(const eowu::schema::States &schema);
   eowu::SetupStatus parse_schemas(const std::string &file);
   eowu::SetupStatus validate_schemas(const eowu::schema::Setup &schema, const std::string &file);
   

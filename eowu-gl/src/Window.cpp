@@ -116,6 +116,14 @@ void eowu::Window::SetPosition(unsigned int x, unsigned int y) {
   glfwSetWindowPos(window, x, y);
 }
 
+void eowu::Window::SetAlias(const std::string &alias) {
+  this->alias = alias;
+}
+
+const std::string& eowu::Window::GetAlias() const {
+  return alias;
+}
+
 
 //
 //  window properties

@@ -67,10 +67,14 @@ public:
   void MakeCurrent() const;
   void Show() const;
   
+  void SetAlias(const std::string &alias);
+  const std::string& GetAlias() const;
+  
   friend void eowu::glfw::window_close_callback(GLFWwindow *window);
   
 private:
   eowu::Identifier id;
+  std::string alias;
   
   GLFWwindow *window;
   GLFWmonitor *monitor;

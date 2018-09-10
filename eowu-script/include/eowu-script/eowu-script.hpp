@@ -17,4 +17,5 @@
 #include "../../src/ScriptWrapper.hpp"
 #include "../../src/Init.hpp"
 #include "../../src/Parser.hpp"
+#include "../../src/Timing.hpp"
 #include "../../src/Validator.hpp"

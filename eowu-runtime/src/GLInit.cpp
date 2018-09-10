@@ -203,6 +203,7 @@ eowu::SetupStatus eowu::init::open_windows(std::shared_ptr<eowu::GLPipeline> gl_
     
     try {
       auto win = context_manager->OpenWindow(open_spec);
+      win->SetAlias(win_id);
       
       window_container->Emplace(win_id, win);
     } catch (const std::exception &e) {

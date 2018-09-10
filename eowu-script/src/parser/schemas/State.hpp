@@ -15,7 +15,7 @@
 namespace eowu {
   namespace schema {
     
-    using RenderFunctionAggregateType = std::unordered_map<std::string, luabridge::LuaRef>;
+    using RefFunctionAggregateType = std::unordered_map<std::string, luabridge::LuaRef>;
     
     struct State {
       std::unordered_map<std::string, eowu::data::Struct> variables;
@@ -24,7 +24,8 @@ namespace eowu {
       luabridge::LuaRef loop_function;
       luabridge::LuaRef exit_function;
       
-      eowu::schema::RenderFunctionAggregateType render_functions;
+      eowu::schema::RefFunctionAggregateType render_functions;
+      eowu::schema::RefFunctionAggregateType flip_functions;
       
       std::string state_id;
       

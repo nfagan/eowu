@@ -37,6 +37,11 @@ namespace eowu {
       };
       
       template<>
+      struct flag_type<eowu::u8> {
+        static constexpr eowu::u32 value = 1u << 2u;
+      };
+      
+      template<>
       struct flag_type<const char> {
         static constexpr eowu::u32 value = 1u << 3u;
       };

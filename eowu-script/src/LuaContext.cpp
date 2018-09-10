@@ -6,7 +6,6 @@
 //
 
 #include "LuaContext.hpp"
-#include "LuaFunction.hpp"
 
 eowu::LuaContext::LuaContext() {
   lua_state = nullptr;
@@ -22,9 +21,4 @@ lua_State* eowu::LuaContext::GetState() const {
 
 void eowu::LuaContext::SetState(lua_State *L) {
   lua_state = L;
-}
-
-void eowu::LuaContext::Call(const eowu::LuaFunction &other) const {
-  std::unique_lock<std::mutex> lock(mut);
-  other.Call();
 }

@@ -25,8 +25,8 @@ namespace eowu {
   class StateManager;
   using StateWrapperMapType = std::unordered_map<std::string, std::shared_ptr<eowu::StateWrapper>>;
   using StateWrapperContainerType = std::unique_ptr<eowu::StateWrapperMapType>;
-  using RenderFunctionMapType = std::unordered_map<std::string, LuaFunction>;
-  using RenderFunctionContainerType = std::unique_ptr<RenderFunctionMapType>;
+  using LuaFunctionMapType = std::unordered_map<std::string, LuaFunction>;
+  using LuaFunctionContainerType = std::unique_ptr<LuaFunctionMapType>;
   
   namespace schema {
     struct States;
@@ -37,7 +37,8 @@ namespace eowu {
                                                std::shared_ptr<eowu::LuaContext> lua_context,
                                                eowu::StateManager &state_manager);
     
-    eowu::RenderFunctionContainerType get_render_functions(const eowu::schema::States &schema);
+    eowu::LuaFunctionContainerType get_render_functions(const eowu::schema::States &schema);
+    eowu::LuaFunctionContainerType get_flip_functions(const eowu::schema::States &schema);
     
     void init_state_schema(lua_State *L);
     void init_render_schema(lua_State *L);

@@ -8,6 +8,7 @@
 #include "SetupParser.hpp"
 #include "ParseUtil.hpp"
 #include "Lua.hpp"
+#include "../LuaFunction.hpp"
 #include "../data/conversion.hpp"
 
 namespace util {
@@ -58,10 +59,35 @@ eowu::parser::ParseResult<eowu::schema::Setup> eowu::parser::setup(const luabrid
   EOWU_PARSER_EARLY_RETURN(states, states_, ssref, "States", eowu::parser::states);
   //  Sources
   EOWU_PARSER_EARLY_RETURN(sources, sources_, source_ref, "Sources", eowu::parser::sources);
+  //  Paths
+  EOWU_PARSER_EARLY_RETURN(paths, paths_, paths_ref, "Paths", eowu::parser::paths);
   
   result.success = true;
   
   return result;  
+}
+
+//
+//  paths
+//
+
+eowu::parser::ParseResult<eowu::schema::Paths> eowu::parser::paths(const luabridge::LuaRef &table) {
+  eowu::parser::ParseResult<eowu::schema::Paths> result;
+  
+  auto kv = get_string_map_from_table(table);
+  
+  try {
+    result.result.data = get_string_or_error(kv, "Data");
+  } catch (const std::exception &e) {
+    result.message = e.what();
+    result.context = "Paths";
+    
+    return result;
+  }
+  
+  result.success = true;
+  
+  return result;
 }
 
 //
@@ -398,12 +424,15 @@ eowu::parser::ParseResult<eowu::schema::State> eowu::parser::state(const luabrid
   
   auto kv = get_string_map_from_table(table);
   
+  //  global noop function
+  const auto &noop = eowu::LuaFunction::get_no_op(table.state()).GetReference();
+  
   try {
+    result.result.state_id = eowu::parser::get_string_or_error(kv, "Name");
     result.result.duration = eowu::parser::get_numeric_value_or<double>(kv, "Duration", 0.0);
     result.result.entry_function = eowu::parser::get_function_or_error(kv, "Entry");
-    result.result.loop_function = eowu::parser::get_function_or_error(kv, "Loop");
-    result.result.exit_function = eowu::parser::get_function_or_error(kv, "Exit");
-    result.result.state_id = eowu::parser::get_string_or_error(kv, "Name");
+    result.result.loop_function = eowu::parser::get_function_or_type_error(kv, "Loop", noop);
+    result.result.exit_function = eowu::parser::get_function_or_type_error(kv, "Exit", noop);
     result.result.is_first = eowu::parser::get_numeric_value_or<int>(kv, "First", 0);
     
     if (kv.count("Variables") > 0) {
@@ -413,25 +442,27 @@ eowu::parser::ParseResult<eowu::schema::State> eowu::parser::state(const luabrid
     
     if (kv.count("Render") > 0) {
       const luabridge::LuaRef &render_function_refs = kv.at("Render");
-      
-      if (!render_function_refs.isTable()) {
-        result.message = eowu::parser::get_type_error_message("Render", "table");
-        result.context = "Render";
-        return result;
-      }
-      
-      auto render_func_result = eowu::parser::render_functions(render_function_refs);
+      auto render_func_result = eowu::parser::function_aggregate(render_function_refs, "Render");
       
       if (!render_func_result.success) {
         result.message = render_func_result.message;
-        result.context = "Render";
-        
         return result;
       }
       
       result.result.render_functions = render_func_result.result;
     }
     
+    if (kv.count("Flip") > 0) {
+      const luabridge::LuaRef &flip_function_refs = kv.at("Flip");
+      auto flip_func_result = eowu::parser::function_aggregate(flip_function_refs, "Flip");
+      
+      if (!flip_func_result.success) {
+        result.message = flip_func_result.message;
+        return result;
+      }
+      
+      result.result.flip_functions = flip_func_result.result;
+    }
   } catch (const std::exception &e) {
     result.message = e.what();
     result.context = "States::" + result.result.state_id;
@@ -448,12 +479,18 @@ eowu::parser::ParseResult<eowu::schema::State> eowu::parser::state(const luabrid
 //  render functions
 //
 
-eowu::parser::ParseResult<eowu::schema::RenderFunctionAggregateType> eowu::parser::render_functions(const luabridge::LuaRef &table) {
-  
+eowu::parser::ParseResult<eowu::schema::RefFunctionAggregateType> eowu::parser::function_aggregate(const luabridge::LuaRef &table,
+                                                                                                   const std::string &key) {
   using namespace eowu::parser;
   using namespace eowu::schema;
   
-  ParseResult<RenderFunctionAggregateType> result;
+  ParseResult<RefFunctionAggregateType> result;
+  
+  if (!table.isTable()) {
+    result.message = eowu::parser::get_type_error_message(key, "table");
+    result.context = key;
+    return result;
+  }
   
   auto kv = get_string_map_from_table(table);
   
@@ -463,7 +500,7 @@ eowu::parser::ParseResult<eowu::schema::RenderFunctionAggregateType> eowu::parse
       
       if (!func.isFunction()) {
         result.message = eowu::parser::get_type_error_message(it.first, "function");
-        result.context = "Render";
+        result.context = key;
         return result;
       }
       
@@ -471,7 +508,7 @@ eowu::parser::ParseResult<eowu::schema::RenderFunctionAggregateType> eowu::parse
       
     } catch (const std::exception &e) {
       result.message = e.what();
-      result.context = "Render";
+      result.context = key;
       
       return result;
     }

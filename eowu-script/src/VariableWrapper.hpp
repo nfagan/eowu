@@ -18,14 +18,15 @@ class eowu::VariableWrapper {
   using VariableDataType = eowu::data::Commitable*;
   
 public:
-  VariableWrapper(VariableDataType data);
+  VariableWrapper(VariableDataType data, VariableDataType default_value);
   
   void Commit();
+  void Reset();
   int Get(lua_State *L);
   int Set(lua_State *L);
   
   static void CreateLuaSchema(lua_State *L);
 private:
-  
   VariableDataType data;
+  VariableDataType default_value;
 };

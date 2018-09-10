@@ -21,11 +21,18 @@
 #include <iostream>
 #endif
 
+namespace priv {
+  static void buffer_swap_noop(const eowu::WindowType &win) {
+    //
+  }
+}
+
 eowu::Renderer::Renderer() {
   this->projection_type = eowu::projection_types::orthographic;
   this->last_program = nullptr;
   this->last_mesh = nullptr;
   this->clear_color = glm::vec3(0.0);
+  this->on_buffer_swap = &priv::buffer_swap_noop;
 }
 
 void eowu::Renderer::ClearQueue() {
@@ -95,6 +102,7 @@ void eowu::Renderer::draw(eowu::WindowType window) {
   }
   
   window->SwapBuffers();
+  on_buffer_swap(window);
   
   last_window = window;
 }
@@ -235,4 +243,10 @@ glm::mat4 eowu::Renderer::get_projection_matrix(eowu::WindowType window) const {
   } else {
     throw eowu::NotImplementedError("Non-orthographic projections not yet implemented.");
   }
+}
+
+void eowu::Renderer::SetOnBufferSwap(const eowu::BufferSwapCallbackType &cb) {
+  std::lock_guard<std::mutex> guard(mut);
+  
+  on_buffer_swap = cb;
 }

@@ -14,6 +14,7 @@
 #include "State.hpp"
 #include "Targets.hpp"
 #include "Source.hpp"
+#include "Paths.hpp"
 
 namespace eowu {
   namespace schema {
@@ -31,6 +32,7 @@ namespace eowu {
       eowu::schema::Targets targets;
       eowu::schema::Stimuli stimuli;
       eowu::schema::Sources sources;
+      eowu::schema::Paths paths;
     };
   }
 }

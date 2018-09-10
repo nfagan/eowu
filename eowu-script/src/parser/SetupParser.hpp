@@ -23,6 +23,7 @@ namespace eowu {
     ParseResult<eowu::schema::Windows> windows(const luabridge::LuaRef &table);
     ParseResult<eowu::schema::Geometry> geometry(const luabridge::LuaRef &table);
     ParseResult<eowu::schema::Textures> textures(const luabridge::LuaRef &table);
+    ParseResult<eowu::schema::Paths> paths(const luabridge::LuaRef &table);
     
     ParseResult<eowu::schema::Stimulus> stimulus(const luabridge::LuaRef &table,
                                                  const std::string &stimulus_id);
@@ -39,6 +40,6 @@ namespace eowu {
     ParseResult<eowu::schema::State> state(const luabridge::LuaRef &table);
     ParseResult<eowu::schema::States> states(const luabridge::LuaRef &table);
     
-    ParseResult<eowu::schema::RenderFunctionAggregateType> render_functions(const luabridge::LuaRef &table);
+    ParseResult<eowu::schema::RefFunctionAggregateType> function_aggregate(const luabridge::LuaRef &table, const std::string &key);
   }
 }

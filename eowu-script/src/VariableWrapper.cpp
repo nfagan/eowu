@@ -10,8 +10,8 @@
 #include "Error.hpp"
 #include "data/conversion.hpp"
 
-eowu::VariableWrapper::VariableWrapper(eowu::VariableWrapper::VariableDataType data_) :
-data(data_) {
+eowu::VariableWrapper::VariableWrapper(eowu::VariableWrapper::VariableDataType data_, eowu::VariableWrapper::VariableDataType default_value_) :
+data(data_), default_value(default_value_) {
   //
 }
 
@@ -46,6 +46,16 @@ int eowu::VariableWrapper::Set(lua_State *L) {
   return 0;
 }
 
+void eowu::VariableWrapper::Reset() {
+  data->Uncommit();
+  
+  const auto setter = [&](auto &use) -> void {
+    data->Set(use);
+  };
+  
+  default_value->Use(setter);
+}
+
 void eowu::VariableWrapper::Commit() {
   data->Commit();
 }
@@ -57,6 +67,7 @@ void eowu::VariableWrapper::CreateLuaSchema(lua_State *L) {
   .addFunction("Commit", &eowu::VariableWrapper::Commit)
   .addCFunction("Set", &eowu::VariableWrapper::Set)
   .addCFunction("Get", &eowu::VariableWrapper::Get)
+  .addFunction("Reset", &eowu::VariableWrapper::Reset)
   .endClass()
   .endNamespace();
 }
