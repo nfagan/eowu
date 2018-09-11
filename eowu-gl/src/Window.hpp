@@ -29,6 +29,7 @@ namespace eowu {
     unsigned int height;
     unsigned int index;
     bool is_fullscreen;
+    bool is_resizeable;
     std::string title;
     
     WindowProperties();

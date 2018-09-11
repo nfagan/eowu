@@ -17,6 +17,7 @@ namespace eowu {
   class GLPipeline;
   class RendererWrapper;
   class LuaFunction;
+  class LockedLuaRenderFunctions;
   class ModelWrapper;
   class StateWrapper;
   
@@ -40,21 +41,18 @@ public:
   void SetGLPipeline(std::shared_ptr<eowu::GLPipeline> pipeline);
   void SetRenderFunctions(eowu::LuaFunctionContainerType render_functions);
   void SetFlipFunctions(eowu::LuaFunctionContainerType render_functions);
-  void SetLuaRenderFunction(std::shared_ptr<eowu::LuaFunction> lua_render_function);
-  void SetLuaFlipFunction(std::shared_ptr<eowu::LuaFunction> lua_flip_function);
+  void SetLuaRenderFunctionPair(std::shared_ptr<eowu::LockedLuaRenderFunctions> lua_render_functions);
   
   bool IsComplete() const;
   
-  void SetActiveRenderFunction(const std::string &id);
-  void SetActiveFlipFunction(const std::string &id);
+  void SetRenderFunctionPair(const std::string &render_id, const std::string &flip_id);
   eowu::StateWrapper* GetStateWrapper(const std::string &id) const;
   eowu::RendererWrapper GetRendererWrapper() const;
   eowu::ModelWrapper GetModelWrapper(const std::string &id) const;
   
   void CommitData() const;
   
-  static std::shared_ptr<eowu::LuaFunction> LuaRenderFunction;
-  static std::shared_ptr<eowu::LuaFunction> LuaFlipFunction;
+  static std::shared_ptr<eowu::LockedLuaRenderFunctions> LuaRenderThreadFunctions;
   //  public for now
   static std::shared_ptr<eowu::data::Store> task_data_store;
   

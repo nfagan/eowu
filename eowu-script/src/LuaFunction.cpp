@@ -15,15 +15,19 @@ did_call(false), function_reference(ref) {
 }
 
 eowu::LuaFunction::LuaFunction(const eowu::LuaFunction &other) :
-did_call(other.did_call.load()), function_reference(other.function_reference) {
+did_call(other.did_call.load()), function_reference(other.GetReference()) {
   //
 }
 
 void eowu::LuaFunction::Set(const eowu::LuaFunction &other) {
+  std::unique_lock<std::recursive_mutex> lock(other.mut);
+  
   Set(other.function_reference);
 }
 
 const luabridge::LuaRef& eowu::LuaFunction::GetReference() const {
+  std::unique_lock<std::recursive_mutex> lock(mut);
+  
   return function_reference;
 }
 
@@ -41,6 +45,14 @@ void eowu::LuaFunction::Set(const luabridge::LuaRef &ref) {
   function_reference = ref;
   
   did_call = false;
+}
+
+bool eowu::LuaFunction::IsValid() const {
+  std::unique_lock<std::recursive_mutex> lock(mut);
+  
+  bool res = function_reference.isFunction();
+  
+  return res;
 }
 
 void eowu::LuaFunction::AbortCall() {

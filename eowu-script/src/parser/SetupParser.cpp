@@ -119,6 +119,7 @@ eowu::parser::ParseResult<eowu::schema::Windows> eowu::parser::windows(const lua
     window.height = get_numeric_value_or<int>(subtable, "height", -1);
     window.index = get_numeric_value_or<unsigned int>(subtable, "index", 0);
     window.full_screen = get_numeric_value_or<unsigned int>(subtable, "fullscreen", 0);
+    window.resizeable = get_numeric_value_or<unsigned int>(subtable, "resizeable", 0);
     window.title = get_string_or_type_error(subtable, "title", id);
     
     result.result.windows.emplace(it.first, window);

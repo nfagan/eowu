@@ -31,7 +31,6 @@ int eowu::Runtime::Main(const std::string &file) {
     return 1;
   }
   
-  
   //  task data store
   auto task_data_store = std::make_shared<eowu::data::Store>();
   eowu::ScriptWrapper::task_data_store = task_data_store;
@@ -47,11 +46,10 @@ int eowu::Runtime::Main(const std::string &file) {
   auto first_state = lua_runtime.GetFirstState();
   auto task_thread = std::thread(eowu::thread::task, std::ref(thread_state), first_state);
   
-  auto &lua_render_function = *eowu::ScriptWrapper::LuaRenderFunction.get();
-  auto &lua_flip_function = *eowu::ScriptWrapper::LuaFlipFunction.get();
+  auto &locked_lua_functions = *eowu::ScriptWrapper::LuaRenderThreadFunctions.get();
   const auto &render_context = lua_runtime.lua_contexts.render;
   
-  eowu::thread::render(thread_state, render_context, lua_render_function, lua_flip_function, gl_pipeline);
+  eowu::thread::render(thread_state, render_context, locked_lua_functions, gl_pipeline);
   
   task_thread.join();
   

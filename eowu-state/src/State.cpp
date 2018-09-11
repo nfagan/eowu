@@ -13,13 +13,9 @@ namespace detail {
   void no_op(eowu::State *state) {}
 }
 
-eowu::State::State(const eowu::StateManager *manager, const std::string &id) {
+eowu::State::State(const eowu::StateManager *manager_, const std::string &id_) :
+manager(manager_), id(id_), next_state(nullptr), called_next(false) {
   set_default_callbacks();
-  this->manager = manager;
-  this->id = id;
-  called_next = false;
-  
-  next_state = nullptr;
 }
 
 eowu::State::State(const eowu::State &other) {
@@ -87,6 +83,10 @@ void eowu::State::Exit() {
 
 eowu::State* eowu::State::GetNext() {
   return next_state;
+}
+
+const std::string& eowu::State::GetId() const {
+  return id;
 }
 
 eowu::State* eowu::State::GetState(const std::string &id) const {

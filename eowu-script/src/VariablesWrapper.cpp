@@ -20,16 +20,14 @@ eowu::VariableWrapper eowu::VariablesWrapper::GetVariable(const std::string &nam
   auto var = &variables->at(name);
   auto dflt = &defaults->at(name);
   
-  eowu::VariableWrapper wrapper(var, dflt);
-  
-  return wrapper;
+  return eowu::VariableWrapper(var, dflt);
 }
 
 void eowu::VariablesWrapper::CreateLuaSchema(lua_State *L) {
   luabridge::getGlobalNamespace(L)
   .beginNamespace(eowu::constants::eowu_namespace)
   .beginClass<eowu::VariablesWrapper>("_Variables")
-  .addFunction("Field", &eowu::VariablesWrapper::GetVariable)
+//  .addFunction("Field", &eowu::VariablesWrapper::GetVariable)
   .endClass()
   .endNamespace();
 }

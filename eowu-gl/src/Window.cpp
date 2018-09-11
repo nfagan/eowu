@@ -130,22 +130,22 @@ const std::string& eowu::Window::GetAlias() const {
 //
 
 eowu::WindowProperties::WindowProperties() :
-width(0), height(0), index(0), is_fullscreen(true) {
+width(0), height(0), index(0), is_fullscreen(true), is_resizeable(true) {
   //
 }
 
 eowu::WindowProperties::WindowProperties(unsigned int width_, unsigned int height_) :
-width(width_), height(height_), index(0), is_fullscreen(false) {
+width(width_), height(height_), index(0), is_fullscreen(false), is_resizeable(true) {
   //
 }
 
 eowu::WindowProperties::WindowProperties(unsigned int index_, unsigned int width_, unsigned int height_) :
-width(width_), height(height_), index(index_), is_fullscreen(false) {
+width(width_), height(height_), index(index_), is_fullscreen(false), is_resizeable(true) {
   //
 }
 
 eowu::WindowProperties::WindowProperties(unsigned int index_) :
-width(0), height(0), index(index_), is_fullscreen(true) {
+width(0), height(0), index(index_), is_fullscreen(true), is_resizeable(false) {
   //
 }
 

@@ -24,29 +24,31 @@ bool eowu::data::Commitable::IsCommitted() const {
 }
 
 void eowu::data::Commitable::Serialize(eowu::serialize::ByteArrayType &into) {
-  std::unique_lock<std::recursive_mutex> lock(mut);
+  std::unique_lock<std::mutex> lock(mut);
   
   eowu::serialize::serialize(value, into);
 }
 
 void eowu::data::Commitable::Use(const std::function<void(const eowu::data::Struct&)> &func) const {
-  std::unique_lock<std::recursive_mutex> lock(mut);
+  std::unique_lock<std::mutex> lock(mut);
   
   func(value);
 }
 
 void eowu::data::Commitable::Set(const eowu::data::Struct &value) {
-  std::unique_lock<std::recursive_mutex> lock(mut);
+  std::unique_lock<std::mutex> lock(mut);
   
   this->value = value;
 }
 
 void eowu::data::Commitable::Uncommit() {
+  std::unique_lock<std::mutex> lock(mut);
+  
   is_committed = false;
 }
 
 void eowu::data::Commitable::Commit() {
-  std::unique_lock<std::recursive_mutex> lock(mut);
+  std::unique_lock<std::mutex> lock(mut);
   
   if (IsCommitted()) {
     throw eowu::AlreadyCommittedError("Attempted to commit an already committed value.");

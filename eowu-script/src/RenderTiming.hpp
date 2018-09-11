@@ -35,7 +35,7 @@ public:
   void IncrementIteration();
   
   eowu::u64 GetIteration() const;
-  double GetCurrentTime(const std::string &for_window);
+  double GetCurrentTime(const std::string &for_window) const;
   
 private:
   mutable std::shared_mutex mut;

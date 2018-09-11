@@ -16,6 +16,7 @@ namespace eowu {
   class State;
   class LuaContext;
   class LuaFunction;
+  class LockedLuaRenderFunctions;
   class GLPipeline;
   class Window;
   
@@ -30,16 +31,18 @@ namespace eowu {
       SharedState();
     };
     
-    void handle_flip(const eowu::WindowContainerType &gl_windows,
-                     eowu::time::RenderTiming &render_time,
-                     const std::shared_ptr<eowu::LuaContext> &lua_context,
-                     eowu::LuaFunction &lua_flip_function);
-    
     void render(eowu::thread::SharedState &state,
                 std::shared_ptr<eowu::LuaContext> lua_context,
-                eowu::LuaFunction &lua_render_function,
-                eowu::LuaFunction &lua_flip_function,
+                eowu::LockedLuaRenderFunctions &lua_render_functions,
                 std::shared_ptr<eowu::GLPipeline> pipeline);
+    
+    bool try_call_render(const std::shared_ptr<eowu::LuaContext> &lua_context,
+                         eowu::LuaFunction *render_function);
+    
+    bool try_call_flip(const std::shared_ptr<eowu::LuaContext> &lua_context,
+                       eowu::LuaFunction *flip_function,
+                       const eowu::WindowContainerType &gl_windows,
+                       const eowu::time::RenderTiming &render_time);
     
     void task(eowu::thread::SharedState &state, eowu::State *first_state);
   }

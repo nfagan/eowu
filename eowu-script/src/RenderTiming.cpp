@@ -17,7 +17,7 @@ eowu::u64 eowu::time::RenderTiming::GetIteration() const {
   return iteration.load();
 }
 
-double eowu::time::RenderTiming::GetCurrentTime(const std::string &for_window) {
+double eowu::time::RenderTiming::GetCurrentTime(const std::string &for_window) const {
   std::shared_lock<std::shared_mutex> lock(mut);
   
   return current_time_seconds.at(for_window);

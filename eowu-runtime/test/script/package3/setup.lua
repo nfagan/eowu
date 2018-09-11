@@ -1,6 +1,7 @@
 local fixation = require('states.fixation')
 local images = require('states.images')
 local new_trial = require('states.new_trial')
+local end_trial = require('states.end_trial')
 
 Setup = {}
 
@@ -10,7 +11,7 @@ Setup.Paths = {
 
 Setup.Windows = {
   main = {
-    width = 300, height = 300, fullscreen = false, index = 0
+    width = 200, height = 200, fullscreen = false
   }
 }
 
@@ -43,4 +44,4 @@ end
 
 Setup.Targets = {}
 
-Setup.States = { fixation, images, new_trial }
+Setup.States = { fixation, images, new_trial, end_trial }

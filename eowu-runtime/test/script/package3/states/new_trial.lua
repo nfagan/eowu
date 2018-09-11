@@ -14,10 +14,9 @@ function state.Entry()
   state:Next('fixation')
 
   local trial = state:Variable('trial')
-
-  script:Commit()
-
+  trial:Uncommit()
   trial:Set(trial:Get() + 1)
+  trial:Commit()
 end
 
 return state

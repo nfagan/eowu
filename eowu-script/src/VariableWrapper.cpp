@@ -15,7 +15,7 @@ data(data_), default_value(default_value_) {
   //
 }
 
-int eowu::VariableWrapper::Get(lua_State *L) {
+int eowu::VariableWrapper::Get(lua_State *L) {  
   const auto functor = [&](const auto& val) {
     eowu::data::to_lua(L, val);
   };
@@ -47,17 +47,20 @@ int eowu::VariableWrapper::Set(lua_State *L) {
 }
 
 void eowu::VariableWrapper::Reset() {
-  data->Uncommit();
-  
-  const auto setter = [&](auto &use) -> void {
+  const auto user = [&](auto &use) -> void {
+    data->Uncommit();
     data->Set(use);
   };
   
-  default_value->Use(setter);
+  default_value->Use(user);
 }
 
 void eowu::VariableWrapper::Commit() {
   data->Commit();
+}
+
+void eowu::VariableWrapper::Uncommit() {
+  data->Uncommit();
 }
 
 void eowu::VariableWrapper::CreateLuaSchema(lua_State *L) {
@@ -65,6 +68,7 @@ void eowu::VariableWrapper::CreateLuaSchema(lua_State *L) {
   .beginNamespace(eowu::constants::eowu_namespace)
   .beginClass<eowu::VariableWrapper>("_Variable")
   .addFunction("Commit", &eowu::VariableWrapper::Commit)
+  .addFunction("Uncommit", &eowu::VariableWrapper::Uncommit)
   .addCFunction("Set", &eowu::VariableWrapper::Set)
   .addCFunction("Get", &eowu::VariableWrapper::Get)
   .addFunction("Reset", &eowu::VariableWrapper::Reset)

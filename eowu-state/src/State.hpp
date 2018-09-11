@@ -46,6 +46,7 @@ public:
   void Exit();
   void Next(eowu::State *state);
   
+  const std::string& GetId() const;
   eowu::State* GetState(const std::string &id) const;
   eowu::State* GetNext();
   const eowu::Timer& GetTimer() const;
@@ -56,11 +57,10 @@ private:
   eowu::Timer timer;
   
   const eowu::StateManager *manager;
+  std::string id;
   eowu::State* next_state;
   
   bool called_next;
-  
-  std::string id;
   
   std::vector<eowu::ExitConditionType> persistent_exit_conditions;
   

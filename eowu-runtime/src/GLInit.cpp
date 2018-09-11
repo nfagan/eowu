@@ -194,8 +194,10 @@ eowu::SetupStatus eowu::init::open_windows(std::shared_ptr<eowu::GLPipeline> gl_
     eowu::WindowProperties open_spec;
     
     bool is_fullscreen = input_spec.full_screen;
+    bool is_resizeable = input_spec.resizeable;
     
     open_spec.is_fullscreen = is_fullscreen;
+    open_spec.is_resizeable = is_resizeable;
     open_spec.index = input_spec.index;
     open_spec.width = input_spec.width;
     open_spec.height = input_spec.height;

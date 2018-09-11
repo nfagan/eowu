@@ -39,7 +39,7 @@ public:
                std::shared_ptr<eowu::LuaContext> context,
                std::unique_ptr<eowu::LuaStateFunctions> state_functions);
   
-  eowu::VariableWrapper GetVariable(const std::string &name);
+  eowu::VariableWrapper* GetVariable(const std::string &name);
   
   void Write(eowu::serialize::ByteArrayType &into) const;
   
@@ -54,8 +54,11 @@ private:
   eowu::State *state;
   std::unordered_map<std::string, eowu::data::Commitable> active_variables;
   std::unordered_map<std::string, eowu::data::Commitable> default_variables;
+  std::unordered_map<std::string, eowu::VariableWrapper> variable_wrappers;
+  
   std::shared_ptr<eowu::LuaContext> lua_context;
   std::unique_ptr<eowu::LuaStateFunctions> state_functions;
   
   void setup_state_callbacks();
+  void setup_variable_wrappers();
 };

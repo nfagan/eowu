@@ -15,7 +15,8 @@ int main(int argc, char** argv) {
   std::string file;
   
   if (argc < 2) {
-    file = "/Users/Nick/repositories/cpp/eowu/eowu-runtime/test/script/brief-valid-schema.lua";
+    std::cout << "Enter a path to a file to run." << std::endl << std::endl;
+    return 0;
   } else {
     file = argv[1];
   }

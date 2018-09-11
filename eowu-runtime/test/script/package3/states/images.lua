@@ -15,15 +15,31 @@ state.Variables = {
   }
 }
 
+local printed_time = false
+local last_t = nil
+
 function state.Entry()
   local script = eowu_script()
   local state = script:State('images')
   local timing = state:Variable('state_time')
 
-  state:Next('new_trial')
-  script:Render('default')
+  state:Next('1')
+  last_t = state:Ellapsed()
+  printed_time = false
+  script:Render('image', 'image')
+
   state:Variable('image_onset'):Reset()
   state:Variable('state_time'):Reset()
+end
+
+function state.Loop()
+  if not printed_time then
+    local script = eowu_script()
+    local state = script:State('images')
+    print('Time waiting to render: ', (state:Ellapsed() - last_t)*1000, 'ms')
+    printed_time = true
+    last_t = state:Ellapsed()
+  end
 end
 
 function state.Exit()
@@ -31,6 +47,8 @@ function state.Exit()
   local state = script:State('images')
   local image = state:Variable('image_onset')
   local timing = state:Variable('state_time')
+
+  while not image:Get().logged do end
 
   image:Commit()
 
@@ -41,17 +59,14 @@ function state.Exit()
   timing:Commit()
 end
 
-local function render_default()
+--  render functions
+
+local function render()
   local script = eowu_script()
   local stim = script:Stimulus('sq')
 
-  --  it's important to set the flip
-  --  function within the render function
-  script:Flip('default')
-
   stim:Units('normalized')
-  stim:Texture('first')
-  stim:Position({0.5, 0.5})
+  stim:Color({1, 1, 1})
 
   local rot = stim.rotation
   local sz = stim.size
@@ -62,34 +77,34 @@ local function render_default()
   stim:Draw()
 end
 
-local function flip_default(id, time)
-  if not id == 'main' then return end
+--  flip functions: called after render function
+
+local function flip(id, time)
+  if id ~= 'main' then return end
 
   local script = eowu_script()
   local state = script:State('images')
   local image = state:Variable('image_onset')
   local val = image:Get()
 
-  if not val.logged then
-    print('logging')
+  if val.logged then return end
 
-    image:Set({
-      time = time,
-      logged = true,
-      another = false,
-      nested = {
-        a = 'a', c = {'another one', 'another one'}
-      },
-    })
-  end
+  image:Set({
+    time = time,
+    logged = true,
+    another = false,
+    nested = {
+      a = 'a', c = {'another one', 'another one'}
+    },
+  })
 end
 
 state.Render = {
-  default = render_default
+  image = render
 }
 
 state.Flip = {
-  default = flip_default
+  image = flip
 }
 
 return state

@@ -21,12 +21,14 @@ public:
   VariableWrapper(VariableDataType data, VariableDataType default_value);
   
   void Commit();
+  void Uncommit();
   void Reset();
   int Get(lua_State *L);
   int Set(lua_State *L);
   
   static void CreateLuaSchema(lua_State *L);
 private:
+  
   VariableDataType data;
   VariableDataType default_value;
 };

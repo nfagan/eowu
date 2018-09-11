@@ -500,8 +500,8 @@ std::string eowu::parser::get_string_or_error(const eowu::parser::MapTableType &
 //  function
 //
 
-luabridge::LuaRef eowu::parser::get_function_or_error(const eowu::parser::MapTableType &table,
-                                                      const std::string &key) {
+const luabridge::LuaRef& eowu::parser::get_function_or_error(const eowu::parser::MapTableType &table,
+                                                             const std::string &key) {
   if (table.count(key) == 0) {
     throw eowu::ScriptParseError("Missing key: " + key);
   }
@@ -515,9 +515,9 @@ luabridge::LuaRef eowu::parser::get_function_or_error(const eowu::parser::MapTab
   return ref;
 }
 
-luabridge::LuaRef eowu::parser::get_function_or_type_error(const eowu::parser::MapTableType &table,
-                                                           const std::string &key,
-                                                           const luabridge::LuaRef &dflt) {
+const luabridge::LuaRef& eowu::parser::get_function_or_type_error(const eowu::parser::MapTableType &table,
+                                                                  const std::string &key,
+                                                                  const luabridge::LuaRef &dflt) {
   if (table.count(key) == 0) {
     return dflt;
   }

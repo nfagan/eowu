@@ -52,9 +52,9 @@ namespace eowu {
                                                     const std::vector<T> &dflt,
                                                     int size_spec = -1);
     
-    luabridge::LuaRef get_function_or_error(const eowu::parser::MapTableType &table,
-                                            const std::string &key);
-    luabridge::LuaRef get_function_or_type_error(const eowu::parser::MapTableType &table,
+    const luabridge::LuaRef& get_function_or_error(const eowu::parser::MapTableType &table,
+                                                   const std::string &key);
+    const luabridge::LuaRef& get_function_or_type_error(const eowu::parser::MapTableType &table,
                                                         const std::string &key,
                                                         const luabridge::LuaRef &dflt);
     

@@ -39,7 +39,7 @@ public:
   void Use(const std::function<void(const eowu::data::Struct&)> &func) const;
   
 private:
-  mutable std::recursive_mutex mut;
+  mutable std::mutex mut;
   
   std::atomic<bool> is_committed;
   eowu::data::Struct value;

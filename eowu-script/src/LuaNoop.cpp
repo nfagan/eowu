@@ -27,16 +27,18 @@ const eowu::LuaFunction& eowu::LuaNoop::make_no_op(lua_State *L) {
   std::string full_noop = std::string("function ") + eowu::constants::eowu_noop_name + "() end";
   
   const char* const buff = full_noop.c_str();
+  
+  //  insert the no op into the global namespace and register it
   int error = luaL_loadbuffer(L, buff, strlen(buff), "line") || lua_pcall(L, 0, 0, 0);
   
   assert(error == 0);
   
+  //  get the evaluated global as a lua reference
   luabridge::LuaRef no_op_global = luabridge::getGlobal(L, eowu::constants::eowu_noop_name);
   
   assert(no_op_global.isFunction());
   
   auto func = std::make_unique<eowu::LuaFunction>(no_op_global);
-  
   eowu::LuaNoop::no_ops.emplace(L, std::move(func));
   
   return *eowu::LuaNoop::no_ops.at(L).get();

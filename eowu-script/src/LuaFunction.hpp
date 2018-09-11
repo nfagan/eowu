@@ -23,6 +23,8 @@ public:
   void Set(const eowu::LuaFunction &other);
   void Set(const luabridge::LuaRef &func);
   
+  bool IsValid() const;
+  
   const luabridge::LuaRef& GetReference() const;
   
   void AbortCall();
@@ -36,7 +38,6 @@ private:
   mutable std::recursive_mutex mut;
   
   std::atomic<bool> did_call;
-  
   luabridge::LuaRef function_reference;
 };
 

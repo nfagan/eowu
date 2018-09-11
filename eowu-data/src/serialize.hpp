@@ -24,6 +24,8 @@ namespace eowu {
     template<typename T>
     void serialize(const std::vector<T> &value, eowu::serialize::ByteArrayType &into, eowu::u32 flag = 0u);
     
+    void unsafe_nest_aggregate(const std::string &name, std::size_t len, eowu::serialize::ByteArrayType &into, eowu::u32 flag = 0u);
+    
     namespace priv {
       template<typename T>
       void scalar(T value, eowu::serialize::ByteArrayType &into, eowu::u32 flag = 0u);

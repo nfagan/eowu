@@ -8,6 +8,13 @@
 #include "Serialize.hpp"
 #include <cstddef>
 
+void eowu::serialize::unsafe_nest_aggregate(const std::string &name, std::size_t len, eowu::serialize::ByteArrayType &into, eowu::u32 flag) {
+  auto aggregate_flag = flag | eowu::serialize::constants::aggregate;
+  
+  eowu::serialize::serialize(name, into, aggregate_flag);
+  eowu::serialize::priv::nd_array(len, into, flag | eowu::serialize::constants::aggregate);
+}
+
 void eowu::serialize::serialize(const std::vector<std::string> &value, eowu::serialize::ByteArrayType &into, eowu::u32 flag) {
   const eowu::u32 use_flag = flag | eowu::serialize::constants::flag_type<std::string>::value;
   

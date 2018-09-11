@@ -79,17 +79,58 @@ chunk = struct();
 
 for i = 1:len
   v = read_chunk( fid, constants );
-  f = fieldnames( v );
-  chunk.(f{1}) = v.(f{1});
+  
+  if ( isstruct(v) )
+    f = fieldnames( v );
+    ff = f{1};
+      
+    if ( isstruct(chunk) )
+      chunk.(ff) = v.(ff);
+    else
+      chunk(ff) = v.(ff);      
+    end
+    
+  else
+    f = keys( v );
+    ff = f{1};
+    
+    if ( isstruct(chunk) )
+      tmp = containers.Map();
+      chunk = struct_to_map( tmp, chunk );
+    end
+    
+    chunk(ff) = v(ff);
+    
+  end
+end
+
+end
+
+function map = struct_to_map(map, s)
+
+f = fieldnames( s );
+
+for i = 1:numel(f)
+  map(f{i}) = s.(f{i});
 end
 
 end
 
 function chunk = read_aggregate( fid, constants )
 
-chunk = struct();
 fieldname = read_char_array( fid );
-chunk.(fieldname) = read_chunk( fid, constants );
+
+if ( isvarname(fieldname) )
+  chunk = struct();
+  chunk.(fieldname) = read_chunk( fid, constants );
+else
+  warning( ['The fieldname "%s" is not a valid Matlab variable name;' ...
+    , ' this data aggregate will be loaded as a containers.Map object,' ...
+    , ' instead of a struct.'], fieldname );
+  
+  chunk = containers.Map();
+  chunk(fieldname) = read_chunk( fid, constants );
+end
 
 end
 

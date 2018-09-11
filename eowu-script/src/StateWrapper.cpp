@@ -31,23 +31,31 @@ eowu::StateWrapper::StateWrapper(eowu::State *state_,
 state(state_), active_variables(variables_), default_variables(variables_),
 lua_context(context), state_functions(std::move(state_functions_)) {
   setup_state_callbacks();
+  setup_variable_wrappers();
 }
 
-eowu::VariableWrapper eowu::StateWrapper::GetVariable(const std::string &name) {
-  auto it = active_variables.find(name);
+eowu::VariableWrapper* eowu::StateWrapper::GetVariable(const std::string &name) {
+  auto it = variable_wrappers.find(name);
   
-  if (it == active_variables.end()) {
+  if (it == variable_wrappers.end()) {
     throw eowu::LuaError("Reference to non-existent variable: '" + name + "'.");
   }
   
-  eowu::data::Commitable* variable = &it->second;
-  eowu::data::Commitable* default_value = &default_variables.at(name);
-  eowu::VariableWrapper wrapper(variable, default_value);
-  
-  return wrapper;
+  return &it->second;
 }
 
 void eowu::StateWrapper::Write(eowu::serialize::ByteArrayType &into) const {
+  eowu::u64 sz = 0;
+  
+  for (const auto &it : active_variables) {
+    if (it.second.IsCommitted()) {
+      sz += 1;
+    }
+  }
+  
+  //  nest variables under the state id namespace
+  eowu::serialize::unsafe_nest_aggregate(state->GetId(), sz, into);
+  
   for (const auto &it : active_variables) {
     const auto &var = it.second;
     
@@ -78,6 +86,18 @@ void eowu::StateWrapper::SetDuration(int duration) {
 
 void eowu::StateWrapper::SetNextState(const std::string &next) {
   state->Next(state->GetState(next));
+}
+
+void eowu::StateWrapper::setup_variable_wrappers() {
+  for (auto &it : active_variables) {
+    const std::string &id = it.first;
+    auto *active_value = &it.second;
+    auto *default_value = &default_variables.at(id);
+    
+    eowu::VariableWrapper wrapper(active_value, default_value);
+    
+    variable_wrappers.emplace(id, wrapper);
+  }
 }
 
 void eowu::StateWrapper::setup_state_callbacks() {

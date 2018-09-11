@@ -98,29 +98,20 @@ bool eowu::LuaRuntime::InitializeSchema(const std::string &file) {
 void eowu::LuaRuntime::InitializeScriptWrapper(const std::string &file,
                                                std::shared_ptr<eowu::GLPipeline> gl_pipeline) {
   
-  //
-  //  extract render functions
-  //
-  
-  const auto lua_state = lua_contexts.render->GetState();
-  const auto &lua_noop = LuaFunction::get_no_op(lua_state);
-  
   const auto render_state_schema = get_render_state_schema(file);
   assert(render_state_schema.success);
-  
-  auto default_render_function = std::make_shared<eowu::LuaFunction>(lua_noop);
-  auto default_flip_function = std::make_shared<eowu::LuaFunction>(lua_noop);
   
   auto render_functions = get_render_functions(render_state_schema.result);
   auto flip_functions = get_flip_functions(render_state_schema.result);
   auto states = init::get_states(setup_schema.states, lua_contexts.task, state_manager);
   
+  auto lua_render_functions = std::make_shared<eowu::LockedLuaRenderFunctions>(nullptr, nullptr);
+  
   script_wrapper.SetStateWrapperContainer(std::move(states));
   script_wrapper.SetGLPipeline(gl_pipeline);
-  script_wrapper.SetLuaRenderFunction(default_render_function);
-  script_wrapper.SetLuaFlipFunction(default_flip_function);
   script_wrapper.SetRenderFunctions(std::move(render_functions));
   script_wrapper.SetFlipFunctions(std::move(flip_functions));
+  script_wrapper.SetLuaRenderFunctionPair(lua_render_functions);
 }
 
 eowu::State* eowu::LuaRuntime::GetFirstState() {

@@ -16,9 +16,7 @@ void eowu::test::test_noop_insert() {
   lua_State *L = luaL_newstate();
   luaL_openlibs(L);
   
-  auto lua_func = eowu::LuaFunction::get_no_op(L);
+  eowu::LuaFunction lua_func(eowu::LuaFunction::get_no_op(L));
   
   EOWU_ASSERT_NOTHROW(lua_func.Call(), "Calling global no-op succeeded", "Calling global-noop threw error: ");
-  
-    
 }

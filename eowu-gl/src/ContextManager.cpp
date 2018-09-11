@@ -88,6 +88,8 @@ eowu::WindowType eowu::ContextManager::OpenWindow(const eowu::WindowProperties &
     other = windows[0]->window;
   }
   
+  glfwWindowHint(GLFW_RESIZABLE, props.is_resizeable);
+  
   const char* const title = props.title.c_str();
   
   if (props.is_fullscreen) {

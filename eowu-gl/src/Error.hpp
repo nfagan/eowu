@@ -28,7 +28,11 @@ namespace eowu {
   EOWU_GENERIC_ERROR(TextureLoadError);
   EOWU_GENERIC_ERROR(IncompleteModelError);
   
-  EOWU_GENERIC_ERROR(NonexistentResourceError);
+  class NonexistentResourceError : public std::runtime_error {
+  public:
+    NonexistentResourceError(const std::string &msg) : std::runtime_error(msg) {}
+    static NonexistentResourceError MessageKindId(const std::string &kind, const std::string &id);
+  };
   
   EOWU_GENERIC_ERROR(InteralContextError);
   EOWU_GENERIC_ERROR(UnrecognizedLabelError);
