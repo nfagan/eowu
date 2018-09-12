@@ -18,7 +18,7 @@ namespace eowu {
     using RefFunctionAggregateType = std::unordered_map<std::string, luabridge::LuaRef>;
     
     struct State {
-      std::unordered_map<std::string, eowu::data::Struct> variables;
+      std::unordered_map<std::string, eowu::data::Commitable> variables;
       
       luabridge::LuaRef entry_function;
       luabridge::LuaRef loop_function;

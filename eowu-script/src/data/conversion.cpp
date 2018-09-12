@@ -133,7 +133,12 @@ void eowu::data::priv::from_lua(const std::string &name, const luabridge::LuaRef
       
       to->value = fields;
     }
-  } else {
-    throw eowu::DataConversionError("No viable conversion from the provided Lua type.");
+  } else {    
+    throw eowu::DataConversionError(priv::get_invalid_type_error_message(from));
   }
+}
+
+std::string eowu::data::priv::get_invalid_type_error_message(const luabridge::LuaRef &from) {
+  const char *type_name = lua_typename(from.state(), from.type());
+  return "No viable conversion to variable-data from the provided Lua type: '" + std::string(type_name) + "'.";
 }

@@ -317,7 +317,10 @@ eowu::parser::VariableMapType eowu::parser::get_variables(const luabridge::LuaRe
     
     auto parsed_struct = eowu::data::from_lua(name, ref);
     
-    result.emplace(name, parsed_struct);
+    eowu::data::Commitable commitable;
+    commitable.Set(parsed_struct);
+    
+    result.emplace(name, commitable);
   }
   
   return result;

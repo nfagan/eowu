@@ -107,6 +107,7 @@ void eowu::LuaRuntime::InitializeScriptWrapper(const std::string &file,
   
   auto lua_render_functions = std::make_shared<eowu::LockedLuaRenderFunctions>(nullptr, nullptr);
   
+  script_wrapper.SetVariables(setup_schema.variables.mapping);
   script_wrapper.SetStateWrapperContainer(std::move(states));
   script_wrapper.SetGLPipeline(gl_pipeline);
   script_wrapper.SetRenderFunctions(std::move(render_functions));

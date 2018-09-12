@@ -5,8 +5,12 @@ local end_trial = require('states.end_trial')
 
 Setup = {}
 
+Setup.Variables = {
+  trial = 1
+}
+
 Setup.Paths = {
-  Data = '/Users/Nick/Desktop/test/',
+  Data = '/Users/Nick/Desktop/test/'
 }
 
 Setup.Windows = {

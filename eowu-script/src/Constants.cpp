@@ -12,3 +12,4 @@ const char* const eowu::constants::eowu_math_namespace = "math";
 const char* const eowu::constants::eowu_script_name = "eowu_script";
 const char* const eowu::constants::eowu_noop_name = "EOWU_NOOP";
 const char* const eowu::constants::eowu_states_table_name = "States";
+const char* const eowu::constants::eowu_variables_name = "Variables";

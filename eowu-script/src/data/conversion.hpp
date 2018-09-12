@@ -17,6 +17,8 @@ namespace eowu {
     
     namespace priv {
       void from_lua(const std::string &name, const luabridge::LuaRef &from, eowu::data::Struct *to);
+      
+      std::string get_invalid_type_error_message(const luabridge::LuaRef &from);
     }
   }
 }

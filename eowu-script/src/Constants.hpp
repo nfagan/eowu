@@ -14,5 +14,6 @@ namespace eowu {
     extern const char* const eowu_script_name;
     extern const char* const eowu_noop_name;
     extern const char* const eowu_states_table_name;
+    extern const char* const eowu_variables_name;
   }
 }

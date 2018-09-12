@@ -1,11 +1,11 @@
 local state = {}
 
-state.Name = '1'
+state.Name = 'end_trial'
 state.Duration = 0
 
 function state.Entry()
   local script = eowu_script()
-  local state = script:State('1')
+  local state = script:State('end_trial')
 
   state:Next('new_trial')
   script:Commit()

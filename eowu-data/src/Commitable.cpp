@@ -14,9 +14,27 @@ is_committed(false) {
   //
 }
 
-eowu::data::Commitable::Commitable(const Commitable &other) :
+eowu::data::Commitable::Commitable(const eowu::data::Commitable &other) :
 is_committed(other.is_committed.load()), value(other.value) {
   //  
+}
+
+eowu::data::Commitable::Commitable(const eowu::data::Commitable &&other) noexcept :
+is_committed(other.is_committed.load()), value(std::move(other.value)) {
+  //
+}
+
+eowu::data::Commitable& eowu::data::Commitable::operator=(const eowu::data::Commitable &other) {
+  eowu::data::Commitable tmp(other);
+  *this = std::move(tmp);
+  return *this;
+}
+
+eowu::data::Commitable& eowu::data::Commitable::operator=(const eowu::data::Commitable &&other) noexcept {
+  is_committed = other.is_committed.load();
+  value = std::move(other.value);
+  
+  return *this;
 }
 
 bool eowu::data::Commitable::IsCommitted() const {

@@ -27,7 +27,7 @@ void eowu::VariablesWrapper::CreateLuaSchema(lua_State *L) {
   luabridge::getGlobalNamespace(L)
   .beginNamespace(eowu::constants::eowu_namespace)
   .beginClass<eowu::VariablesWrapper>("_Variables")
-//  .addFunction("Field", &eowu::VariablesWrapper::GetVariable)
+  .addFunction("Field", &eowu::VariablesWrapper::GetVariable)
   .endClass()
   .endNamespace();
 }

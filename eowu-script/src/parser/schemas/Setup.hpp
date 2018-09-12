@@ -15,6 +15,7 @@
 #include "Targets.hpp"
 #include "Source.hpp"
 #include "Paths.hpp"
+#include "Variables.hpp"
 
 namespace eowu {
   namespace schema {
@@ -33,6 +34,7 @@ namespace eowu {
       eowu::schema::Stimuli stimuli;
       eowu::schema::Sources sources;
       eowu::schema::Paths paths;
+      eowu::schema::Variables variables;
     };
   }
 }

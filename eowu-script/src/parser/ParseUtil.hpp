@@ -21,7 +21,7 @@ namespace luabridge {
 namespace eowu {
   namespace parser {
     using MapTableType = std::unordered_map<std::string, luabridge::LuaRef>;
-    using VariableMapType = std::unordered_map<std::string, eowu::data::Struct>;
+    using VariableMapType = std::unordered_map<std::string, eowu::data::Commitable>;
     using CommitableMapType = std::unordered_map<std::string, eowu::data::Commitable>;
     
     eowu::parser::MapTableType get_string_map_from_table(const luabridge::LuaRef &ref);

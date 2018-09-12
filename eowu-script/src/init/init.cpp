@@ -73,18 +73,8 @@ eowu::StateWrapperContainerType eowu::init::get_states(const eowu::schema::State
     eowu::LuaFunction exit(schema.exit_function);
     eowu::LuaFunction loop(schema.loop_function);
     
-    std::unordered_map<std::string, eowu::data::Commitable> variables;
-    
-    for (const auto &it : schema.variables) {
-      eowu::data::Commitable commitable;
-      
-      commitable.Set(it.second);
-      
-      variables.emplace(it.first, commitable);
-    }
-    
     auto state_functions = std::make_unique<eowu::LuaStateFunctions>(entry, loop, exit);
-    auto wrapper = std::make_shared<eowu::StateWrapper>(state, variables, lua_context, std::move(state_functions));
+    auto wrapper = std::make_shared<eowu::StateWrapper>(state, schema.variables, lua_context, std::move(state_functions));
     
     result->emplace(schema.state_id, std::move(wrapper));
   }

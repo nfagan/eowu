@@ -40,6 +40,8 @@ namespace eowu {
     ParseResult<eowu::schema::State> state(const luabridge::LuaRef &table);
     ParseResult<eowu::schema::States> states(const luabridge::LuaRef &table);
     
+    ParseResult<eowu::schema::Variables> variables(const luabridge::LuaRef &table);
+    
     ParseResult<eowu::schema::RefFunctionAggregateType> function_aggregate(const luabridge::LuaRef &table, const std::string &key);
   }
 }

@@ -23,7 +23,11 @@ namespace eowu {
 class eowu::data::Commitable {
   
 public:
-  Commitable(const Commitable &other);
+  Commitable(const eowu::data::Commitable &other);
+  Commitable(const eowu::data::Commitable &&other) noexcept;
+  
+  eowu::data::Commitable& operator=(const eowu::data::Commitable &other);
+  eowu::data::Commitable& operator=(const eowu::data::Commitable &&other) noexcept;
   
   Commitable();
   ~Commitable() = default;

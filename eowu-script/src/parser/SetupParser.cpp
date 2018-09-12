@@ -62,6 +62,20 @@ eowu::parser::ParseResult<eowu::schema::Setup> eowu::parser::setup(const luabrid
   //  Paths
   EOWU_PARSER_EARLY_RETURN(paths, paths_, paths_ref, "Paths", eowu::parser::paths);
   
+  if (kv.count("Variables") > 0) {
+    const auto &variables = kv.at("Variables");
+    auto variable_result = eowu::parser::variables(variables);
+    
+    if (!variable_result.success) {
+      result.message = variable_result.message;
+      result.context = variable_result.context;
+      
+      return result;
+    }
+    
+    result.result.variables = std::move(variable_result.result);
+  }
+  
   result.success = true;
   
   return result;  
@@ -383,6 +397,26 @@ eowu::parser::ParseResult<eowu::schema::Targets> eowu::parser::targets(const lua
   return result;
 }
 
+//
+//  variables
+//
+
+eowu::parser::ParseResult<eowu::schema::Variables> eowu::parser::variables(const luabridge::LuaRef &table) {
+  ParseResult<eowu::schema::Variables> result;
+  
+  try {
+    result.result.mapping = eowu::parser::get_variables(table);
+  } catch (const std::exception &e) {
+    result.message = e.what();
+    result.context = "Variables";
+    
+    return result;
+  }
+  
+  result.success = true;
+  
+  return result;
+}
 
 //
 //  states

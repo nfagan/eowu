@@ -54,7 +54,8 @@ void eowu::StateWrapper::Write(eowu::serialize::ByteArrayType &into) const {
   }
   
   //  nest variables under the state id namespace
-  eowu::serialize::unsafe_nest_aggregate(state->GetId(), sz, into);
+  eowu::serialize::unsafe_nest_aggregate(state->GetId(), 1, into);
+  eowu::serialize::unsafe_nest_aggregate(eowu::constants::eowu_variables_name, sz, into);
   
   for (const auto &it : active_variables) {
     const auto &var = it.second;

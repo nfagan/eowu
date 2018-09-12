@@ -9,6 +9,7 @@
 #include "StateWrapper.hpp"
 #include "ModelWrapper.hpp"
 #include "RendererWrapper.hpp"
+#include "VariableWrapper.hpp"
 #include "Constants.hpp"
 #include "LockedLuaRenderFunctions.hpp"
 #include "Lua.hpp"
@@ -30,6 +31,8 @@ eowu::LuaFunctionContainerType eowu::ScriptWrapper::flip_functions = nullptr;
 std::shared_ptr<eowu::LockedLuaRenderFunctions> eowu::ScriptWrapper::LuaRenderThreadFunctions = nullptr;
 //  task data store
 std::shared_ptr<eowu::data::Store> eowu::ScriptWrapper::task_data_store = nullptr;
+//  variables
+eowu::ScriptWrapper::Variables eowu::ScriptWrapper::variables{};
 
 bool eowu::ScriptWrapper::IsComplete() const {
 #ifdef EOWU_DEBUG
@@ -42,6 +45,11 @@ bool eowu::ScriptWrapper::IsComplete() const {
 #else
   return true;
 #endif
+}
+
+void eowu::ScriptWrapper::SetVariables(const std::unordered_map<std::string, eowu::data::Commitable> &variables) {  
+  eowu::ScriptWrapper::variables.active = variables;
+  eowu::ScriptWrapper::variables.defaults = variables;
 }
 
 void eowu::ScriptWrapper::SetStateWrapperContainer(eowu::StateWrapperContainerType states) {
@@ -66,12 +74,11 @@ void eowu::ScriptWrapper::SetFlipFunctions(eowu::LuaFunctionContainerType flip_f
 
 void eowu::ScriptWrapper::SetRenderFunctionPair(const std::string &render_id, const std::string &flip_id) {  
   const auto &render_it = render_functions->find(render_id);
+  const auto &flip_it = flip_functions->find(flip_id);
   
   if (render_it == render_functions->end()) {
     throw eowu::NonexistentResourceError::MessageKindId("Render function", render_id);
   }
-  
-  const auto &flip_it = flip_functions->find(flip_id);
   
   if (flip_it == flip_functions->end()) {
     throw eowu::NonexistentResourceError::MessageKindId("Flip function", flip_id);
@@ -99,7 +106,13 @@ eowu::ModelWrapper eowu::ScriptWrapper::GetModelWrapper(const std::string &id) c
 eowu::StateWrapper* eowu::ScriptWrapper::GetStateWrapper(const std::string &id) const {
   assert(IsComplete());
   
-  return states->at(id).get();
+  const auto &it = states->find(id);
+  
+  if (it == states->end()) {
+    throw eowu::NonexistentResourceError::MessageKindId("State", id);
+  }
+  
+  return it->second.get();
 }
 
 eowu::RendererWrapper eowu::ScriptWrapper::GetRendererWrapper() const {
@@ -111,20 +124,78 @@ eowu::RendererWrapper eowu::ScriptWrapper::GetRendererWrapper() const {
   return render_wrapper;
 }
 
+eowu::VariableWrapper eowu::ScriptWrapper::GetVariable(const std::string &id) {  
+  auto it = variables.active.find(id);
+  
+  if (it == variables.active.end()) {
+    throw eowu::LuaError("Reference to non-existent variable: '" + id + "'.");
+  }
+  
+  eowu::data::Commitable *active = &it->second;
+  eowu::data::Commitable *defaults = &variables.defaults.at(id);
+  
+  eowu::VariableWrapper wrapper(active, defaults);
+  
+  return wrapper;
+}
+
 void eowu::ScriptWrapper::CommitData() const {
+  std::vector<char> into;
+  
+  eowu::serialize::unsafe_nest_aggregate("Data", 2, into);
+  
+  //  serialize task variables
+  commit_variables(into);
+  
+  //  serialize states
+  commit_states(into);
+  
+  task_data_store->Write(into);
+}
+
+void eowu::ScriptWrapper::commit_states(std::vector<char> &into) const {
+  //  Serialize each state's variables + timing data.
+  
   const auto &state_container = *states.get();
   const auto n_states = state_container.size();
   
-  eowu::serialize::ByteArrayType into;
-  eowu::serialize::unsafe_nest_aggregate("variables", n_states, into);
+  eowu::serialize::unsafe_nest_aggregate(eowu::constants::eowu_states_table_name, n_states, into);
   
   for (const auto &it : state_container) {
     const auto &state = it.second;
     
     state->Write(into);
   }
+}
+
+void eowu::ScriptWrapper::commit_variables(std::vector<char> &into) const {
+  //  Serialize each committed variable.
   
-  task_data_store->Write(into);
+  const auto &variables = eowu::ScriptWrapper::variables.active;
+  
+  std::size_t n_committed = 0;
+  
+  for (const auto &it : variables) {
+    if (it.second.IsCommitted()) {
+      n_committed++;
+    }
+  }
+  
+  eowu::serialize::unsafe_nest_aggregate(eowu::constants::eowu_variables_name, n_committed, into);
+  
+  for (const auto &it : variables) {
+    const auto &variable = it.second;
+    
+    if (!variable.IsCommitted()) {
+      continue;
+    }
+    
+    const auto inserter = [&](const auto &data) -> void {
+      eowu::serialize::serialize(data, into);
+    };
+    
+    variable.Use(inserter);
+  }
 }
 
 void eowu::ScriptWrapper::CreateLuaSchema(lua_State *L) {
@@ -136,5 +207,6 @@ void eowu::ScriptWrapper::CreateLuaSchema(lua_State *L) {
   .addFunction("State", &eowu::ScriptWrapper::GetStateWrapper)
   .addFunction("Render", &eowu::ScriptWrapper::SetRenderFunctionPair)
   .addFunction("Renderer", &eowu::ScriptWrapper::GetRendererWrapper)
+  .addFunction("Variable", &eowu::ScriptWrapper::GetVariable)
   .endClass();
 }

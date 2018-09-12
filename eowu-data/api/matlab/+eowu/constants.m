@@ -1,5 +1,12 @@
 function c = constants()
 
+%   CONSTANTS -- Get type identifiers.
+%
+%     See also eowu.read
+%
+%     OUT:
+%       - `c` (struct)
+
 c = struct();
 
 c.mask_double =           bitshift( uint32(1), uint32(1) );

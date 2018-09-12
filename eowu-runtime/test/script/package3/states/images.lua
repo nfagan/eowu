@@ -22,8 +22,9 @@ function state.Entry()
   local script = eowu_script()
   local state = script:State('images')
   local timing = state:Variable('state_time')
+  local first = script:Variable('trial')
 
-  state:Next('1')
+  state:Next('end_trial')
   last_t = state:Ellapsed()
   printed_time = false
   script:Render('image', 'image')
