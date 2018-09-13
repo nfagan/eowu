@@ -6,7 +6,11 @@ local end_trial = require('states.end_trial')
 Setup = {}
 
 Setup.Variables = {
-  trial = 1
+  trial = 0,
+  frames = {
+    images = 0/0,
+    fixation = 0/0
+  }
 }
 
 Setup.Paths = {
@@ -15,7 +19,7 @@ Setup.Paths = {
 
 Setup.Windows = {
   main = {
-    width = 200, height = 200, fullscreen = false
+    width = 400, height = 400, fullscreen = false, resizeable = false
   }
 }
 

@@ -17,11 +17,17 @@ eowu::State* eowu::StateManager::CreateState(const std::string &id) {
     throw eowu::StateCreationError("State ids must be unique.");
   }
   
-  auto state = new eowu::State(this, id);
+  auto state = new eowu::State(this, id, nullptr);
   
   states.emplace(id, state);
   
   return state;
+}
+
+eowu::StateManager::~StateManager() {
+  for (const auto &it : states) {
+    delete it.second;
+  }
 }
 
 bool eowu::StateManager::HasState(const std::string &id) const {

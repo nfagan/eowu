@@ -56,7 +56,8 @@ eowu::LuaFunctionContainerType eowu::init::get_flip_functions(const eowu::schema
 
 eowu::StateWrapperContainerType eowu::init::get_states(const eowu::schema::States &schemas,
                                                        std::shared_ptr<eowu::LuaContext> lua_context,
-                                                       eowu::StateManager &state_manager) {
+                                                       eowu::StateManager &state_manager,
+                                                       eowu::StateRunner &state_runner) {
   
   auto result = std::make_unique<eowu::StateWrapperMapType>();
   
@@ -68,6 +69,8 @@ eowu::StateWrapperContainerType eowu::init::get_states(const eowu::schema::State
     if (schema.duration >= 0) {
       state->SetDuration(std::chrono::milliseconds((int)schema.duration));
     }
+    
+    state->SetGlobalTimer(&state_runner.GetTimer());
     
     eowu::LuaFunction entry(schema.entry_function);
     eowu::LuaFunction exit(schema.exit_function);

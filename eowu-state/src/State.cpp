@@ -13,8 +13,8 @@ namespace detail {
   void no_op(eowu::State *state) {}
 }
 
-eowu::State::State(const eowu::StateManager *manager_, const std::string &id_) :
-manager(manager_), id(id_), next_state(nullptr), called_next(false) {
+eowu::State::State(const eowu::StateManager *manager_, const std::string &id_, const eowu::Timer *global_timer_) :
+manager(manager_), global_timer(global_timer_), id(id_), next_state(nullptr), called_next(false) {
   set_default_callbacks();
 }
 
@@ -27,6 +27,7 @@ eowu::State::State(const eowu::State &other) {
   
   id = other.id;
   manager = other.manager;
+  global_timer = other.global_timer;
   
   called_next = false;
   next_state = nullptr;
@@ -34,12 +35,15 @@ eowu::State::State(const eowu::State &other) {
 
 void eowu::State::OnEntry() {
   std::unique_lock<std::mutex> lock(mut);
+  //  call private entry handler first
   entry();
   on_entry(this);
 }
 
 void eowu::State::OnExit() {
   std::unique_lock<std::mutex> lock(mut);
+  //  call private exit handler first
+  exit();
   on_exit(this);
 }
 
@@ -68,6 +72,11 @@ void eowu::State::SetOnExit(const eowu::StateCallbackType &cb) {
   on_exit = cb;
 }
 
+void eowu::State::SetGlobalTimer(const eowu::Timer *global_timer) {
+  std::unique_lock<std::mutex> lock(mut);
+  this->global_timer = global_timer;
+}
+
 void eowu::State::Next(eowu::State *state) {
   next_state = state;
 }
@@ -94,7 +103,11 @@ eowu::State* eowu::State::GetState(const std::string &id) const {
 }
 
 const eowu::Timer& eowu::State::GetTimer() const {
-  return timer;
+  return local_timer;
+}
+
+eowu::State::GlobalTimePoints eowu::State::GetLatestGlobalTimePoints() const {
+  return global_time_points;
 }
 
 void eowu::State::SetOnLoop(const eowu::StateCallbackType &cb) {
@@ -107,13 +120,25 @@ bool eowu::State::ShouldExit() const {
 }
 
 void eowu::State::entry() {
-  timer.Reset();
+  local_timer.Reset();
   Next(nullptr);
   called_next = false;
+  
+  //  Mark the time of entry in terms of the global clock.
+  if (global_timer) {
+    global_time_points.entry = global_timer->Ellapsed();
+  }
+}
+
+void eowu::State::exit() {
+  //  Mark the time of exit in terms of the global clock.
+  if (global_timer) {
+    global_time_points.exit = global_timer->Ellapsed();
+  }
 }
 
 void eowu::State::loop() {
-  timer.Update();
+  local_timer.Update();
 }
 
 bool eowu::State::check_exit_conditions() const {

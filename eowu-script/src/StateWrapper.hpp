@@ -61,4 +61,6 @@ private:
   
   void setup_state_callbacks();
   void setup_variable_wrappers();
+  
+  eowu::data::Struct get_latest_timing_info() const;
 };

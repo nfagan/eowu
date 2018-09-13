@@ -17,7 +17,12 @@
 #include <iostream>
 #include <thread>
 
-int eowu::Runtime::Main(const std::string &file) {  
+int eowu::Runtime::Main(const std::string &file) {
+  eowu::StateManager state_manager;
+  eowu::StateRunner state_runner;
+  
+  eowu::LuaRuntime lua_runtime(state_manager, state_runner);
+  
   if (!lua_runtime.InitializeSchema(file)) {
     return 1;
   }
@@ -44,7 +49,7 @@ int eowu::Runtime::Main(const std::string &file) {
   eowu::thread::SharedState thread_state;
   
   auto first_state = lua_runtime.GetFirstState();
-  auto task_thread = std::thread(eowu::thread::task, std::ref(thread_state), first_state);
+  auto task_thread = std::thread(eowu::thread::task, std::ref(thread_state), std::ref(state_runner), first_state);
   
   auto &locked_lua_functions = *eowu::ScriptWrapper::LuaRenderThreadFunctions.get();
   const auto &render_context = lua_runtime.lua_contexts.render;

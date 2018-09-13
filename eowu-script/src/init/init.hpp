@@ -23,6 +23,8 @@ namespace eowu {
   class GLPipeline;
   class StateWrapper;
   class StateManager;
+  class StateRunner;
+  
   using StateWrapperMapType = std::unordered_map<std::string, std::shared_ptr<eowu::StateWrapper>>;
   using StateWrapperContainerType = std::unique_ptr<eowu::StateWrapperMapType>;
   using LuaFunctionMapType = std::unordered_map<std::string, LuaFunction>;
@@ -35,7 +37,8 @@ namespace eowu {
   namespace init {
     eowu::StateWrapperContainerType get_states(const eowu::schema::States &schema,
                                                std::shared_ptr<eowu::LuaContext> lua_context,
-                                               eowu::StateManager &state_manager);
+                                               eowu::StateManager &state_manager,
+                                               eowu::StateRunner &state_runner);
     
     eowu::LuaFunctionContainerType get_render_functions(const eowu::schema::States &schema);
     eowu::LuaFunctionContainerType get_flip_functions(const eowu::schema::States &schema);

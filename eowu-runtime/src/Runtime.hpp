@@ -24,7 +24,4 @@ public:
   ~Runtime() = default;
   
   int Main(const std::string &file);
-  
-private:
-  eowu::LuaRuntime lua_runtime;  
 };

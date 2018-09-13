@@ -53,8 +53,13 @@ void eowu::StateWrapper::Write(eowu::serialize::ByteArrayType &into) const {
     }
   }
   
-  //  nest variables under the state id namespace
-  eowu::serialize::unsafe_nest_aggregate(state->GetId(), 1, into);
+  //  nest variables + timing under the state id namespace
+  eowu::serialize::unsafe_nest_aggregate(state->GetId(), 2, into);
+  
+  //  serialize state timing
+  eowu::serialize::serialize(get_latest_timing_info(), into);
+  
+  //  serialize variables
   eowu::serialize::unsafe_nest_aggregate(eowu::constants::eowu_variables_name, sz, into);
   
   for (const auto &it : active_variables) {
@@ -116,6 +121,20 @@ void eowu::StateWrapper::setup_state_callbacks() {
   state->SetOnExit([&](auto* state) {
     lua_context->Call(state_functions->on_exit);
   });
+}
+
+eowu::data::Struct eowu::StateWrapper::get_latest_timing_info() const {
+  auto state_times = state->GetLatestGlobalTimePoints();
+  
+  double entry = state_times.entry.count();
+  double exit = state_times.exit.count();
+  
+  eowu::data::Struct entry_field{"Entry", entry};
+  eowu::data::Struct exit_field{"Exit", exit};
+  
+  eowu::data::Struct timing{"Timing", std::vector<eowu::data::Struct>{entry_field, exit_field}};
+  
+  return timing;
 }
 
 void eowu::StateWrapper::CreateLuaSchema(lua_State *L) {

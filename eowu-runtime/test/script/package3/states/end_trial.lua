@@ -7,6 +7,8 @@ function state.Entry()
   local script = eowu_script()
   local state = script:State('end_trial')
 
+  script:Variable('frames'):Commit()
+
   state:Next('new_trial')
   script:Commit()
 end

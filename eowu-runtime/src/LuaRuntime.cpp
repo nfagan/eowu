@@ -9,6 +9,11 @@
 #include <iostream>
 #include <eowu-common/logging.hpp>
 
+eowu::LuaRuntime::LuaRuntime(eowu::StateManager &manager, eowu::StateRunner &runner) :
+state_manager(manager), state_runner(runner) {
+  //
+}
+
 eowu::SetupStatus eowu::LuaRuntime::parse_schemas(const std::string &file) {
   eowu::SetupStatus result;
   
@@ -103,7 +108,7 @@ void eowu::LuaRuntime::InitializeScriptWrapper(const std::string &file,
   
   auto render_functions = get_render_functions(render_state_schema.result);
   auto flip_functions = get_flip_functions(render_state_schema.result);
-  auto states = init::get_states(setup_schema.states, lua_contexts.task, state_manager);
+  auto states = init::get_states(setup_schema.states, lua_contexts.task, state_manager, state_runner);
   
   auto lua_render_functions = std::make_shared<eowu::LockedLuaRenderFunctions>(nullptr, nullptr);
   

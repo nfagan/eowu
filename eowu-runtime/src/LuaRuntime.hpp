@@ -22,7 +22,7 @@ namespace eowu {
 class eowu::LuaRuntime {
   
 public:
-  LuaRuntime() = default;
+  LuaRuntime(eowu::StateManager &manager, eowu::StateRunner &runner);
   ~LuaRuntime() = default;
   
   bool InitializeSchema(const std::string &file);
@@ -40,7 +40,8 @@ public:
   
 private:
   eowu::ScriptWrapper script_wrapper;
-  eowu::StateManager state_manager;
+  eowu::StateManager &state_manager;
+  eowu::StateRunner &state_runner;
   
   void initialize_lua_contexts();
   

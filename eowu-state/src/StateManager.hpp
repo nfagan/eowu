@@ -22,7 +22,7 @@ namespace eowu {
 class eowu::StateManager {
 public:
   StateManager() = default;
-  ~StateManager() = default;
+  ~StateManager();
   
   eowu::State* CreateState(const std::string &id);
   eowu::State* GetState(const std::string &id) const;

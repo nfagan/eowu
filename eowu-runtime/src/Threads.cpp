@@ -21,10 +21,10 @@ task_thread_initialized(false), render_thread_initialized(false), threads_should
   //
 }
 
-void eowu::thread::task(eowu::thread::SharedState &state, eowu::State *first_state) {
+void eowu::thread::task(eowu::thread::SharedState &state,
+                        eowu::StateRunner &state_runner,
+                        eowu::State *first_state) {
   
-  eowu::StateManager state_manager;
-  eowu::StateRunner state_runner;
   const auto &state_runner_timer = state_runner.GetTimer();
   
   state_runner.Begin(first_state);

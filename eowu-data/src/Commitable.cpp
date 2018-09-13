@@ -56,6 +56,10 @@ void eowu::data::Commitable::Use(const std::function<void(const eowu::data::Stru
 void eowu::data::Commitable::Set(const eowu::data::Struct &value) {
   std::unique_lock<std::mutex> lock(mut);
   
+  if (IsCommitted()) {
+    throw eowu::AlreadyCommittedError("Attempted to commit an already committed value.");
+  }
+  
   this->value = value;
 }
 
@@ -67,10 +71,6 @@ void eowu::data::Commitable::Uncommit() {
 
 void eowu::data::Commitable::Commit() {
   std::unique_lock<std::mutex> lock(mut);
-  
-  if (IsCommitted()) {
-    throw eowu::AlreadyCommittedError("Attempted to commit an already committed value.");
-  }
   
   is_committed = true;
 }

@@ -22,6 +22,7 @@ public:
   ~LockedLuaRenderFunctions() = default;
   
   void Queue(eowu::LuaFunction *render, eowu::LuaFunction *flip);
+  void Set(eowu::LuaFunction *render, eowu::LuaFunction *flip);
   void Use(const std::function<void(eowu::LuaFunction*, eowu::LuaFunction*)> &cb);
   void Flush();
   

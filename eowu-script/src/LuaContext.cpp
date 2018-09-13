@@ -12,7 +12,7 @@ eowu::LuaContext::LuaContext() {
 }
 
 eowu::LuaContext::LuaContext(lua_State *state) {
-  lua_state = state;
+  SetState(state);
 }
 
 lua_State* eowu::LuaContext::GetState() const {
@@ -21,4 +21,7 @@ lua_State* eowu::LuaContext::GetState() const {
 
 void eowu::LuaContext::SetState(lua_State *L) {
   lua_state = L;
+  
+  lua_gc(lua_state, LUA_GCSETPAUSE, 50);
+  lua_gc(lua_state, LUA_GCSETSTEPMUL, 400);
 }

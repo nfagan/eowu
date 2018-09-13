@@ -22,9 +22,14 @@ namespace eowu {
 }
 
 class eowu::State {
+public:
+  struct GlobalTimePoints {
+    eowu::time::DurationType entry;
+    eowu::time::DurationType exit;
+  };
   
 public:
-  State(const eowu::StateManager *manager, const std::string &id);
+  State(const eowu::StateManager *manager, const std::string &id, const eowu::Timer *global_timer);
   State(const eowu::State &other);
   
   ~State() = default;
@@ -35,6 +40,8 @@ public:
   void SetOnEntry(const eowu::StateCallbackType &cb);
   void SetOnLoop(const eowu::StateCallbackType &cb);
   void SetOnExit(const eowu::StateCallbackType &cb);
+  
+  void SetGlobalTimer(const eowu::Timer *global_timer);
   
   bool ShouldExit() const;
   
@@ -50,13 +57,17 @@ public:
   eowu::State* GetState(const std::string &id) const;
   eowu::State* GetNext();
   const eowu::Timer& GetTimer() const;
+  GlobalTimePoints GetLatestGlobalTimePoints() const;
   
 private:
   mutable std::mutex mut;
   
-  eowu::Timer timer;
-  
   const eowu::StateManager *manager;
+  
+  eowu::Timer local_timer;
+  const eowu::Timer *global_timer;
+  GlobalTimePoints global_time_points;
+  
   std::string id;
   eowu::State* next_state;
   
@@ -70,6 +81,7 @@ private:
   StateCallbackType on_next;
   
   void entry();
+  void exit();
   void loop();
   bool check_exit_conditions() const;
   void set_default_callbacks();

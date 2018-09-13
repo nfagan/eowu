@@ -14,6 +14,7 @@
 
 namespace eowu {
   class State;
+  class StateRunner;
   class LuaContext;
   class LuaFunction;
   class LockedLuaRenderFunctions;
@@ -44,6 +45,8 @@ namespace eowu {
                        const eowu::WindowContainerType &gl_windows,
                        const eowu::time::RenderTiming &render_time);
     
-    void task(eowu::thread::SharedState &state, eowu::State *first_state);
+    void task(eowu::thread::SharedState &state,
+              eowu::StateRunner &state_runner,
+              eowu::State *first_state);
   }
 }

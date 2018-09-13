@@ -72,7 +72,28 @@ warnings = containers.Map();
 
 while ( ftell(fid) ~= eof )
   chunks{end+1} = read_chunk( fid, constants, warnings );
+  
+  print_progress( ftell(fid), eof );
 end
+
+end
+
+function print_progress(pos, eof)
+
+persistent last_n;
+
+perc = pos / eof * 100;
+
+if ( isempty(last_n) )
+  fprintf( '\n\n' );
+else
+  fprintf( repmat('\b', 1, last_n) );
+end
+
+str = sprintf( 'Loading ... %d%%', round(perc) );
+fprintf( '%s\n', str );
+
+last_n = numel( str ) + 1;
 
 end
 
@@ -218,7 +239,7 @@ end
 
 function v = read_boolean(fid)
 
-v = fread( fid, 1, 'uint8' );
+v = logical( fread(fid, 1, 'uint8') );
 
 end
 

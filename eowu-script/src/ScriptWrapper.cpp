@@ -128,7 +128,7 @@ eowu::VariableWrapper eowu::ScriptWrapper::GetVariable(const std::string &id) {
   auto it = variables.active.find(id);
   
   if (it == variables.active.end()) {
-    throw eowu::LuaError("Reference to non-existent variable: '" + id + "'.");
+    throw eowu::NonexistentResourceError::MessageKindId("Variable", id);
   }
   
   eowu::data::Commitable *active = &it->second;
