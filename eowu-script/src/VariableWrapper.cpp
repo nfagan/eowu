@@ -15,12 +15,10 @@ data(data_), default_value(default_value_) {
   //
 }
 
-int eowu::VariableWrapper::Get(lua_State *L) {  
-  const auto functor = [&](const auto& val) {
+int eowu::VariableWrapper::Get(lua_State *L) {
+  data->Use([&](const auto &val) {
     eowu::data::to_lua(L, val);
-  };
-  
-  data->Use(functor);
+  });
   
   return 1;
 }
@@ -30,11 +28,9 @@ int eowu::VariableWrapper::Set(lua_State *L) {
   
   std::string name;
   
-  const auto name_getter = [&](auto &use) -> void {
+  data->Use([&](auto &use) -> void {
     name = use.name;
-  };
-  
-  data->Use(name_getter);
+  });
   
   if (inputs == 1) {
     throw eowu::LuaError("Attempted to assign a nil value to variable: '" + name + "'.");
@@ -46,13 +42,11 @@ int eowu::VariableWrapper::Set(lua_State *L) {
   return 0;
 }
 
-void eowu::VariableWrapper::Reset() {
-  const auto user = [&](auto &use) -> void {
+void eowu::VariableWrapper::Reset() {  
+  default_value->Use([&](auto &use) -> void {
     data->Uncommit();
     data->Set(use);
-  };
-  
-  default_value->Use(user);
+  });
 }
 
 void eowu::VariableWrapper::Commit() {
