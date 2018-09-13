@@ -32,7 +32,7 @@ eowu::LuaFunctionContainerType eowu::ScriptWrapper::render_functions = nullptr;
 eowu::LuaFunctionContainerType eowu::ScriptWrapper::flip_functions = nullptr;
 //
 //  render-flip pair
-std::shared_ptr<eowu::LockedLuaRenderFunctions> eowu::ScriptWrapper::LuaRenderThreadFunctions = nullptr;
+std::shared_ptr<eowu::LockedLuaRenderFunctions> eowu::ScriptWrapper::lua_render_thread_functions = nullptr;
 //
 //  task data store
 std::shared_ptr<eowu::data::Store> eowu::ScriptWrapper::task_data_store = nullptr;
@@ -45,12 +45,20 @@ bool eowu::ScriptWrapper::IsComplete() const {
   bool sc = states != nullptr;
   bool pc = pipeline != nullptr;
   bool rc = render_functions != nullptr;
-  bool lc = LuaRenderThreadFunctions != nullptr;
+  bool lc = lua_render_thread_functions != nullptr;
   
   return sc && pc && rc && lc;
 #else
   return true;
 #endif
+}
+
+void eowu::ScriptWrapper::SetTaskDataStore(std::shared_ptr<eowu::data::Store> store) {
+  task_data_store = store;
+}
+
+void eowu::ScriptWrapper::SetLockedRenderFunctions(std::shared_ptr<eowu::LockedLuaRenderFunctions> locked_functions) {
+  lua_render_thread_functions = locked_functions;
 }
 
 void eowu::ScriptWrapper::SetVariables(const std::unordered_map<std::string, eowu::data::Commitable> &variables) {  
@@ -67,7 +75,7 @@ void eowu::ScriptWrapper::SetGLPipeline(std::shared_ptr<eowu::GLPipeline> pipeli
 }
 
 void eowu::ScriptWrapper::SetLuaRenderFunctionPair(std::shared_ptr<eowu::LockedLuaRenderFunctions> lua_render_functions) {
-  LuaRenderThreadFunctions = lua_render_functions;
+  lua_render_thread_functions = lua_render_functions;
 }
 
 void eowu::ScriptWrapper::SetRenderFunctions(eowu::LuaFunctionContainerType render_functions) {
@@ -93,7 +101,7 @@ void eowu::ScriptWrapper::SetRenderFunctionPair(const std::string &render_id, co
   eowu::LuaFunction *render_func = &render_it->second;
   eowu::LuaFunction *flip_func = &flip_it->second;
   
-  LuaRenderThreadFunctions->Queue(render_func, flip_func);
+  lua_render_thread_functions->Queue(render_func, flip_func);
 }
 
 eowu::ModelWrapper eowu::ScriptWrapper::GetModelWrapper(const std::string &id) const {
@@ -143,6 +151,10 @@ eowu::VariableWrapper eowu::ScriptWrapper::GetVariable(const std::string &id) {
   eowu::VariableWrapper wrapper(active, defaults);
   
   return wrapper;
+}
+
+std::shared_ptr<eowu::LockedLuaRenderFunctions> eowu::ScriptWrapper::GetLockedRenderFunctions() const {
+  return eowu::ScriptWrapper::lua_render_thread_functions;
 }
 
 void eowu::ScriptWrapper::CommitData() const {

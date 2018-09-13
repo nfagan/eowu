@@ -10,6 +10,7 @@
 #include "ContextManager.hpp"
 #include "Error.hpp"
 #include <iostream>
+#include <chrono>
 
 eowu::ContextManager::ContextManager() {
   is_initialized = false;
@@ -106,7 +107,9 @@ eowu::WindowType eowu::ContextManager::OpenWindow(const eowu::WindowProperties &
   glfwGetWindowSize(new_window, &client_width, &client_height);
   
   auto win = std::make_shared<eowu::Window>(monitor, new_window, client_width, client_height);
+  
   win->SetPosition(0, 0);
+  win->SetSwapInterval(props.swap_interval);
   
   register_window(win);
   
@@ -166,8 +169,31 @@ void eowu::ContextManager::configure_window_callbacks(GLFWwindow *win) {
   
   glfwSetWindowSizeCallback(win, eowu::glfw::window_size_callback);
   glfwSetWindowCloseCallback(win, eowu::glfw::window_close_callback);
+  glfwSetCursorPosCallback(win, eowu::glfw::window_mouse_position_callback);
+  glfwSetKeyCallback(win, eowu::glfw::window_key_press_callback);
 }
 
+//  mouse position
+void eowu::glfw::window_mouse_position_callback(GLFWwindow *window, double x, double y) {
+  eowu::ContextManager* context = (eowu::ContextManager*)glfwGetWindowUserPointer(window);
+  
+  assert(context);
+  
+  auto win = context->get_window_with_trap(window);
+}
+
+//  key press
+void eowu::glfw::window_key_press_callback(GLFWwindow *window, int key, int scancode, int action, int mode) {
+  eowu::ContextManager* context = (eowu::ContextManager*)glfwGetWindowUserPointer(window);
+  
+  assert(context);
+  
+  auto win = context->get_window_with_trap(window);
+  
+  std::cout << std::boolalpha << (action == GLFW_REPEAT) << std::endl;
+}
+
+//  window close
 void eowu::glfw::window_close_callback(GLFWwindow *window) {
   eowu::ContextManager* context = (eowu::ContextManager*)glfwGetWindowUserPointer(window);
   
@@ -179,6 +205,7 @@ void eowu::glfw::window_close_callback(GLFWwindow *window) {
   glfwDestroyWindow(win->window);
 }
 
+//  window resize
 void eowu::glfw::window_size_callback(GLFWwindow *window, int width, int height) {
   eowu::ContextManager* context = (eowu::ContextManager*)glfwGetWindowUserPointer(window);
   

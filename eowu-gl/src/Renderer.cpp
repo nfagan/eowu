@@ -15,7 +15,6 @@
 #include <utility>
 #include <cstddef>
 #include <glad/glad.h>
-#include <GLFW/glfw3.h>
 
 #ifdef EOWU_DEBUG
 #include <iostream>
@@ -83,8 +82,7 @@ void eowu::Renderer::draw(eowu::WindowType window) {
   }
   
   window->MakeCurrent();
-  
-  glfwSwapInterval(1);
+  window->ApplySwapInterval();
   
   if (window->WasResized()) {
     auto fb_size = window->GetFramebufferSize();
@@ -102,6 +100,7 @@ void eowu::Renderer::draw(eowu::WindowType window) {
   }
   
   window->SwapBuffers();
+  //  happens immediately after buffer was swapped
   on_buffer_swap(window);
   
   last_window = window;
@@ -135,7 +134,7 @@ void eowu::Renderer::draw_one_model(const eowu::WindowType& window, const eowu::
   auto transform = model.GetTransform();
   
   if (!material || !mesh) {
-    EOWU_LOG_INFO("Renderer::draw_one_model: Material or Mesh was null.");
+    EOWU_LOG_WARN("Renderer::draw_one_model: Material or Mesh was null.");
     return;
   }
   
@@ -172,7 +171,7 @@ void eowu::Renderer::draw_one_model(const eowu::WindowType& window, const eowu::
       prog = programs.at(hash_code);
 //      EOWU_LOG_INFO("Renderer::draw_one_model: Using cached shader.");
     } else {
-      EOWU_LOG_INFO("Renderer::draw_one_model: Generating new program.");
+//      EOWU_LOG_INFO("Renderer::draw_one_model: Generating new program.");
       prog = eowu::builder::from_source(v_src, f_src);
     }
     

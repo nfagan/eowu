@@ -23,10 +23,12 @@ class eowu::LuaRuntime {
   
 public:
   LuaRuntime(eowu::StateManager &manager, eowu::StateRunner &runner);
+  
   ~LuaRuntime() = default;
   
   bool InitializeSchema(const std::string &file);
-  void InitializeScriptWrapper(const std::string &file,
+  void InitializeScriptWrapper(eowu::ScriptWrapper &script_wrapper,
+                               const std::string &file,
                                std::shared_ptr<eowu::GLPipeline> gl_pipeline);
   
   eowu::State* GetFirstState();
@@ -39,7 +41,6 @@ public:
   } lua_contexts;
   
 private:
-  eowu::ScriptWrapper script_wrapper;
   eowu::StateManager &state_manager;
   eowu::StateRunner &state_runner;
   

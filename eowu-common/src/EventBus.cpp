@@ -22,6 +22,8 @@ eowu::u64 eowu::EventBus::Subscribe(const std::string &event_name, const eowu::E
   } else {
     //
   }
+  
+  return 0;
 }
 
 eowu::u64 eowu::EventBus::get_next_id() const {

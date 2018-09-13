@@ -17,6 +17,7 @@ eowu::Window::Window(GLFWmonitor *monitor, GLFWwindow *window, unsigned int widt
   this->window = window;
   this->width = width;
   this->height = height;
+  this->swap_interval = 1;
   this->was_resized = false;
   this->is_open = true;
   this->is_valid = true;
@@ -36,6 +37,14 @@ void eowu::Window::SetWidth(unsigned int width) {
 
 void eowu::Window::SetHeight(unsigned int height) {
   this->height = height;
+}
+
+void eowu::Window::SetSwapInterval(unsigned int interval) {
+  this->swap_interval = interval;
+}
+
+void eowu::Window::ApplySwapInterval() const {
+  glfwSwapInterval(swap_interval);
 }
 
 glm::vec2 eowu::Window::GetFramebufferSize() const {
@@ -130,22 +139,22 @@ const std::string& eowu::Window::GetAlias() const {
 //
 
 eowu::WindowProperties::WindowProperties() :
-width(0), height(0), index(0), is_fullscreen(true), is_resizeable(true) {
+width(0), height(0), index(0), swap_interval(1), is_fullscreen(true), is_resizeable(true) {
   //
 }
 
 eowu::WindowProperties::WindowProperties(unsigned int width_, unsigned int height_) :
-width(width_), height(height_), index(0), is_fullscreen(false), is_resizeable(true) {
+width(width_), height(height_), index(0), swap_interval(1), is_fullscreen(false), is_resizeable(true) {
   //
 }
 
 eowu::WindowProperties::WindowProperties(unsigned int index_, unsigned int width_, unsigned int height_) :
-width(width_), height(height_), index(index_), is_fullscreen(false), is_resizeable(true) {
+width(width_), height(height_), index(index_), swap_interval(1), is_fullscreen(false), is_resizeable(true) {
   //
 }
 
 eowu::WindowProperties::WindowProperties(unsigned int index_) :
-width(0), height(0), index(index_), is_fullscreen(true), is_resizeable(false) {
+width(0), height(0), index(index_), swap_interval(1), is_fullscreen(true), is_resizeable(false) {
   //
 }
 

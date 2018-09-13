@@ -46,6 +46,8 @@ public:
   void SetFlipFunctions(eowu::LuaFunctionContainerType render_functions);
   void SetLuaRenderFunctionPair(std::shared_ptr<eowu::LockedLuaRenderFunctions> lua_render_functions);
   void SetVariables(const std::unordered_map<std::string, eowu::data::Commitable> &variables);
+  void SetTaskDataStore(std::shared_ptr<eowu::data::Store> task_data_store);
+  void SetLockedRenderFunctions(std::shared_ptr<eowu::LockedLuaRenderFunctions> locked_functions);
   
   bool IsComplete() const;
   
@@ -55,13 +57,11 @@ public:
   eowu::ModelWrapper GetModelWrapper(const std::string &id) const;
   eowu::VariableWrapper GetVariable(const std::string &id);
   
+  std::shared_ptr<eowu::LockedLuaRenderFunctions> GetLockedRenderFunctions() const;
+  
   std::size_t CountVariables() const;
   
   void CommitData() const;
-  
-  static std::shared_ptr<eowu::LockedLuaRenderFunctions> LuaRenderThreadFunctions;
-  //  public for now
-  static std::shared_ptr<eowu::data::Store> task_data_store;
   
   static void CreateLuaSchema(lua_State *L);
   
@@ -75,6 +75,8 @@ private:
   static eowu::StateWrapperContainerType states;
   static std::shared_ptr<eowu::GLPipeline> pipeline;
   static Variables variables;
+  static std::shared_ptr<eowu::data::Store> task_data_store;
+  static std::shared_ptr<eowu::LockedLuaRenderFunctions> lua_render_thread_functions;
   
   void commit_variables(std::vector<char> &into) const;
   void commit_states(std::vector<char> &into) const;

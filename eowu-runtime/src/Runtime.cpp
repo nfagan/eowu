@@ -18,6 +18,7 @@
 #include <thread>
 
 int eowu::Runtime::Main(const std::string &file) {
+  eowu::ScriptWrapper script_wrapper;
   eowu::StateManager state_manager;
   eowu::StateRunner state_runner;
   
@@ -38,23 +39,27 @@ int eowu::Runtime::Main(const std::string &file) {
   
   //  task data store
   auto task_data_store = std::make_shared<eowu::data::Store>();
-  eowu::ScriptWrapper::task_data_store = task_data_store;
+  script_wrapper.SetTaskDataStore(task_data_store);
   
   const auto &data_file = lua_runtime.setup_schema.paths.data + "task.dat";
   task_data_store->Open(data_file);
   //  end task data store
   
-  lua_runtime.InitializeScriptWrapper(file, gl_pipeline);
+  //  @TODO: Handle task-data storage here as well.
+  lua_runtime.InitializeScriptWrapper(script_wrapper, file, gl_pipeline);
   
   eowu::thread::SharedState thread_state;
   
-  auto first_state = lua_runtime.GetFirstState();
-  auto task_thread = std::thread(eowu::thread::task, std::ref(thread_state), std::ref(state_runner), first_state);
+  //  Task thread
+  state_runner.Begin(lua_runtime.GetFirstState());
   
-  auto &locked_lua_functions = *eowu::ScriptWrapper::LuaRenderThreadFunctions.get();
-  const auto &render_context = lua_runtime.lua_contexts.render;
+  auto task_thread = std::thread(eowu::thread::task, std::ref(thread_state), std::ref(state_runner));
   
-  eowu::thread::render(thread_state, render_context, locked_lua_functions, gl_pipeline);
+  //  Render thread
+  auto locked_lua_functions = script_wrapper.GetLockedRenderFunctions();
+  const auto &lua_render_context = lua_runtime.lua_contexts.render;
+  
+  eowu::thread::render(thread_state, lua_render_context, locked_lua_functions, gl_pipeline);
   
   task_thread.join();
   

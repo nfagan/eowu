@@ -21,15 +21,10 @@ task_thread_initialized(false), render_thread_initialized(false), threads_should
   //
 }
 
-void eowu::thread::task(eowu::thread::SharedState &state,
-                        eowu::StateRunner &state_runner,
-                        eowu::State *first_state) {
+void eowu::thread::task(eowu::thread::SharedState &state, eowu::StateRunner &state_runner) {
+  state.task_thread_initialized.store(true);
   
   const auto &state_runner_timer = state_runner.GetTimer();
-  
-  state_runner.Begin(first_state);
-  
-  state.task_thread_initialized.store(true);
   
   while (!state.render_thread_initialized) {
     EOWU_LOG_INFO("Task thread: Awaiting render thread initialization.");
@@ -58,7 +53,7 @@ void eowu::thread::task(eowu::thread::SharedState &state,
 
 void eowu::thread::render(eowu::thread::SharedState &state,
                           std::shared_ptr<eowu::LuaContext> lua_context,
-                          eowu::LockedLuaRenderFunctions &lua_render_functions,
+                          std::shared_ptr<eowu::LockedLuaRenderFunctions> lua_render_functions,
                           std::shared_ptr<eowu::GLPipeline> pipeline) {
   
   auto renderer = pipeline->GetRenderer();
@@ -88,7 +83,7 @@ void eowu::thread::render(eowu::thread::SharedState &state,
       break;
     }
     
-    lua_render_functions.Use([&](auto *render, auto *flip) -> void {
+    lua_render_functions->Use([&](auto *render, auto *flip) -> void {
       //  call render function for this frame
       bool render_res = eowu::thread::try_call_render(lua_context, render);
       
@@ -113,7 +108,7 @@ void eowu::thread::render(eowu::thread::SharedState &state,
   }
   
   //  clean-up
-  lua_render_functions.Flush();
+  lua_render_functions->Flush();
   
   gl_context_manager->CloseWindows();
   

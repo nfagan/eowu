@@ -28,8 +28,11 @@ namespace eowu {
     unsigned int width;
     unsigned int height;
     unsigned int index;
+    unsigned int swap_interval;
+    
     bool is_fullscreen;
     bool is_resizeable;
+    
     std::string title;
     
     WindowProperties();
@@ -57,6 +60,9 @@ public:
   void SetHeight(unsigned int height);
   void SetWidth(unsigned int width);
   void SetPosition(unsigned int x, unsigned int y);
+  void SetSwapInterval(unsigned int interval);
+  
+  void ApplySwapInterval() const;
   
   bool IsOpen() const;
   bool WasResized() const;
@@ -82,6 +88,7 @@ private:
   
   std::atomic<unsigned int> width;
   std::atomic<unsigned int> height;
+  std::atomic<unsigned int> swap_interval;
   
   std::atomic<bool> is_open;
   std::atomic<bool> was_resized;

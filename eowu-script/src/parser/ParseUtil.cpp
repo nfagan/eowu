@@ -355,6 +355,7 @@ T eowu::parser::get_numeric_value_or(const eowu::parser::MapTableType &table,
 
 EOWU_get_numeric_value_or(int);
 EOWU_get_numeric_value_or(unsigned int);
+EOWU_get_numeric_value_or(bool);
 EOWU_get_numeric_value_or(double);
 
 //

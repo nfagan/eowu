@@ -29,7 +29,7 @@ namespace eowu {
       
       std::string state_id;
       
-      int is_first;
+      bool is_first;
       double duration;
       
       State(lua_State *L);

@@ -132,8 +132,9 @@ eowu::parser::ParseResult<eowu::schema::Windows> eowu::parser::windows(const lua
     window.width = get_numeric_value_or<int>(subtable, "width", -1);
     window.height = get_numeric_value_or<int>(subtable, "height", -1);
     window.index = get_numeric_value_or<unsigned int>(subtable, "index", 0);
-    window.full_screen = get_numeric_value_or<unsigned int>(subtable, "fullscreen", 0);
-    window.resizeable = get_numeric_value_or<unsigned int>(subtable, "resizeable", 0);
+    window.is_fullscreen = get_numeric_value_or<bool>(subtable, "fullscreen", false);
+    window.is_resizeable = get_numeric_value_or<bool>(subtable, "resizeable", false);
+    window.is_vsynced = get_numeric_value_or<bool>(subtable, "vsync", true);
     window.title = get_string_or_type_error(subtable, "title", id);
     
     result.result.windows.emplace(it.first, window);
@@ -468,7 +469,7 @@ eowu::parser::ParseResult<eowu::schema::State> eowu::parser::state(const luabrid
     result.result.entry_function = eowu::parser::get_function_or_error(kv, "Entry");
     result.result.loop_function = eowu::parser::get_function_or_type_error(kv, "Loop", noop);
     result.result.exit_function = eowu::parser::get_function_or_type_error(kv, "Exit", noop);
-    result.result.is_first = eowu::parser::get_numeric_value_or<int>(kv, "First", 0);
+    result.result.is_first = eowu::parser::get_numeric_value_or<bool>(kv, "First", false);
     
     if (kv.count("Variables") > 0) {
       const luabridge::LuaRef &var_ref = kv.at("Variables");

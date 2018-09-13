@@ -24,6 +24,8 @@ namespace eowu {
   namespace glfw {
     void window_size_callback(GLFWwindow *window, int width, int height);
     void window_close_callback(GLFWwindow *window);
+    void window_mouse_position_callback(GLFWwindow *window, double x, double y);
+    void window_key_press_callback(GLFWwindow *window, int key, int scancode, int action, int mode);
   }
 }
 
@@ -48,6 +50,8 @@ public:
   
   friend void eowu::glfw::window_size_callback(GLFWwindow *window, int width, int height);
   friend void eowu::glfw::window_close_callback(GLFWwindow *window);
+  friend void eowu::glfw::window_mouse_position_callback(GLFWwindow *window, double x, double y);
+  friend void eowu::glfw::window_key_press_callback(GLFWwindow *window, int key, int scancode, int action, int mode);
 private:
   bool is_initialized;
   bool loaded_gl_pointers;

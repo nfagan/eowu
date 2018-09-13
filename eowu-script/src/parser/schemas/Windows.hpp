@@ -15,8 +15,10 @@ namespace eowu {
     
     struct Window {
       unsigned int index;
-      unsigned int full_screen;
-      unsigned int resizeable;
+      bool is_fullscreen;
+      bool is_resizeable;
+      bool is_vsynced;
+      
       int width;
       int height;
       std::string title;

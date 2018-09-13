@@ -33,6 +33,9 @@ Setup.Geometry = {
 Setup.Sources = {
   mouse = {
     type = 'Mouse'
+  },
+  keyboard = {
+    type = 'Keyboard'
   }
 }
 

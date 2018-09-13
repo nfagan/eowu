@@ -34,7 +34,7 @@ namespace eowu {
     
     void render(eowu::thread::SharedState &state,
                 std::shared_ptr<eowu::LuaContext> lua_context,
-                eowu::LockedLuaRenderFunctions &lua_render_functions,
+                std::shared_ptr<eowu::LockedLuaRenderFunctions> lua_render_functions,
                 std::shared_ptr<eowu::GLPipeline> pipeline);
     
     bool try_call_render(const std::shared_ptr<eowu::LuaContext> &lua_context,
@@ -45,8 +45,6 @@ namespace eowu {
                        const eowu::WindowContainerType &gl_windows,
                        const eowu::time::RenderTiming &render_time);
     
-    void task(eowu::thread::SharedState &state,
-              eowu::StateRunner &state_runner,
-              eowu::State *first_state);
+    void task(eowu::thread::SharedState &state, eowu::StateRunner &state_runner);
   }
 }

@@ -13,6 +13,21 @@
 #include <eowu-state/eowu-state.hpp>
 #include <chrono>
 
+#define EOWU_GET_LUA_FUNCTION_CONTAINER(name, field) \
+  eowu::LuaFunctionContainerType eowu::init::name(const eowu::schema::States &schema) { \
+    auto result = std::make_unique<eowu::LuaFunctionMapType>(); \
+    \
+    for (const auto &state_it : schema.mapping) { \
+      for (const auto &func_it : state_it.second.field) { \
+        eowu::LuaFunction func(func_it.second); \
+        result->emplace(func_it.first, func); \
+      } \
+    } \
+      \
+    return result; \
+  }
+
+
 void eowu::init::init_render_schema(lua_State *L) {
   eowu::RendererWrapper::CreateLuaSchema(L);
   eowu::VectorWrapper::CreateLuaSchema(L);
@@ -26,33 +41,8 @@ void eowu::init::init_state_schema(lua_State *L) {
   eowu::MathWrapper::CreateLuaSchema(L);
 }
 
-eowu::LuaFunctionContainerType eowu::init::get_render_functions(const eowu::schema::States &schema) {
-  auto result = std::make_unique<eowu::LuaFunctionMapType>();
-  
-  for (const auto &state_it : schema.mapping) {
-    for (const auto &func_it : state_it.second.render_functions) {
-      eowu::LuaFunction func(func_it.second);
-      
-      result->emplace(func_it.first, func);
-    }
-  }
-  
-  return result;
-}
-
-eowu::LuaFunctionContainerType eowu::init::get_flip_functions(const eowu::schema::States &schema) {
-  auto result = std::make_unique<eowu::LuaFunctionMapType>();
-  
-  for (const auto &state_it : schema.mapping) {
-    for (const auto &func_it : state_it.second.flip_functions) {
-      eowu::LuaFunction func(func_it.second);
-      
-      result->emplace(func_it.first, func);
-    }
-  }
-  
-  return result;
-}
+EOWU_GET_LUA_FUNCTION_CONTAINER(get_render_functions, render_functions)
+EOWU_GET_LUA_FUNCTION_CONTAINER(get_flip_functions, flip_functions)
 
 eowu::State* eowu::init::get_first_state(const eowu::schema::States &schema,
                                          const eowu::StateManager &state_manager) {
@@ -60,7 +50,7 @@ eowu::State* eowu::init::get_first_state(const eowu::schema::States &schema,
   for (const auto &it : schema.mapping) {
     const auto &state = it.second;
     
-    if (state.is_first > 0) {
+    if (state.is_first) {
       return state_manager.GetState(state.state_id);
     }
   }

@@ -9,7 +9,8 @@
 #include <iostream>
 #include <eowu-common/logging.hpp>
 
-eowu::LuaRuntime::LuaRuntime(eowu::StateManager &manager, eowu::StateRunner &runner) :
+eowu::LuaRuntime::LuaRuntime(eowu::StateManager &manager,
+                             eowu::StateRunner &runner) :
 state_manager(manager), state_runner(runner) {
   //
 }
@@ -100,7 +101,8 @@ bool eowu::LuaRuntime::InitializeSchema(const std::string &file) {
   return true;
 }
 
-void eowu::LuaRuntime::InitializeScriptWrapper(const std::string &file,
+void eowu::LuaRuntime::InitializeScriptWrapper(eowu::ScriptWrapper &script_wrapper,
+                                               const std::string &file,
                                                std::shared_ptr<eowu::GLPipeline> gl_pipeline) {
   
   const auto render_state_schema = get_render_state_schema(file);
