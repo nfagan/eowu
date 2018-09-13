@@ -104,6 +104,7 @@ void eowu::LuaRuntime::InitializeScriptWrapper(const std::string &file,
                                                std::shared_ptr<eowu::GLPipeline> gl_pipeline) {
   
   const auto render_state_schema = get_render_state_schema(file);
+  //  should already have been validated.
   assert(render_state_schema.success);
   
   auto render_functions = get_render_functions(render_state_schema.result);
@@ -121,26 +122,7 @@ void eowu::LuaRuntime::InitializeScriptWrapper(const std::string &file,
 }
 
 eowu::State* eowu::LuaRuntime::GetFirstState() {
-  for (const auto &it : setup_schema.states.mapping) {
-    const auto &state = it.second;
-    
-    if (state.is_first > 0) {
-      return state_manager.GetState(state.state_id);
-    }
-  }
-  
-  const auto keys = state_manager.GetStateIds();
-  
-  if (keys.size() == 0) {
-    EOWU_LOG_WARN("LuaRuntime::GetFirstState: No states were present.");
-    return nullptr;
-  }
-  
-  const auto &state_id = keys[0];
-  
-  EOWU_LOG_WARN("LuaRuntime::GetFirstState: No state was marked as first; using " + state_id);
-  
-  return state_manager.GetState(state_id);
+  return init::get_first_state(setup_schema.states, state_manager);
 }
 
 std::shared_ptr<eowu::LuaContext> eowu::LuaRuntime::get_new_lua_context() {

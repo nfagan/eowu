@@ -30,8 +30,13 @@ void eowu::LockedLuaRenderFunctions::Flush() {
   is_queued = false;
   did_use = true;
   
-  render_function->AbortCall();
-  flip_function->AbortCall();
+  if (render_function != nullptr) {
+    render_function->AbortCall();
+  }
+  
+  if (flip_function != nullptr) {
+    flip_function->AbortCall();
+  }
 }
 
 void eowu::LockedLuaRenderFunctions::Queue(eowu::LuaFunction *render, eowu::LuaFunction *flip) {

@@ -57,7 +57,7 @@ void eowu::data::Commitable::Set(const eowu::data::Struct &value) {
   std::unique_lock<std::mutex> lock(mut);
   
   if (IsCommitted()) {
-    throw eowu::AlreadyCommittedError("Attempted to commit an already committed value.");
+    throw eowu::AlreadyCommittedError("Attempted to set an already committed value.");
   }
   
   this->value = value;

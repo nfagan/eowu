@@ -70,11 +70,9 @@ void eowu::StateWrapper::Write(eowu::serialize::ByteArrayType &into) const {
       continue;
     }
     
-    const auto inserter = [&](const auto &data) -> void {
+    var.Use([&](const auto &data) -> void {
       eowu::serialize::serialize(data, into);
-    };
-    
-    var.Use(inserter);
+    });
   }
 }
 

@@ -21,16 +21,22 @@
 
 //  states
 eowu::StateWrapperContainerType eowu::ScriptWrapper::states = nullptr;
+//
 //  gl pipeline
 std::shared_ptr<eowu::GLPipeline> eowu::ScriptWrapper::pipeline = nullptr;
+//
 //  render functions
 eowu::LuaFunctionContainerType eowu::ScriptWrapper::render_functions = nullptr;
+//
 //  flip functions
 eowu::LuaFunctionContainerType eowu::ScriptWrapper::flip_functions = nullptr;
+//
 //  render-flip pair
 std::shared_ptr<eowu::LockedLuaRenderFunctions> eowu::ScriptWrapper::LuaRenderThreadFunctions = nullptr;
+//
 //  task data store
 std::shared_ptr<eowu::data::Store> eowu::ScriptWrapper::task_data_store = nullptr;
+//
 //  variables
 eowu::ScriptWrapper::Variables eowu::ScriptWrapper::variables{};
 

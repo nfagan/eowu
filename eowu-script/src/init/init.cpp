@@ -54,6 +54,30 @@ eowu::LuaFunctionContainerType eowu::init::get_flip_functions(const eowu::schema
   return result;
 }
 
+eowu::State* eowu::init::get_first_state(const eowu::schema::States &schema,
+                                         const eowu::StateManager &state_manager) {
+  
+  for (const auto &it : schema.mapping) {
+    const auto &state = it.second;
+    
+    if (state.is_first > 0) {
+      return state_manager.GetState(state.state_id);
+    }
+  }
+  
+  const auto keys = state_manager.GetStateIds();
+  
+  if (keys.size() == 0) {
+    EOWU_LOG_WARN("init::get_first_state: No states were present.");
+    return nullptr;
+  }
+  
+  const auto &state_id = keys[0];
+  EOWU_LOG_WARN("init::get_first_state: No state was marked as first; using '" + state_id + "'.");
+  
+  return state_manager.GetState(state_id);
+}
+
 eowu::StateWrapperContainerType eowu::init::get_states(const eowu::schema::States &schemas,
                                                        std::shared_ptr<eowu::LuaContext> lua_context,
                                                        eowu::StateManager &state_manager,
