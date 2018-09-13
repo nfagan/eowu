@@ -14,12 +14,12 @@ Setup.Variables = {
 }
 
 Setup.Paths = {
-  Data = '/Users/Nick/Desktop/test/'
+  Data = 'C:\\Users\\changLab\\Documents\\eowu\\'
 }
 
 Setup.Windows = {
   main = {
-    width = 400, height = 400, fullscreen = false, resizeable = false
+    width = 400, height = 400, fullscreen = false, resizeable = true
   }
 }
 
@@ -39,9 +39,7 @@ Setup.Sources = {
   }
 }
 
-Setup.Textures = {
-  first = '/Users/Nick/Desktop/eg.png'
-}
+Setup.Textures = {}
 
 Setup.Stimuli = {
   sq = { geometry = 'rect' },

@@ -99,7 +99,7 @@ local function render()
   end
 
   stim:Units('normalized')
-  stim:Texture('first')
+  stim:Color({1, 1, 1})
 
   local rot = stim.rotation
   local sz = stim.size
