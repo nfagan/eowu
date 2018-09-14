@@ -19,7 +19,7 @@ void eowu::test::test_path() {
   auto outer_dir = eowu::path::get_outer_directory(file_path_1);
   
   EOWU_ASSERT_TRUE(outer_dir == "/Users/Nick", "Outer directory parsing succeeded on: " + platform,
-                   "Outer directory parsing failed on: " + platform);
+                   "Outer directory parsing failed on: " + platform + "; value was: " + outer_dir);
   
   //  test trailing slash
   std::string file_path_2 = "/Users/Nick/test/";
@@ -27,7 +27,7 @@ void eowu::test::test_path() {
   outer_dir = eowu::path::get_outer_directory(file_path_2);
   
   EOWU_ASSERT_TRUE(outer_dir == "/Users/Nick", "Outer directory parsing with trailing slash succeeded on: " + platform,
-                   "Outer directory parsing with trailing slash failed on: " + platform);
+                   "Outer directory parsing with trailing slash failed on: " + platform + "; value was: " + outer_dir);
   
   //  test no slashes
   std::string file_path_3 = "Users";
@@ -35,7 +35,7 @@ void eowu::test::test_path() {
   outer_dir = eowu::path::get_outer_directory(file_path_3);
   
   EOWU_ASSERT_TRUE(outer_dir == file_path_3, "Outer directory parsing with no slashes succeeded on: " + platform,
-                   "Outer directory parsing with no slashes failed on: " + platform);
+                   "Outer directory parsing with no slashes failed on: " + platform + "; value was: " + outer_dir);
   
   //  test empty string
   std::string file_path_4;
@@ -43,5 +43,5 @@ void eowu::test::test_path() {
   outer_dir = eowu::path::get_outer_directory(file_path_4);
   
   EOWU_ASSERT_TRUE(outer_dir == "", "Outer directory parsing with empty string succeeded on: " + platform,
-                   "Outer directory parsing with empty string failed on: " + platform);
+                   "Outer directory parsing with empty string failed on: " + platform + "; value was: " + outer_dir);
 }
