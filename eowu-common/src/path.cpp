@@ -12,7 +12,7 @@
 std::string eowu::path::get_eowu_root_directory() {
   std::string file = __FILE__;
   
-  
+  return "";
 }
 
 std::string eowu::path::get_outer_directory(const std::string &inner_dir, bool *success) {
