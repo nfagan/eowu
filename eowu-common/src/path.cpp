@@ -10,6 +10,7 @@
 #include <string_view>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <iostream>
 
 std::string eowu::path::get_eowu_root_directory(bool *success) {
   std::string file = __FILE__;
@@ -124,8 +125,16 @@ std::string eowu::path::full_file(const std::vector<std::string> &components) {
         break;
       }
       
-      if (&processed[processed_sz-1] == slash) {
+      std::string_view last(processed);
+      std::string_view first(processed);
+      
+      last = last.substr(processed_sz-1, 1);
+      first = first.substr(0, 1);
+      
+      if (last == slash) {
         processed.pop_back();
+      } else if (first == slash && i > 0) {
+        processed.erase(0, 1);
       } else {
         break;
       }
@@ -135,6 +144,7 @@ std::string eowu::path::full_file(const std::vector<std::string> &components) {
       if (i > 0) {
         result += slash;
       }
+      
       result += processed;
     }
   }
