@@ -11,7 +11,28 @@
 #include <eowu-common/platform.hpp>
 #include <iostream>
 
+void eowu::test::test_fullfile() {
+  EOWU_PRINT_TEST_BEGIN("full_file");
+  
+#ifdef EOWU_IS_WIN
+  std::vector<std::string> components{"C:\\", "Users\\Nick", "Another"};
+  std::string expected = "C:\\Users\\Nick\\Another";
+#else
+  std::vector<std::string> components{"/Users", "Nick/", "Another"};
+  std::string expected = "/Users/Nick/Another";
+#endif
+  
+  std::string platform = eowu::platform::name;
+  auto res = eowu::path::full_file(components);
+  
+  EOWU_ASSERT_TRUE(res == expected, "full_file succeeded on: " + platform + "; value was: " + res,
+                   "full_file failed on: " + platform + "; value was: " + res);
+  
+}
+
 void eowu::test::test_path() {
+  EOWU_PRINT_TEST_BEGIN("path");
+  
   std::string platform = eowu::platform::name;
   
 #ifndef EOWU_IS_WIN

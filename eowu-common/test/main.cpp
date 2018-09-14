@@ -9,6 +9,7 @@
 
 int main(int argc, char **argv) {
   eowu::test::test_path();
+  eowu::test::test_fullfile();
   
   return 0;
 }

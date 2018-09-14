@@ -10,5 +10,6 @@
 namespace eowu {
   namespace test {
     void test_path();
+    void test_fullfile();
   }
 }

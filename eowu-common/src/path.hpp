@@ -9,6 +9,7 @@
 
 #include <string>
 #include <cstddef>
+#include <vector>
 
 namespace eowu {
   namespace path {
@@ -18,5 +19,9 @@ namespace eowu {
     std::string get_outer_directory(const std::string &inner_dir, bool *success);
     std::string get_outer_directory(const std::string &inner_dir, std::size_t n_levels, bool *success);
     std::string get_outer_directory(const std::string &inner_dir);
+    
+    bool directory_exists(const std::string &path);
+    
+    std::string full_file(const std::vector<std::string> &components);
   }
 }
