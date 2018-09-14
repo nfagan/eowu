@@ -34,7 +34,6 @@ void eowu::test::test_fullfile() {
   auto res2 = eowu::path::full_file(components2);
   EOWU_ASSERT_TRUE(res2 == expected, "full_file succeeded on: " + platform + "; value was: " + res2,
                    "full_file failed on: " + platform + "; value was: " + res2);
-  
 }
 
 void eowu::test::test_path() {

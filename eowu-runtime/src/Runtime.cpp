@@ -13,6 +13,7 @@
 #include <eowu-gl/eowu-gl.hpp>
 #include <eowu-state/eowu-state.hpp>
 #include <eowu-data.hpp>
+#include <eowu-common/path.hpp>
 #include <Lua.hpp>
 #include <iostream>
 #include <thread>
@@ -40,8 +41,13 @@ int eowu::Runtime::Main(const std::string &file) {
   //  task data store
   auto task_data_store = std::make_shared<eowu::data::Store>();
   script_wrapper.SetTaskDataStore(task_data_store);
+  const auto &data_path = lua_runtime.setup_schema.paths.data;
   
-  const auto &data_file = lua_runtime.setup_schema.paths.data + "task.dat";
+  if (!eowu::path::directory_exists(data_path)) {
+    throw std::runtime_error("Directory: '" + data_path + "' does not exist.");
+  }
+  
+  const auto data_file = eowu::path::full_file({data_path, "task.dat"});
   task_data_store->Open(data_file);
   //  end task data store
   

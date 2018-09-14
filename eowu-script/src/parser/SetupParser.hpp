@@ -16,6 +16,8 @@ namespace luabridge {
 
 namespace eowu {
   namespace parser {
+    ParseResult<bool> insert_package_path(lua_State *L, const std::string &file);
+    
     ParseResult<eowu::schema::EntryScript> entry_script(lua_State *L, const std::string &file);
     
     ParseResult<eowu::schema::Setup> setup(const luabridge::LuaRef &table);
