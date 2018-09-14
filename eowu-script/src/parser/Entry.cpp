@@ -9,6 +9,7 @@
 #include "ParseUtil.hpp"
 #include "Lua.hpp"
 #include <eowu-common/path.hpp>
+#include <eowu-common/platform.hpp>
 
 eowu::parser::ParseResult<bool> eowu::parser::insert_package_path(lua_State *L, const std::string &file) {
   eowu::parser::ParseResult<bool> result;
@@ -23,7 +24,7 @@ eowu::parser::ParseResult<bool> eowu::parser::insert_package_path(lua_State *L, 
     return result;
   }
   
-  std::string package_executor = "package.path = package.path .. (';' .. '" +  outer_dir + "' .. '\\?.lua')";
+  std::string package_executor = "package.path = package.path .. (';' .. '" +  outer_dir + "' .. '/?.lua')";
   const char* const buff = package_executor.c_str();
   
   int error = luaL_loadbuffer(L, buff, strlen(buff), "line") || lua_pcall(L, 0, 0, 0);
@@ -47,6 +48,7 @@ eowu::parser::ParseResult<eowu::schema::EntryScript> eowu::parser::entry_script(
   eowu::parser::ParseResult<eowu::schema::EntryScript> entry_script(L);
   int lua_status;
 
+#ifdef EOWU_IS_MAC
   //  insert package path into the executing file
   auto insert_result = parser::insert_package_path(L, file);
 
@@ -55,6 +57,7 @@ eowu::parser::ParseResult<eowu::schema::EntryScript> eowu::parser::entry_script(
     entry_script.context = insert_result.context;
     return entry_script;
   }
+#endif
   
   lua_status = luaL_loadfile(L, file.c_str());
   
