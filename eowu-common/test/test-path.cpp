@@ -14,7 +14,11 @@
 void eowu::test::test_path() {
   std::string platform = eowu::platform::name;
   
+#ifndef EOWU_IS_WIN
   std::string file_path_1 = "/Users/Nick/test";
+#else
+  std::string file_path_1 = "C:\\Users\\Nick\\test";
+#endif
   
   auto outer_dir = eowu::path::get_outer_directory(file_path_1);
   
@@ -22,7 +26,11 @@ void eowu::test::test_path() {
                    "Outer directory parsing failed on: " + platform + "; value was: " + outer_dir);
   
   //  test trailing slash
+#ifndef EOWU_IS_WIN
   std::string file_path_2 = "/Users/Nick/test/";
+#else
+  std::string file_path_2 = "C:\\Users\\Nick\\test\\";
+#endif
   
   outer_dir = eowu::path::get_outer_directory(file_path_2);
   
