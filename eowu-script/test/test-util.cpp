@@ -13,13 +13,6 @@
 
 std::string util::get_lua_test_script_directory() {
   return eowu::path::get_eowu_root_directory() + "/eowu-script/test/script/";
-//  
-//  
-//#ifdef __APPLE__
-//  return "/Users/Nick/repositories/cpp/eowu/eowu-script/test/script/";
-//#else
-//  return "C:\\Users\\changLab\\Repositories\\cpp\\eowu\\eowu-script\\test\\script\\";
-//#endif
 }
 
 namespace detail {
