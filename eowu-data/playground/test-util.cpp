@@ -6,7 +6,15 @@
 //
 
 #include "test-util.hpp"
+#include <eowu-common/path.hpp>
+#include <assert.h>
 
 std::string eowu::test::util::get_test_data_dir() {
-  return "/Users/Nick/repositories/cpp/eowu/eowu-data/data/";
+  bool success;
+  
+  const auto eowu_root = eowu::path::get_eowu_root_directory(&success);
+  
+  assert(success);
+  
+  return eowu_root + "/eowu-data/data";
 }
