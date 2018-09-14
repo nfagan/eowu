@@ -16,7 +16,7 @@ void eowu::test::test_fullfile() {
   
 #ifdef EOWU_IS_WIN
   std::vector<std::string> components{"C:\\", "Users\\Nick\\", "Another"};
-  std::vector<std::string> components2{"C:\\", "\\\\Nick\\", "\\Another"};
+  std::vector<std::string> components2{"C:\\", "\\\\Users\\Nick\\", "\\Another"};
   std::string expected = "C:\\Users\\Nick\\Another";
 #else
   std::vector<std::string> components{"/Users", "Nick/", "Another"};
