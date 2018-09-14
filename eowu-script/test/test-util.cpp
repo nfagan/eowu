@@ -8,11 +8,11 @@
 #include "test-util.hpp"
 #include <eowu-script/eowu-script.hpp>
 #include "Lua.hpp"
-#include <eowu-common/path.hpp>
+#include <eowu-common/fs.hpp>
 #include <stdexcept>
 
 std::string util::get_lua_test_script_directory() {
-  return eowu::path::get_eowu_root_directory() + "/eowu-script/test/script/";
+  return eowu::fs::get_eowu_root_directory() + "/eowu-script/test/script/";
 }
 
 namespace detail {

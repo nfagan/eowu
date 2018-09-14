@@ -6,13 +6,13 @@
 //
 
 #include "test-util.hpp"
-#include <eowu-common/path.hpp>
+#include <eowu-common/fs.hpp>
 #include <assert.h>
 
 std::string eowu::test::util::get_test_data_dir() {
   bool success;
   
-  const auto eowu_root = eowu::path::get_eowu_root_directory(&success);
+  const auto eowu_root = eowu::fs::get_eowu_root_directory(&success);
   
   assert(success);
   

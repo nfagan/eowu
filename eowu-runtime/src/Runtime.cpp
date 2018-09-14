@@ -7,13 +7,12 @@
 
 #include "Runtime.hpp"
 #include "GLInit.hpp"
+#include "DataInit.hpp"
 #include "Threads.hpp"
 #include <eowu-script/eowu-script.hpp>
 #include <eowu-script/eowu-script.hpp>
 #include <eowu-gl/eowu-gl.hpp>
 #include <eowu-state/eowu-state.hpp>
-#include <eowu-data.hpp>
-#include <eowu-common/path.hpp>
 #include <Lua.hpp>
 #include <iostream>
 #include <thread>
@@ -29,6 +28,21 @@ int eowu::Runtime::Main(const std::string &file) {
     return 1;
   }
   
+  //  task data store
+  const auto &data_root_directory = lua_runtime.setup_schema.paths.data;
+  
+  auto data_init_result = eowu::data::initialize_data_pipeline(data_root_directory);
+  
+  if (!data_init_result.status.success) {
+    data_init_result.status.file = file;
+    data_init_result.status.print();
+    return 1;
+  }
+  
+  //  otherwise, the task data store is ok.
+  script_wrapper.SetTaskDataStore(data_init_result.result.task_data_store);
+  
+  //  gl pipeline
   auto gl_pipeline = eowu::GLPipeline::GetInstance();
   auto gl_status = init::initialize_gl_pipeline(gl_pipeline, lua_runtime.setup_schema);
   
@@ -38,20 +52,7 @@ int eowu::Runtime::Main(const std::string &file) {
     return 1;
   }
   
-  //  task data store
-  auto task_data_store = std::make_shared<eowu::data::Store>();
-  script_wrapper.SetTaskDataStore(task_data_store);
-  const auto &data_path = lua_runtime.setup_schema.paths.data;
-  
-  if (!eowu::path::directory_exists(data_path)) {
-    throw std::runtime_error("Directory: '" + data_path + "' does not exist.");
-  }
-  
-  const auto data_file = eowu::path::full_file({data_path, "task.dat"});
-  task_data_store->Open(data_file);
-  //  end task data store
-  
-  //  @TODO: Handle task-data storage here as well.
+  //  otherwise, the gl pipeline is ok.
   lua_runtime.InitializeScriptWrapper(script_wrapper, file, gl_pipeline);
   
   eowu::thread::SharedState thread_state;

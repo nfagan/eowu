@@ -15,7 +15,7 @@ int main(int argc, char** argv) {
   std::string file;
   
   if (argc < 2) {
-    std::cout << "Enter a path to a file to run." << std::endl << std::endl;
+    std::cout << std::endl << "Specify a file to run." << std::endl << std::endl;
     return 0;
   } else {
     file = argv[1];

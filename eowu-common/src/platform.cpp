@@ -8,9 +8,9 @@
 #include "platform.hpp"
 
 #ifdef EOWU_IS_WIN
-const char* const eowu::path::slash = "\\";
+const char* const eowu::fs::slash = "\\";
 #else
-const char* const eowu::path::slash = "/";
+const char* const eowu::fs::slash = "/";
 #endif
 
 #ifdef EOWU_IS_WIN

@@ -20,7 +20,7 @@
 #endif
 
 namespace eowu {
-  namespace path {
+  namespace fs {
     extern const char* const slash;
   }
   

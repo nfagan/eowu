@@ -15,7 +15,7 @@
 #include <assert.h>
 #include <chrono>
 #include <algorithm>
-#include <eowu-common/path.hpp>
+#include <eowu-common/fs.hpp>
 
 bool any_should_close(const std::vector<eowu::WindowType> &wins) {
   return std::any_of(wins.cbegin(), wins.cend(), [](const auto &win) {
@@ -91,7 +91,7 @@ void test_renderer_instantiation() {
   auto material = std::make_shared<eowu::Material>();
   auto material2 = std::make_shared<eowu::Material>(material);
   
-  auto tex_path = eowu::path::get_eowu_root_directory() + "/eowu-gl/test/res/go1.png";
+  auto tex_path = eowu::fs::get_eowu_root_directory() + "/eowu-gl/test/res/go1.png";
   auto tex = eowu::load::image(tex_path);
   
   material2->SetFaceColor(tex);

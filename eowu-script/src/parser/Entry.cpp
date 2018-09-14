@@ -8,7 +8,7 @@
 #include "SetupParser.hpp"
 #include "ParseUtil.hpp"
 #include "Lua.hpp"
-#include <eowu-common/path.hpp>
+#include <eowu-common/fs.hpp>
 #include <eowu-common/platform.hpp>
 
 eowu::parser::ParseResult<bool> eowu::parser::insert_package_path(lua_State *L, const std::string &file) {
@@ -17,10 +17,12 @@ eowu::parser::ParseResult<bool> eowu::parser::insert_package_path(lua_State *L, 
   result.result = false;
   result.context = "parser::insert_package_path";
   
-  auto outer_dir = eowu::path::get_outer_directory(file, &result.success);
+  auto outer_dir = eowu::fs::get_outer_directory(file);
   
-  if (!result.success) {
-    result.message = "Failed to parse outer directory from file: '" + file + "'.";
+  //  if we start the utility with a single file path like: `eowu setup.lua`
+  //  then there won't be an outer directory.
+  if (outer_dir == "") {
+    result.success = true;
     return result;
   }
   
