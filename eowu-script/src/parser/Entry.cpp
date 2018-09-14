@@ -23,7 +23,7 @@ eowu::parser::ParseResult<bool> eowu::parser::insert_package_path(lua_State *L, 
     return result;
   }
   
-  std::string package_executor = "package.path = package.path .. (';' .. '" +  outer_dir + "' .. '/?.lua')";
+  std::string package_executor = "package.path = package.path .. (';' .. '" +  outer_dir + "' .. '\\?.lua')";
   const char* const buff = package_executor.c_str();
   
   int error = luaL_loadbuffer(L, buff, strlen(buff), "line") || lua_pcall(L, 0, 0, 0);
