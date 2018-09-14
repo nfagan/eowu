@@ -16,25 +16,29 @@ void eowu::test::test_path() {
   
 #ifndef EOWU_IS_WIN
   std::string file_path_1 = "/Users/Nick/test";
+  std::string expected_1 = "/Users/Nick";
 #else
   std::string file_path_1 = "C:\\Users\\Nick\\test";
+  std::string expected_1 = "C:\\Users\\Nick";
 #endif
   
   auto outer_dir = eowu::path::get_outer_directory(file_path_1);
   
-  EOWU_ASSERT_TRUE(outer_dir == "/Users/Nick", "Outer directory parsing succeeded on: " + platform,
+  EOWU_ASSERT_TRUE(outer_dir == expected_1, "Outer directory parsing succeeded on: " + platform,
                    "Outer directory parsing failed on: " + platform + "; value was: " + outer_dir);
   
   //  test trailing slash
 #ifndef EOWU_IS_WIN
   std::string file_path_2 = "/Users/Nick/test/";
+  std::string expected_2 = expected_1;
 #else
   std::string file_path_2 = "C:\\Users\\Nick\\test\\";
+  std::string expected_2 = expected_1;
 #endif
   
   outer_dir = eowu::path::get_outer_directory(file_path_2);
   
-  EOWU_ASSERT_TRUE(outer_dir == "/Users/Nick", "Outer directory parsing with trailing slash succeeded on: " + platform,
+  EOWU_ASSERT_TRUE(outer_dir == expected_2, "Outer directory parsing with trailing slash succeeded on: " + platform,
                    "Outer directory parsing with trailing slash failed on: " + platform + "; value was: " + outer_dir);
   
   //  test no slashes
