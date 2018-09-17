@@ -16,9 +16,8 @@ Setup.Save = {
 
 Setup.Windows = {
   main = {
-    width = 600, 
-    height = 600,
-    resizeable = true
+    width = 400,
+    height = 400
   }
 }
 

@@ -226,7 +226,7 @@ glm::vec2 eowu::XYTarget::GetUnitsPadding() const {
   auto screen_dims = transform.GetScreenDimensions();
   auto pixel_padding = padding;
   
-  if (units == eowu::units::normalized || units == eowu::units::mixed) {
+  if (units == eowu::units::normalized) {
     pixel_padding.x = pixel_padding.x * screen_dims.x;
     pixel_padding.y = pixel_padding.y * screen_dims.y;
   }
@@ -280,7 +280,6 @@ void eowu::XYTarget::match_to_linked_model() {
 bool eowu::XYTarget::has_linked_model() const {
   return linked_model != nullptr;
 }
-
 
 //
 //  Make

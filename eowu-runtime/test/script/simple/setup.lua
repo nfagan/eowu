@@ -20,12 +20,8 @@ Setup.Geometry = {
 }
 
 Setup.Stimuli = {
-  fix = {
-    geometry = 'rect',
-    color = { 0, 1, 1 },
-    size = { 0.5, 0.5 },
-    position = { 0.5, 0.5 },
-    units = 'normalized'
+  example = {
+    geometry = 'rect'
   }
 }
 
