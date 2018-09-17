@@ -9,7 +9,7 @@ state.Variables = {
 }
 
 function state.Entry()
-  local script = eowu_script()
+  local script = eowu.script()
   local state = script:State('new_trial')
 
   local trial = script:Variable('trial')

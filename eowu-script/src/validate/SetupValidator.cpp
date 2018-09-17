@@ -38,8 +38,22 @@ eowu::schema::validate::Setup eowu::validate::make_setup(const eowu::schema::Set
   setup_validator.geometry = make_geometry(schema);
   setup_validator.stimulus = make_stimulus(schema);
   setup_validator.target = make_target(schema);
+  setup_validator.source = make_source(schema);
   
   return setup_validator;
+}
+
+//
+//  make, source
+//
+
+eowu::schema::validate::Source eowu::validate::make_source(const eowu::schema::Setup &schema) {
+  eowu::schema::validate::Source source_validator;
+  
+  source_validator.source_types = { "Mouse", "Keyboard" };
+  source_validator.window_ids = eowu::validate::get_keys(schema.windows.windows);
+  
+  return source_validator;
 }
 
 //
@@ -50,8 +64,10 @@ eowu::schema::validate::Target eowu::validate::make_target(const eowu::schema::S
   eowu::schema::validate::Target target_validator;
   
   //  target validator
-  target_validator.kinds = { "Rectangle" };
+  target_validator.kinds = { "Circle", "Rectangle" };
   target_validator.source_ids = eowu::validate::get_keys(schema.sources.sources);
+  target_validator.model_ids = eowu::validate::get_keys(schema.stimuli.stimuli);
+  target_validator.window_ids = eowu::validate::get_keys(schema.windows.windows);
   
   return target_validator;
 }
@@ -64,11 +80,9 @@ eowu::schema::validate::Stimulus eowu::validate::make_stimulus(const eowu::schem
   eowu::schema::validate::Stimulus stimulus_validator;
   
   const auto geom_ids = eowu::validate::get_keys(schema.geometry.builtins.mapping);
-  const auto targ_ids = eowu::validate::get_keys(schema.targets.targets);
   const auto tex_ids = eowu::validate::get_keys(schema.textures.mapping);
   
   stimulus_validator.geometry_ids = geom_ids;
-  stimulus_validator.target_ids = targ_ids;
   stimulus_validator.texture_ids = tex_ids;
   stimulus_validator.units = eowu::units::get_string_unit_labels();
   
@@ -82,7 +96,7 @@ eowu::schema::validate::Stimulus eowu::validate::make_stimulus(const eowu::schem
 eowu::schema::validate::Geometry eowu::validate::make_geometry(const eowu::schema::Setup &schema) {
   eowu::schema::validate::Geometry geometry_validator;
   
-  geometry_validator.builtin_ids = { "Rectangle", "Circle", "Triangle" };
+  geometry_validator.builtin_ids = { "Rectangle", "Circle", "Triangle", "RectangleFrame", "CircleFrame", "TriangleFrame" };
   
   return geometry_validator;
 }
@@ -111,6 +125,37 @@ eowu::ValidationResult eowu::validate::setup(const eowu::schema::Setup &schema,
   //  states
   auto state_res = validate::states(schema.states);
   EOWU_RESULT_EARLY_RETURN(state_res);
+  
+  //  sources
+  auto sources_res = validate::sources(schema.sources, validation.source);
+  EOWU_RESULT_EARLY_RETURN(sources_res);
+  
+  //  io
+  auto io_res = validate::io(schema.paths, schema.save);
+  EOWU_RESULT_EARLY_RETURN(io_res);
+  
+  result.success = true;
+  
+  return result;
+}
+
+//
+//  io
+//
+
+eowu::ValidationResult eowu::validate::io(const eowu::schema::Paths &paths_schema, const eowu::schema::Save &save_schema) {
+  eowu::ValidationResult result;
+  
+  bool any_data_to_save = save_schema.source_ids.size() > 0 || save_schema.save_state_data;
+  
+  //  ensure that, if we don't provide a 'data' path, then we didn't specify any
+  //  data to be saved.
+  if (any_data_to_save && !paths_schema.provided_data) {
+    result.message = "Requested that state or source data be saved, but no 'data' path was specified.";
+    result.context = "Paths::data";
+    
+    return result;
+  }
   
   result.success = true;
   
@@ -166,6 +211,57 @@ eowu::ValidationResult eowu::validate::states(const eowu::schema::States &schema
 }
 
 //
+//  Source
+//
+
+eowu::ValidationResult eowu::validate::sources(const eowu::schema::Sources &schema,
+                                               const eowu::schema::validate::Source &validation) {
+  eowu::ValidationResult result;
+  
+  for (const auto &it : schema.sources) {
+    auto res = eowu::validate::source(it.second, validation);
+    
+    if (!res.success) {
+      return res;
+    }
+  }
+  
+  result.success = true;
+  
+  return result;
+  
+}
+
+eowu::ValidationResult eowu::validate::source(const eowu::schema::Source &schema,
+                                              const eowu::schema::validate::Source &validation) {
+  eowu::ValidationResult result;
+  
+  const auto context = "Sources::" + schema.source_id;
+  
+  //  source types
+  auto type_res = eowu::validate::check_unrecognized_one_of(validation.source_types, schema.type, "type");
+  EOWU_RESULT_CONTEXT_EARLY_RETURN(type_res);
+  
+  if (schema.type == "Mouse") {
+    if (!schema.provided_window_id) {
+      result.message = "Source type: '" + schema.type + "' is missing required key: 'window'.";
+      result.context = context;
+      return result;
+    }
+  }
+  
+  //  window ids
+  if (schema.type == "Mouse") {
+    auto win_res = eowu::validate::check_unrecognized_one_of(validation.window_ids, schema.window_id, "Window");
+    EOWU_RESULT_CONTEXT_EARLY_RETURN(win_res);
+  }
+  
+  result.success = true;
+  
+  return result;
+}
+
+//
 //  Target
 //
 
@@ -194,16 +290,25 @@ eowu::ValidationResult eowu::validate::target(const eowu::schema::Target &schema
   const auto context = "Targets::" + schema.target_id;
   
   //  padding
-  auto pad_res = eowu::validate::check_at_least_size(schema.padding, 2, "Padding");
+  auto pad_res = eowu::validate::check_at_least_size(schema.padding, 2, "padding");
   EOWU_RESULT_CONTEXT_EARLY_RETURN(pad_res);
   
   //  source ids
-  auto source_res = eowu::validate::check_unrecognized_one_of(validation.source_ids, schema.source_id, "Source");
+  auto source_res = eowu::validate::check_unrecognized_one_of(validation.source_ids, schema.source_id, "source");
   EOWU_RESULT_CONTEXT_EARLY_RETURN(source_res);
   
   //  kind ids
-  auto kind_res = eowu::validate::check_unrecognized_one_of(validation.kinds, schema.kind, "Kind");
+  auto kind_res = eowu::validate::check_unrecognized_one_of(validation.kinds, schema.type, "type");
   EOWU_RESULT_CONTEXT_EARLY_RETURN(kind_res);
+  
+  //  model ids
+  if (schema.provided_model_id) {
+    auto model_res = eowu::validate::check_unrecognized_one_of(validation.model_ids, schema.model_id, "stimulus");
+    EOWU_RESULT_CONTEXT_EARLY_RETURN(model_res);
+  }
+  
+  auto win_res = eowu::validate::check_unrecognized_one_of(validation.window_ids, schema.window_id, "window");
+  EOWU_RESULT_CONTEXT_EARLY_RETURN(win_res);
   
   result.success = true;
   
@@ -216,6 +321,8 @@ eowu::ValidationResult eowu::validate::target(const eowu::schema::Target &schema
 
 eowu::ValidationResult eowu::validate::stimuli(const eowu::schema::Stimuli &schema,
                                                const eowu::schema::validate::Stimulus &validation) {
+  
+  //  @TODO: Ensure target ids are unique across stimuli.
   eowu::ValidationResult result;
   
   for (const auto &it : schema.stimuli) {
@@ -251,12 +358,6 @@ eowu::ValidationResult eowu::validate::stimulus(const eowu::schema::Stimulus &sc
   //  geometry ids
   auto geom_res = eowu::validate::check_unrecognized_one_of(validation.geometry_ids, schema.geometry_id, "Geometry");
   EOWU_RESULT_CONTEXT_EARLY_RETURN(geom_res);
-  
-  //  target ids
-  for (const auto &id : schema.target_ids) {
-    auto targ_res = eowu::validate::check_unrecognized_one_of(validation.target_ids, id, "Target");
-    EOWU_RESULT_CONTEXT_EARLY_RETURN(targ_res);
-  }
   
   //  units
   auto unit_res = eowu::validate::check_unrecognized_one_of(validation.units, schema.units, "Units");

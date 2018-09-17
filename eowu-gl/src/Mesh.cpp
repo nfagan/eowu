@@ -112,6 +112,10 @@ unsigned int eowu::Mesh::get_gl_topology(unsigned int topology) {
       return GL_TRIANGLES;
     case eowu::topologies::triangle_strip:
       return GL_TRIANGLE_STRIP;
+    case eowu::topologies::lines:
+      return GL_LINES;
+    case eowu::topologies::line_strip:
+      return GL_LINE_STRIP;
     default:
       EOWU_LOG_WARN("Mesh::get_gl_topology: Unrecognized topology. Using 'GL_TRIANGLES'.");
       return GL_TRIANGLES;

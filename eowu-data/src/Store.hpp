@@ -20,15 +20,19 @@ namespace eowu {
 
 class eowu::data::Store {
 public:
-  Store() = default;
+  Store();
+  Store(bool is_bypassed);
   ~Store();
   
   void Open(const std::string &filename);
   void Close();
   void Write(const eowu::serialize::ByteArrayType &data);
   bool IsOpen() const;
+  bool IsBypassed() const;
   
 private:
+  bool is_bypassed;
+  
   std::atomic<bool> is_open;
   
   std::ofstream file;

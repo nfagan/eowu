@@ -11,6 +11,7 @@
 #include <eowu-common/logging.hpp>
 #include <eowu-common/config.hpp>
 #include <stdexcept>
+#include <cstddef>
 
 #ifdef EOWU_DEBUG
 #include <iostream>
@@ -19,6 +20,22 @@
 eowu::thread::SharedState::SharedState() :
 task_thread_initialized(false), render_thread_initialized(false), threads_should_continue(true) {
   //
+}
+
+void eowu::thread::targets(eowu::thread::SharedState &state, const std::vector<std::shared_ptr<eowu::XYTarget>> &targets) {
+  
+  while (!state.render_thread_initialized || !state.task_thread_initialized) {
+    //
+  }
+  
+  std::size_t sz = targets.size();
+  
+  while (state.threads_should_continue) {
+    for (std::size_t i = 0; i < sz; i++) {
+      const auto &targ = targets[i];
+      targ->Update();
+    }
+  }
 }
 
 void eowu::thread::task(eowu::thread::SharedState &state, eowu::StateRunner &state_runner) {

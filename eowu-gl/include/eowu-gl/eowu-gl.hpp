@@ -32,3 +32,5 @@
 #include "../../src/Vector.hpp"
 #include "../../src/Vertex.hpp"
 #include "../../src/WindowContainerMap.hpp"
+#include "../../src/XYSource.hpp"
+#include "../../src/XYTarget.hpp"

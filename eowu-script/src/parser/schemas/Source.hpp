@@ -16,6 +16,11 @@ namespace eowu {
     struct Source {
       std::string type;
       std::string source_id;
+      std::string window_id;
+      
+      bool provided_window_id;
+      
+      Source() : provided_window_id(false) {}
     };
     
     struct Sources {

@@ -86,22 +86,28 @@ void eowu::ScriptWrapper::SetFlipFunctions(eowu::LuaFunctionContainerType flip_f
   eowu::ScriptWrapper::flip_functions = std::move(flip_functions);
 }
 
-void eowu::ScriptWrapper::SetRenderFunctionPair(const std::string &render_id, const std::string &flip_id) {  
-  const auto &render_it = render_functions->find(render_id);
-  const auto &flip_it = flip_functions->find(flip_id);
+int eowu::ScriptWrapper::SetRenderFunctionPair(lua_State *L) {
+  int n_inputs = lua_gettop(L);
   
-  if (render_it == render_functions->end()) {
-    throw eowu::NonexistentResourceError::MessageKindId("Render function", render_id);
+  eowu::LuaFunction *render_func = nullptr;
+  eowu::LuaFunction *flip_func = nullptr;
+  
+  if (n_inputs == 0) {
+    throw eowu::LuaError("Render: Expected 1 or 2 input arguments; got 0");
   }
   
-  if (flip_it == flip_functions->end()) {
-    throw eowu::NonexistentResourceError::MessageKindId("Flip function", flip_id);
+  if (n_inputs > 1) {
+    int input_index = n_inputs > 2 ? -2 : -1;
+    render_func = get_function_from_state(L, input_index, render_functions.get(), "render");
   }
   
-  eowu::LuaFunction *render_func = &render_it->second;
-  eowu::LuaFunction *flip_func = &flip_it->second;
+  if (n_inputs > 2) {
+    flip_func = get_function_from_state(L, -1, flip_functions.get(), "flip");
+  }
   
   lua_render_thread_functions->Queue(render_func, flip_func);
+  
+  return 0;
 }
 
 eowu::ModelWrapper eowu::ScriptWrapper::GetModelWrapper(const std::string &id) const {
@@ -216,8 +222,26 @@ void eowu::ScriptWrapper::commit_variables(std::vector<char> &into) const {
   }
 }
 
+eowu::LuaFunction* eowu::ScriptWrapper::get_function_from_state(lua_State *L, int stack_index, eowu::LuaFunctionMapType *funcs, const std::string &kind) {
+  auto ref = luabridge::LuaRef::fromStack(L, stack_index);
+  
+  if (!ref.isString()) {
+    throw eowu::LuaError("Render: '" + kind + "' function id must be a string.");
+  }
+  
+  const std::string func_id = ref.cast<std::string>();
+  const auto &it = funcs->find(func_id);
+  
+  if (it == funcs->end()) {
+    throw eowu::NonexistentResourceError::MessageKindId(kind, func_id);
+  }
+  
+  return &it->second;
+}
+
 void eowu::ScriptWrapper::CreateLuaSchema(lua_State *L) {
   luabridge::getGlobalNamespace(L)
+  .beginNamespace(eowu::constants::eowu_namespace)
   .beginClass<eowu::ScriptWrapper>(eowu::constants::eowu_script_name)
   .addConstructor<void(*)(void)>()
   .addFunction("Commit", &eowu::ScriptWrapper::CommitData)
@@ -226,5 +250,6 @@ void eowu::ScriptWrapper::CreateLuaSchema(lua_State *L) {
   .addFunction("Render", &eowu::ScriptWrapper::SetRenderFunctionPair)
   .addFunction("Renderer", &eowu::ScriptWrapper::GetRendererWrapper)
   .addFunction("Variable", &eowu::ScriptWrapper::GetVariable)
-  .endClass();
+  .endClass()
+  .endNamespace();
 }

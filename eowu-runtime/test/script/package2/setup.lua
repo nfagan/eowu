@@ -9,6 +9,10 @@ Setup.Windows = {
   }
 }
 
+Setup.Paths = {
+	Data = '/Users/Nick/Desktop/test'
+}
+
 Setup.Geometry = {
   Builtin = {
     rect = 'Rectangle',

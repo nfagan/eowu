@@ -13,5 +13,7 @@ namespace eowu {
   namespace topologies {
     static constexpr unsigned int triangles = 0;
     static constexpr unsigned int triangle_strip = 1;
+    static constexpr unsigned int lines = 2;
+    static constexpr unsigned int line_strip = 3;
   }
 }

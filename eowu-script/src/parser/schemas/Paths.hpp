@@ -12,7 +12,11 @@
 namespace eowu {
   namespace schema {
     struct Paths {
+      bool provided_data;
+      
       std::string data;
+      
+      Paths() : provided_data(false) {}
     };
   }
 }

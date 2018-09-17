@@ -35,10 +35,14 @@ public:
   void SetUnits(unsigned int units);
   void SetScreenDimensions(const glm::vec2 &dims);
   
+  unsigned int GetUnits() const;
   glm::vec3 GetPosition() const;
   glm::vec3 GetRotation() const;
   glm::vec3 GetScale() const;
   glm::vec2 GetScreenDimensions() const;
+  glm::vec3 GetUnitsPosition() const;
+  glm::vec3 GetUnitsScale() const;
+  glm::vec4 GetBoundingRect() const;
   
   glm::mat4 GetTransformationMatrix() const;
 private:
@@ -51,7 +55,4 @@ private:
   glm::vec3 scale;
   
   glm::vec2 screen_dimensions;
-  
-  glm::vec3 get_units_position() const;
-  glm::vec3 get_units_scale() const;
 };

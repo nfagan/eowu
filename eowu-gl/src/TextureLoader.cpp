@@ -15,6 +15,8 @@
 eowu::Texture eowu::load::image(const std::string &filename) {
   int width, height, n_components;
   
+  //  Correctly orient texture.
+  stbi_set_flip_vertically_on_load(true);
   unsigned char *data = stbi_load(filename.c_str(), &width, &height, &n_components, 0);
   
   if (!data) {

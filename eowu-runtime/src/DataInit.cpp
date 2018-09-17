@@ -7,6 +7,7 @@
 
 #include "DataInit.hpp"
 #include <eowu-data.hpp>
+#include <eowu-script/eowu-script.hpp>
 #include <eowu-common/fs.hpp>
 #include <iomanip>
 #include <ctime>
@@ -49,25 +50,37 @@ eowu::SetupResult<std::string> eowu::data::create_date_container_directory(const
   return result;
 }
 
-eowu::data::DataResult eowu::data::initialize_data_pipeline(const std::string &data_root_directory) {
+eowu::data::DataResult eowu::data::initialize_data_pipeline(const std::string &data_root_directory,
+                                                            const eowu::schema::Save &schema) {
   
   eowu::data::DataResult result;
+  std::string date_container_directory;
+  
+  bool any_saved_data = schema.save_state_data || schema.source_ids.size() > 0;  
   
   //  make sure root directory is valid
-  auto data_root_result = eowu::data::check_root_directory_exists(data_root_directory);
-  EOWU_DATA_RESULT_EARLY_RETURN(data_root_result, result);
-  
-  //  create the date container directory
-  auto date_container_result = eowu::data::create_date_container_directory(data_root_directory);
-  EOWU_DATA_RESULT_EARLY_RETURN(date_container_result, result);
-  
-  const auto &date_container_directory = date_container_result.result;
+  if (any_saved_data) {
+    auto data_root_result = eowu::data::check_root_directory_exists(data_root_directory);
+    EOWU_DATA_RESULT_EARLY_RETURN(data_root_result, result);
+    
+    //  create the date container directory
+    auto date_container_result = eowu::data::create_date_container_directory(data_root_directory);
+    EOWU_DATA_RESULT_EARLY_RETURN(date_container_result, result);
+    
+    date_container_directory = date_container_result.result;
+  }
   
   //  make sure task data file can be initialized successfully
-  auto task_data_result = eowu::data::create_task_data_store(date_container_directory, "task.dat");
-  EOWU_DATA_RESULT_EARLY_RETURN(task_data_result, result);
+  if (schema.save_state_data) {
+    auto task_data_result = eowu::data::create_task_data_store(date_container_directory, "task.dat");
+    EOWU_DATA_RESULT_EARLY_RETURN(task_data_result, result);
+    
+    result.result.task_data_store = task_data_result.result;
+  } else {
+    bool is_bypassed = true;
+    result.result.task_data_store = std::make_shared<eowu::data::Store>(is_bypassed);
+  }
   
-  result.result.task_data_store = task_data_result.result;
   result.status.success = true;
   
   return result;
@@ -77,7 +90,7 @@ eowu::SetupResult<bool> eowu::data::check_root_directory_exists(const std::strin
   eowu::SetupResult<bool> result;
   
   if (!eowu::fs::directory_exists(data_root_directory)) {
-    result.status.message = eowu::fs::nonexistent_directory_message(data_root_directory, "Data");
+    result.status.message = eowu::fs::nonexistent_directory_message(data_root_directory, "data");
     result.status.context = "data::check_root_directory_exists";
     return result;
   }

@@ -8,6 +8,7 @@
 #pragma once
 
 #include "Identifier.hpp"
+#include "XYSource.hpp"
 #include <eowu-common/types.hpp>
 #include <glm/glm.hpp>
 #include <string>
@@ -54,6 +55,7 @@ public:
   unsigned int GetWidth() const;
   unsigned int GetHeight() const;
   const eowu::Identifier& GetIdentifier() const;
+  const eowu::XYSource& GetMouse() const;
   
   void Close();
   
@@ -83,16 +85,18 @@ private:
   eowu::Identifier id;
   std::string alias;
   
-  GLFWwindow *window;
   GLFWmonitor *monitor;
+  GLFWwindow *window;
+  
+  eowu::XYSource mouse;
   
   std::atomic<unsigned int> width;
   std::atomic<unsigned int> height;
   std::atomic<unsigned int> swap_interval;
   
   std::atomic<bool> is_open;
-  std::atomic<bool> was_resized;
   std::atomic<bool> is_valid;
+  std::atomic<bool> was_resized;
   
   void mark_closed();
 };

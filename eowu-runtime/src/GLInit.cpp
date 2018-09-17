@@ -72,6 +72,7 @@ eowu::SetupStatus eowu::init::create_models(std::shared_ptr<eowu::GLPipeline> gl
   
   auto resource_manager = gl_pipeline->GetResourceManager();
   auto texture_manager = gl_pipeline->GetTextureManager();
+  auto mesh_factory_functions = eowu::init::get_geometry_to_mesh_factory_map();
   
   const auto &stimuli = schema.stimuli.stimuli;
   const auto &geometries = schema.geometry.builtins.mapping;
@@ -92,16 +93,18 @@ eowu::SetupStatus eowu::init::create_models(std::shared_ptr<eowu::GLPipeline> gl
       
       const std::string &mesh_type = geometries.at(mesh_id);
       
-      if (mesh_type == "Rectangle") {
-        eowu::mesh_factory::make_quad(mesh.get());
-      } else if (mesh_type == "Circle") {
-        eowu::mesh_factory::make_sphere(mesh.get());
-      } else if (mesh_type == "Triangle") {
-        eowu::mesh_factory::make_triangle(mesh.get());
-      } else {
-        //  TODO: Add other mesh types
-        assert(false);
+      const auto &mesh_func_it = mesh_factory_functions.find(mesh_type);
+      
+      //  if we missed something in validation, this will catch it.
+      if (mesh_func_it == mesh_factory_functions.end()) {
+        result.message = "Internal error: no mesh implementation for mesh type '" + mesh_type + "'.";
+        result.context = eowu::contexts::gl_init + std::string("::create_models");
+        
+        return result;
       }
+      
+      //  call the mesh_factory function mapped to this mesh_type.
+      mesh_func_it->second(mesh.get());
       
       meshes.emplace(mesh_id, mesh);
     } else {
@@ -115,6 +118,8 @@ eowu::SetupStatus eowu::init::create_models(std::shared_ptr<eowu::GLPipeline> gl
     if (stim_schema.provided_texture_id) {
       auto tex = texture_manager->Get(stim_schema.texture_id);
       material->SetFaceColor(tex);
+    } else {
+      material->SetFaceColor(eowu::util::require_vec3(stim_schema.color));
     }
     
     //  handle stimulus placement
@@ -217,4 +222,15 @@ eowu::SetupStatus eowu::init::open_windows(std::shared_ptr<eowu::GLPipeline> gl_
   result.success = true;
   
   return result;
+}
+
+std::unordered_map<std::string, eowu::init::MeshFactoryFunction> eowu::init::get_geometry_to_mesh_factory_map() {  
+  return {
+    {"Rectangle", &eowu::mesh_factory::make_quad},
+    {"Circle", &eowu::mesh_factory::make_default_sphere},
+    {"Triangle", &eowu::mesh_factory::make_triangle},
+    {"RectangleFrame", &eowu::mesh_factory::make_frame_quad},
+    {"CircleFrame", &eowu::mesh_factory::make_frame_circle},
+    {"TriangleFrame", &eowu::mesh_factory::make_frame_triangle}
+  };
 }

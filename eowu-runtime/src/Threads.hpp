@@ -11,6 +11,7 @@
 #include <eowu-gl/eowu-gl.hpp>
 #include <atomic>
 #include <memory>
+#include <vector>
 
 namespace eowu {
   class State;
@@ -31,6 +32,9 @@ namespace eowu {
       
       SharedState();
     };
+    
+    void targets(eowu::thread::SharedState &state,
+                 const std::vector<std::shared_ptr<eowu::XYTarget>> &targets);
     
     void render(eowu::thread::SharedState &state,
                 std::shared_ptr<eowu::LuaContext> lua_context,

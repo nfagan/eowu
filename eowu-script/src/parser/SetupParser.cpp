@@ -17,6 +17,15 @@ namespace util {
   }
 }
 
+#define EOWU_PARSER_EARLY_RETURN_ALLOW_MISSING(in, out, assign) \
+  if (!in.success) { \
+    out.message = in.message; \
+    out.context = in.context; \
+    return out; \
+  } \
+  out.result.assign = std::move(in.result);
+
+
 #define EOWU_PARSER_EARLY_RETURN(id, id_value, id_ref, param_id, function) \
   const char* const id = param_id; \
 \
@@ -49,36 +58,83 @@ eowu::parser::ParseResult<eowu::schema::Setup> eowu::parser::setup(const luabrid
   EOWU_PARSER_EARLY_RETURN(windows, windows_, wref, "Windows", eowu::parser::windows);
   //  Geometry
   EOWU_PARSER_EARLY_RETURN(geometry, geometry_, gref, "Geometry", eowu::parser::geometry);
-  //  Textures
-  EOWU_PARSER_EARLY_RETURN(textures, textures_, tref, "Textures", eowu::parser::textures);
   //  Stimuli
   EOWU_PARSER_EARLY_RETURN(stimuli, stim_, sref, "Stimuli", eowu::parser::stimuli);
-  //  Target
-  EOWU_PARSER_EARLY_RETURN(targets, targets_, targref, "Targets", eowu::parser::targets);
   //  States
   EOWU_PARSER_EARLY_RETURN(states, states_, ssref, "States", eowu::parser::states);
-  //  Sources
-  EOWU_PARSER_EARLY_RETURN(sources, sources_, source_ref, "Sources", eowu::parser::sources);
-  //  Paths
-  EOWU_PARSER_EARLY_RETURN(paths, paths_, paths_ref, "Paths", eowu::parser::paths);
   
+  //  Sources
+  if (kv.count("Sources") > 0) {
+    auto source_result = eowu::parser::sources(kv.at("Sources"));
+    EOWU_PARSER_EARLY_RETURN_ALLOW_MISSING(source_result, result, sources);
+  }
+  
+  //  Targets
+  if (kv.count("Targets") > 0) {
+    auto targ_result = eowu::parser::targets(kv.at("Targets"));
+    EOWU_PARSER_EARLY_RETURN_ALLOW_MISSING(targ_result, result, targets);
+  }
+  
+  //  Textures
+  if (kv.count("Textures") > 0) {
+    auto tex_result = eowu::parser::textures(kv.at("Textures"));
+    EOWU_PARSER_EARLY_RETURN_ALLOW_MISSING(tex_result, result, textures);
+  }
+  
+  //  Save
+  if (kv.count("Save") > 0) {
+    auto save_result = eowu::parser::save(kv.at("Save"));
+    EOWU_PARSER_EARLY_RETURN_ALLOW_MISSING(save_result, result, save);
+  }
+  
+  //  Paths
+  if (kv.count("Paths") > 0) {
+    auto path_result = eowu::parser::paths(kv.at("Paths"));
+    EOWU_PARSER_EARLY_RETURN_ALLOW_MISSING(path_result, result, paths);
+  }
+  
+  //  Variables
   if (kv.count("Variables") > 0) {
-    const auto &variables = kv.at("Variables");
-    auto variable_result = eowu::parser::variables(variables);
-    
-    if (!variable_result.success) {
-      result.message = variable_result.message;
-      result.context = variable_result.context;
-      
-      return result;
-    }
-    
-    result.result.variables = std::move(variable_result.result);
+    auto variable_result = eowu::parser::variables(kv.at("Variables"));
+    EOWU_PARSER_EARLY_RETURN_ALLOW_MISSING(variable_result, result, variables);
   }
   
   result.success = true;
   
   return result;  
+}
+
+//
+//  save
+//
+
+eowu::parser::ParseResult<eowu::schema::Save> eowu::parser::save(const luabridge::LuaRef &table) {
+  eowu::parser::ParseResult<eowu::schema::Save> result;
+  
+  auto kv = get_string_map_from_table(table);
+  
+  try {
+    result.result.save_state_data = get_numeric_value_or<bool>(kv, "states", false);
+    
+    if (kv.count("sources") > 0) {
+      auto v_source_ids = get_string_vector_from_table(kv.at("sources"));
+      
+      std::unordered_set<std::string> s_source_ids(v_source_ids.begin(), v_source_ids.end());
+      
+      result.result.source_ids = std::move(s_source_ids);
+      result.result.provided_source_ids = true;
+    }
+    
+  } catch (const std::exception &e) {
+    result.message = e.what();
+    result.context = "Save";
+    
+    return result;
+  }
+  
+  result.success = true;
+  
+  return result;
 }
 
 //
@@ -91,7 +147,10 @@ eowu::parser::ParseResult<eowu::schema::Paths> eowu::parser::paths(const luabrid
   auto kv = get_string_map_from_table(table);
   
   try {
-    result.result.data = get_string_or_error(kv, "Data");
+    if (kv.count("data") > 0) {
+      result.result.data = get_string_or_error(kv, "data");
+      result.result.provided_data = true;
+    }
   } catch (const std::exception &e) {
     result.message = e.what();
     result.context = "Paths";
@@ -268,11 +327,7 @@ eowu::parser::ParseResult<eowu::schema::Stimulus> eowu::parser::stimulus(const l
     value.size = get_numeric_vector_or_type_error<double>(kv, "size", value.size);
     value.position = get_numeric_vector_or_type_error<double>(kv, "position", value.position);
     value.rotation = get_numeric_vector_or_type_error<double>(kv, "rotation", value.rotation);
-    
-    if (kv.count("targets") > 0) {
-      value.target_ids = get_string_vector_from_table(kv.at("targets"));
-    }
-    
+    value.color = get_numeric_vector_or_type_error<double>(kv, "color", value.color);
     value.provided_texture_id = value.texture_id != "";
     
   } catch (const std::exception &e) {
@@ -327,6 +382,13 @@ eowu::parser::ParseResult<eowu::schema::Source> eowu::parser::source(const luabr
   try {
     result.result.source_id = source_id;
     result.result.type = get_string_or_error(kv, "type");
+    
+    //  has window id
+    if (kv.count("window") > 0) {
+      result.result.window_id = get_string_or_type_error(kv, "window", "");
+      result.result.provided_window_id = true;
+    }
+    
   } catch (const std::exception &e) {
     result.message = e.what();
     result.context = "Sources::" + source_id;
@@ -354,9 +416,16 @@ eowu::parser::ParseResult<eowu::schema::Target> eowu::parser::target(const luabr
   
   try {
     result.result.target_id = target_id;
-    result.result.kind = get_string_or_error(kv, "kind");
+    result.result.type = get_string_or_error(kv, "type");
     result.result.source_id = get_string_or_error(kv, "source");
+    result.result.window_id = get_string_or_error(kv, "window");
     result.result.padding = get_numeric_vector_or_type_error<double>(kv, "padding", result.result.padding);
+    
+    if (kv.count("stimulus") > 0) {
+      result.result.model_id = get_string_or_error(kv, "stimulus");
+      result.result.provided_model_id = true;
+    }
+    
   } catch (const std::exception &e) {
     result.message = e.what();
     result.context = "Targets::" + target_id;

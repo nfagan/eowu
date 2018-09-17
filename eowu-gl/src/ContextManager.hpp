@@ -47,6 +47,7 @@ public:
   bool AllShouldClose() const;
   
   const WindowContainerType& GetWindows() const;
+  const WindowType& GetWindowByAlias(const std::string &alias) const;
   
   friend void eowu::glfw::window_size_callback(GLFWwindow *window, int width, int height);
   friend void eowu::glfw::window_close_callback(GLFWwindow *window);
@@ -66,6 +67,7 @@ private:
   
   void register_window(eowu::WindowType win);
   void configure_window_callbacks(GLFWwindow *win);
+  void update_mouse_position(const WindowType &win, const eowu::Coordinate &coord);
 };
 
 template<typename ...T>

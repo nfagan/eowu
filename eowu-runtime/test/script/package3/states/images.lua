@@ -21,7 +21,7 @@ local printed_time = false
 local last_t = nil
 
 function state.Entry()
-  local script = eowu_script()
+  local script = eowu.script()
   local state = script:State('images')
   local timing = state:Variable('state_time')
   local first = script:Variable('trial')
@@ -46,7 +46,7 @@ end
 
 function state.Loop()
   if not printed_time then
-    local script = eowu_script()
+    local script = eowu.script()
     local state = script:State('images')
     state:Variable('render_time'):Set(state:Ellapsed() - last_t)
     state:Variable('render_time'):Commit()
@@ -54,11 +54,11 @@ function state.Loop()
     last_t = state:Ellapsed()
   end
 
-  local script = eowu_script()
+  local script = eowu.script()
 end
 
 function state.Exit()
-  local script = eowu_script()
+  local script = eowu.script()
   local state = script:State('images')
   local image = state:Variable('image_onset')
   local timing = state:Variable('state_time')
@@ -84,7 +84,7 @@ end
 --  render functions
 
 local function render()
-  local script = eowu_script()
+  local script = eowu.script()
   local state = script:State('images')
   local frames = state:Variable('frames')
   local stim = script:Stimulus('sq')
@@ -120,7 +120,7 @@ end
 local function flip(id, time)
   if id ~= 'main' then return end
 
-  local script = eowu_script()
+  local script = eowu.script()
   local state = script:State('images')
   local image = state:Variable('image_onset')
   local val = image:Get()

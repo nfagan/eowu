@@ -15,7 +15,11 @@ Setup.Variables = {
 
 Setup.Paths = {
   -- Data = 'C:\\Users\\changLab\\Documents\\eowu\\'
-  Data = '/Users/Nick/repositories/cpp/eowu/data/'
+  data = '/Users/Nick/repositories/cpp/eowu/data/'
+}
+
+Setup.Save = {
+  states = true
 }
 
 Setup.Windows = {
@@ -24,6 +28,28 @@ Setup.Windows = {
   }
 }
 
+Setup.Sources = {
+  position = {
+    type = 'Mouse',
+    window = 'main'
+  },
+  keyboard = {
+    type = 'Keyboard'
+  }
+}
+
+Setup.Targets = {
+  first = {
+    source = 'position',
+    window = 'main',
+    type = 'Circle',
+    padding = { 0, 0 },
+    stimulus = 'sq',
+  }
+}
+
+Setup.Textures = {}
+
 Setup.Geometry = {
   Builtin = {
     rect = 'Rectangle',
@@ -31,27 +57,14 @@ Setup.Geometry = {
   }
 }
 
-Setup.Sources = {
-  mouse = {
-    type = 'Mouse'
-  },
-  keyboard = {
-    type = 'Keyboard'
-  }
-}
-
-Setup.Textures = {}
-
 Setup.Stimuli = {
   sq = { geometry = 'rect' },
-  circ = { geometry = 'circ' }
+  circ = { geometry = 'circ', targets = {'first'} }
 }
 
 for i = 1, 1000 do
   local stim = { geometry = 'circ' }
   Setup.Stimuli['sq' .. i] = stim
 end
-
-Setup.Targets = {}
 
 Setup.States = { fixation, images, new_trial, end_trial }

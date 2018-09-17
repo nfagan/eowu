@@ -26,6 +26,7 @@ namespace eowu {
     ParseResult<eowu::schema::Geometry> geometry(const luabridge::LuaRef &table);
     ParseResult<eowu::schema::Textures> textures(const luabridge::LuaRef &table);
     ParseResult<eowu::schema::Paths> paths(const luabridge::LuaRef &table);
+    ParseResult<eowu::schema::Save> save(const luabridge::LuaRef &table);
     
     ParseResult<eowu::schema::Stimulus> stimulus(const luabridge::LuaRef &table,
                                                  const std::string &stimulus_id);

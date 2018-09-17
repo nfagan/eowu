@@ -48,6 +48,8 @@ public:
   double Ellapsed() const;
   void Exit();
   
+  const std::string& GetName() const;
+  
   static void CreateLuaSchema(lua_State *L);
 private:
   

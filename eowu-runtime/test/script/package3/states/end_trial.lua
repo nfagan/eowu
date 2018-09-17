@@ -4,7 +4,7 @@ state.Name = 'end_trial'
 state.Duration = 0
 
 function state.Entry()
-  local script = eowu_script()
+  local script = eowu.script()
   local state = script:State('end_trial')
 
   script:Variable('frames'):Commit()

@@ -8,7 +8,7 @@
 #include "Units.hpp"
 #include "Error.hpp"
 
-std::vector<std::string> eowu::units::get_string_unit_labels() {
+std::unordered_set<std::string> eowu::units::get_string_unit_labels() {
   return { "normalized", "pixels", "mixed" };
 }
 

@@ -51,7 +51,7 @@ public:
   
   bool IsComplete() const;
   
-  void SetRenderFunctionPair(const std::string &render_id, const std::string &flip_id);
+  int SetRenderFunctionPair(lua_State *L);
   eowu::StateWrapper* GetStateWrapper(const std::string &id) const;
   eowu::RendererWrapper GetRendererWrapper() const;
   eowu::ModelWrapper GetModelWrapper(const std::string &id) const;
@@ -80,4 +80,6 @@ private:
   
   void commit_variables(std::vector<char> &into) const;
   void commit_states(std::vector<char> &into) const;
+  
+  eowu::LuaFunction* get_function_from_state(lua_State *L, int stack_index, eowu::LuaFunctionMapType *funcs, const std::string &kind);
 };

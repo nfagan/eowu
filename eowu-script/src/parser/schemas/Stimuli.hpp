@@ -20,18 +20,13 @@ namespace eowu {
       std::string texture_id;
       bool provided_texture_id;
       std::vector<double> color;
-      std::vector<std::string> target_ids;
       std::string units;
       std::vector<double> size;
       std::vector<double> position;
       std::vector<double> rotation;
       
-      Stimulus() {
-        size = { 0, 0, 0 };
-        position = { 0, 0, 0 };
-        rotation = { 0, 0, 0 };
-        
-        provided_texture_id = false;
+      Stimulus() : provided_texture_id(false), size({0, 0, 0}), position({0, 0, 0}), rotation({0, 0, 0}) {
+        //
       }
       
     };

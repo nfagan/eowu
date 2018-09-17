@@ -7,7 +7,7 @@ state.Variables = {
 }
 
 function state.Entry()
-  local script = eowu_script()
+  local script = eowu.script()
   local state = script:State('fixation')
   state:Next('images')
   script:Render('fixation', 'fixation')
@@ -27,7 +27,7 @@ local function flip(id, time)
 end
 
 local function render()
-  local script = eowu_script()
+  local script = eowu.script()
   local stim = script:Stimulus('sq')
   local renderer = script:Renderer()
   local state = script:State('fixation')
@@ -44,6 +44,8 @@ local function render()
 
   stim:Rotation({0, 0, rot.z - 0.05})
   stim:Size({sz.x + 0.01, sz.y + 0.01})
+
+  stim:Size({0.5, 0.5})
 
   for i = 1, 100 do
     local s = script:Stimulus('sq' .. i)

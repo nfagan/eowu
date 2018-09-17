@@ -34,11 +34,12 @@ eof = s.bytes;
 
 fid = fopen( file , 'r' );
 state = configure_warn_state();
+[~, filename, ext] = fileparts( file );
 
 err = 0;
 
 try
-  res = read_impl( fid, constants, eof );
+  res = read_impl( fid, [filename, ext], constants, eof );
 catch err
   % 
 end
@@ -65,32 +66,29 @@ warning( state );
 
 end
 
-function chunks = read_impl(fid, constants, eof)
+function chunks = read_impl(fid, fname, constants, eof)
 
 chunks = {};
 warnings = containers.Map();
+last_n = [];
 
 while ( ftell(fid) ~= eof )
-  chunks{end+1} = read_chunk( fid, constants, warnings );
+  chunks{end+1} = read_chunk( fid, constants, warnings ); %#ok
   
-  print_progress( ftell(fid), eof );
+  last_n = print_progress( ftell(fid), eof, fname, last_n );
 end
 
 end
 
-function print_progress(pos, eof)
-
-persistent last_n;
+function last_n = print_progress(pos, eof, fname, last_n)
 
 perc = pos / eof * 100;
 
-if ( isempty(last_n) )
-  fprintf( '\n\n' );
-else
+if ( ~isempty(last_n) )
   fprintf( repmat('\b', 1, last_n) );
 end
 
-str = sprintf( 'Loading ... %d%%', round(perc) );
+str = sprintf( 'Loading "%s" ... %d%%', fname, round(perc) );
 fprintf( '%s\n', str );
 
 last_n = numel( str ) + 1;

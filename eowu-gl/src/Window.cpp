@@ -12,15 +12,10 @@
 #include <functional>
 #include <assert.h>
 
-eowu::Window::Window(GLFWmonitor *monitor, GLFWwindow *window, unsigned int width, unsigned int height) {
-  this->monitor = monitor;
-  this->window = window;
-  this->width = width;
-  this->height = height;
-  this->swap_interval = 1;
-  this->was_resized = false;
-  this->is_open = true;
-  this->is_valid = true;
+eowu::Window::Window(GLFWmonitor *monitor_, GLFWwindow *window_, unsigned int width_, unsigned int height_) :
+monitor(monitor_), window(window_), width(width_), height(height_),
+swap_interval(1), is_open(true), is_valid(true), was_resized(false) {
+  //
 }
 
 eowu::Window::~Window() {
@@ -29,6 +24,10 @@ eowu::Window::~Window() {
 
 const eowu::Identifier& eowu::Window::GetIdentifier() const {
   return id;
+}
+
+const eowu::XYSource& eowu::Window::GetMouse() const {
+  return mouse;
 }
 
 void eowu::Window::SetWidth(unsigned int width) {
@@ -99,6 +98,8 @@ void eowu::Window::Close() {
 void eowu::Window::mark_closed() {
   is_open = false;
   is_valid = false;
+  
+  mouse.SetIsValid(false);
 }
 
 bool eowu::Window::ShouldClose() const {

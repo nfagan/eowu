@@ -13,6 +13,7 @@
 #include "Stimuli.hpp"
 #include "State.hpp"
 #include "Targets.hpp"
+#include "Save.hpp"
 #include "Source.hpp"
 #include "Paths.hpp"
 #include "Variables.hpp"
@@ -35,6 +36,7 @@ namespace eowu {
       eowu::schema::Sources sources;
       eowu::schema::Paths paths;
       eowu::schema::Variables variables;
+      eowu::schema::Save save;
     };
   }
 }

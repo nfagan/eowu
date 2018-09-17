@@ -74,6 +74,16 @@ const eowu::WindowContainerType& eowu::ContextManager::GetWindows() const {
   return windows;
 }
 
+const eowu::WindowType& eowu::ContextManager::GetWindowByAlias(const std::string &alias) const {
+  for (const auto &win : windows) {
+    if (win->GetAlias() == alias) {
+      return win;
+    }
+  }
+  
+  throw eowu::NonexistentResourceError::MessageKindId("Window", alias);
+}
+
 eowu::WindowType eowu::ContextManager::OpenWindow(const eowu::WindowProperties &props) {
   if (!IsInitialized()) {
     throw ContextNotInitializedError("OpenGL context has not been initialized.");
@@ -172,13 +182,18 @@ void eowu::ContextManager::configure_window_callbacks(GLFWwindow *win) {
   glfwSetKeyCallback(win, eowu::glfw::window_key_press_callback);
 }
 
+//  private mouse updater
+void eowu::ContextManager::update_mouse_position(const WindowType &win, const eowu::Coordinate &coord) {
+  win->mouse.Update(coord);
+}
+
 //  mouse position
 void eowu::glfw::window_mouse_position_callback(GLFWwindow *window, double x, double y) {
   eowu::ContextManager* context = (eowu::ContextManager*)glfwGetWindowUserPointer(window);
   
   assert(context);
   
-  auto win = context->get_window_with_trap(window);
+  context->update_mouse_position(context->get_window_with_trap(window), {x, y});
 }
 
 //  key press

@@ -10,7 +10,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <mutex>
 #include <utility>
-#include "Error.hpp"
 
 eowu::Transform::Transform() {
   position = glm::vec3(0.0f);
@@ -80,6 +79,10 @@ void eowu::Transform::SetScreenDimensions(const glm::vec2 &dims) {
   screen_dimensions = dims;
 }
 
+unsigned int eowu::Transform::GetUnits() const {
+  return units;
+}
+
 glm::vec3 eowu::Transform::GetPosition() const {
   std::shared_lock<std::shared_mutex> lock(mut);
   return position;
@@ -100,7 +103,7 @@ glm::vec2 eowu::Transform::GetScreenDimensions() const {
   return screen_dimensions;
 }
 
-glm::vec3 eowu::Transform::get_units_position() const {
+glm::vec3 eowu::Transform::GetUnitsPosition() const {
   auto pos = GetPosition();
   
   auto un = units.load();
@@ -113,7 +116,7 @@ glm::vec3 eowu::Transform::get_units_position() const {
   return pos;
 }
 
-glm::vec3 eowu::Transform::get_units_scale() const {
+glm::vec3 eowu::Transform::GetUnitsScale() const {
   auto scl = GetScale();
   
   if (units.load() == eowu::units::normalized) {
@@ -124,10 +127,27 @@ glm::vec3 eowu::Transform::get_units_scale() const {
   return scl;
 }
 
+glm::vec4 eowu::Transform::GetBoundingRect() const {
+  glm::vec4 rect;
+  
+  auto pos = GetUnitsPosition();
+  auto scl = GetUnitsScale();
+  
+  float half_width = scl.x / 2.0;
+  float half_height = scl.y / 2.0;
+  
+  rect[0] = pos.x - half_width;
+  rect[1] = pos.y - half_height;
+  rect[2] = pos.x + half_width;
+  rect[3] = pos.y + half_height;
+  
+  return rect;
+}
+
 glm::mat4 eowu::Transform::GetTransformationMatrix() const {
   const auto rot = GetRotation();
-  const auto pos = get_units_position();
-  const auto scl = get_units_scale();
+  const auto pos = GetUnitsPosition();
+  const auto scl = GetUnitsScale();
   
   glm::mat4 transform(1.0f);
   

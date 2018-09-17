@@ -8,7 +8,7 @@
 #pragma once
 
 #include <eowu-common/types.hpp>
-#include <vector>
+#include <unordered_set>
 #include <string>
 
 namespace eowu {
@@ -17,7 +17,7 @@ namespace eowu {
     static constexpr unsigned int pixels = 1;
     static constexpr unsigned int mixed = 2;
     
-    std::vector<std::string> get_string_unit_labels();
+    std::unordered_set<std::string> get_string_unit_labels();
     unsigned int get_units_from_string_label(const std::string &unit_id);
   }
 }

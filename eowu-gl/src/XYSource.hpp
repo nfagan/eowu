@@ -19,21 +19,29 @@ struct eowu::Coordinate {
   double x;
   double y;
   
+  Coordinate(double x, double y);
   Coordinate();
   ~Coordinate() = default;
 };
 
 class eowu::XYSource {
 public:
-  XYSource() = default;
+  XYSource();
   ~XYSource() = default;
   
   void Update(eowu::Coordinate coord);
+  
   Coordinate ConsumeLatestSample();
   Coordinate GetLatestSample() const;
-  bool NewSampleAvailable();
+  
+  void SetIsValid(bool value);
+  
+  bool NewSampleAvailable() const;
+  bool IsValid() const;
   
 private:
+  std::atomic<bool> is_valid;
   std::atomic<bool> new_sample_available;
+  
   std::atomic<Coordinate> coordinate;
 };

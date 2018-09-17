@@ -44,6 +44,10 @@ eowu::VariableWrapper* eowu::StateWrapper::GetVariable(const std::string &name) 
   return &it->second;
 }
 
+const std::string& eowu::StateWrapper::GetName() const {
+  return state->GetId();
+}
+
 void eowu::StateWrapper::Write(eowu::serialize::ByteArrayType &into) const {
   eowu::u64 sz = 0;
   
@@ -144,6 +148,7 @@ void eowu::StateWrapper::CreateLuaSchema(lua_State *L) {
   .addFunction("Next", &eowu::StateWrapper::SetNextState)
   .addFunction("Exit", &eowu::StateWrapper::Exit)
   .addFunction("Ellapsed", &eowu::StateWrapper::Ellapsed)
+  .addProperty("name", &eowu::StateWrapper::GetName)
   .endClass()
   .endNamespace();
 }

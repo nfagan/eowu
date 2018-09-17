@@ -11,6 +11,10 @@
 #include <memory>
 
 namespace eowu {
+  namespace schema {
+    struct Save;
+  }
+  
   namespace data {
     class Store;
     
@@ -20,7 +24,8 @@ namespace eowu {
     
     struct DataResult : eowu::SetupResult<DataInit> {};
     
-    eowu::data::DataResult initialize_data_pipeline(const std::string &data_root_directory);
+    eowu::data::DataResult initialize_data_pipeline(const std::string &data_root_directory,
+                                                    const eowu::schema::Save &schema);
     
     eowu::SetupResult<std::string> create_date_container_directory(const std::string &data_root_directory);
     eowu::SetupResult<bool> check_root_directory_exists(const std::string &data_root_directory);

@@ -15,5 +15,6 @@ namespace eowu {
     using DurationType = std::chrono::duration<double>;
     
     TimePointType now();
+    DurationType zero();
   }
 }

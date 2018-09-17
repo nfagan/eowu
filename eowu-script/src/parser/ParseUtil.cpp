@@ -21,7 +21,7 @@
   template std::vector<type> eowu::parser::get_numeric_vector_or_type_error(const eowu::parser::MapTableType &table, const std::string &key, const std::vector<type> &dflt, int size_spec)
 
 std::string eowu::parser::get_type_error_message(const std::string &key, const std::string &type) {
-  return "Key '" + key + "' does not refer to the expected type '" + type + "'.";
+  return "Key '" + key + "' must refer to a value of type '" + type + "'.";
 }
 
 std::string eowu::parser::get_array_size_error_message(const std::string &key, int expected_size, int given_size) {
