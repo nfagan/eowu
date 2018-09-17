@@ -68,7 +68,6 @@ public:
   const eowu::XYSource* GetSource() const;
   glm::vec2 GetUnitsPadding() const;
   
-  static eowu::XYTarget MakeCommon();
 private:
   mutable std::mutex mut;
   

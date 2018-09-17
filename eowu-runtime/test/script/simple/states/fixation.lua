@@ -40,9 +40,9 @@ local function render()
 
   if tn % 2 == 0 then 
     --  even number trial
-    stim:Color({0.5, 1, 0.75})
+    stim:Color({0.5, 0, 1})
   else
-    stim:Color({1, 0.5, 0.75})
+    stim:Color({1, 0.5, 1})
   end
 
   stim:Units('normalized')

@@ -280,17 +280,3 @@ void eowu::XYTarget::match_to_linked_model() {
 bool eowu::XYTarget::has_linked_model() const {
   return linked_model != nullptr;
 }
-
-//
-//  Make
-//
-
-eowu::XYTarget eowu::XYTarget::MakeCommon() {
-  eowu::XYTarget target;
-  
-  target.SetOnEntry(eowu::target_functions::reset);
-  target.SetOnInBounds(eowu::target_functions::update_on_in_bounds);
-  target.SetBoundsFunction(eowu::bounds_functions::circle_in_bounds);
-  
-  return target;
-}
