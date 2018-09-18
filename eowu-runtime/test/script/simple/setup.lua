@@ -9,7 +9,7 @@ Setup.Variables = {
 Setup.Windows = {
   main = {
     width = 400,
-    height = 400
+    height = 400,
   }
 }
 

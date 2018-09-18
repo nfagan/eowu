@@ -9,6 +9,8 @@
 #include "Util.hpp"
 #include <eowu-gl/eowu-gl.hpp>
 #include <eowu-script/eowu-script.hpp>
+#include <eowu-common/random.hpp>
+#include <cstddef>
 
 #define EOWU_TARGET_RESULT_EARLY_RETURN(from, to) \
   if (!from.status.success) { \
@@ -27,6 +29,9 @@ eowu::init::TargetResult eowu::init::initialize_targets(const eowu::schema::Targ
   const auto resource_manager = gl_pipeline->GetResourceManager();
   const auto context_manager = gl_pipeline->GetContextManager();
   
+  std::unordered_map<std::string, std::shared_ptr<eowu::Model>> target_models_by_type;
+  auto mesh_factory_map = eowu::init::get_target_type_to_mesh_factory_map();
+  
   for (const auto &it : schema.targets) {
     const auto &target_schema = it.second;
     const auto &source_id = target_schema.source_id;
@@ -35,6 +40,7 @@ eowu::init::TargetResult eowu::init::initialize_targets(const eowu::schema::Targ
     const auto &model_id = target_schema.model_id;
     const auto &window_id = target_schema.window_id;
     const bool provided_model_id = target_schema.provided_model_id;
+    const bool is_hidden = target_schema.is_hidden;
     
     auto target = std::make_shared<eowu::XYTarget>();
     
@@ -69,6 +75,36 @@ eowu::init::TargetResult eowu::init::initialize_targets(const eowu::schema::Targ
       return result;
     }
     
+    std::shared_ptr<eowu::Model> target_model = nullptr;
+    
+    //  target model
+    if (target_models_by_type.count(target_type) == 0) {
+      const std::string id = eowu::init::get_target_id(resource_manager);
+      
+      auto mesh = resource_manager->Create<eowu::Mesh>(id);
+      auto mat = resource_manager->Create<eowu::Material>(id);
+      
+      const auto &mesh_func_it = mesh_factory_map.find(target_type);
+      
+      if (mesh_func_it == mesh_factory_map.end()) {
+        result.status.message = "Target type '" + target_type + "' has no associated model.";
+        return result;
+      }
+      
+      //  white frame by default.
+      mat->SetFaceColor(glm::vec3(1.0));
+      
+      //  create the mesh.
+      mesh_func_it->second(mesh.get());
+      
+      target_model = resource_manager->Create<eowu::Model>(id, mesh, mat);
+      target_models_by_type.emplace(target_type, target_model);
+    } else {
+      target_model = target_models_by_type.at(target_type);
+    }
+    
+    result.result.target_models.emplace(target_id, target_model);
+    
     //  window
     std::shared_ptr<eowu::Window> win;
     
@@ -87,9 +123,59 @@ eowu::init::TargetResult eowu::init::initialize_targets(const eowu::schema::Targ
     target->SetWindow(win.get());
     
     result.result.targets.emplace(target_id, target);
+    
+    //  hidden
+    result.result.hidden.emplace(target_id, is_hidden);
   }
   
   result.status.success = true;
   
   return result;
+}
+
+eowu::init::TargetWrapperMapType eowu::init::make_target_wrappers(std::shared_ptr<eowu::LuaContext> lua_context,
+                                                                  const eowu::init::TargetMap &target_map,
+                                                                  const eowu::init::TargetModelMap &target_model_map,
+                                                                  const eowu::init::TargetHiddenMap &hidden,
+                                                                  std::shared_ptr<eowu::GLPipeline> gl_pipeline) {
+  //  Create target wrappers around targets.
+  
+  auto target_wrappers = eowu::init::TargetWrapperMapType{};
+  auto window_container = gl_pipeline->GetWindowContainer();
+  auto renderer = gl_pipeline->GetRenderer();
+  
+  for (const auto &it : target_map) {
+    const auto &target_id = it.first;
+    const auto &target = it.second;
+    
+    auto model = target_model_map.at(target_id);
+    bool is_hidden = hidden.at(target_id);
+    
+    auto target_wrapper = std::make_shared<eowu::TargetWrapper>(lua_context, target, model, renderer, window_container);
+    
+    if (is_hidden) {
+      target_wrapper->Hide();
+    }
+    
+    target_wrappers.emplace(target_id, target_wrapper);
+  }
+  
+  return target_wrappers;
+}
+
+std::unordered_map<std::string, eowu::init::MeshFactoryFunction> eowu::init::get_target_type_to_mesh_factory_map() {
+  return {
+    {"Circle", &eowu::mesh_factory::make_frame_circle},
+    {"Rectangle", &eowu::mesh_factory::make_frame_quad}
+  };
+}
+
+std::string eowu::init::get_target_id(const std::shared_ptr<eowu::ResourceManager> &resource_manager) {
+  std::string id = eowu::random::get_random_string(20);
+  
+  while (resource_manager->Has<eowu::Model>(id)) {
+    id = eowu::random::get_random_string(20);
+  }
+  
+  return id;
 }

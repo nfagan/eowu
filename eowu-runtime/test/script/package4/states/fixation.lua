@@ -7,6 +7,10 @@ state.Variables = {
 }
 state.First = true
 
+function choice1()
+  print('entered from choice')
+end
+
 function state.Entry()
   local script = eowu.script()
   local state = script:State('fixation')
@@ -16,7 +20,36 @@ function state.Entry()
   state:Next('images')
   script:Render('fixation')
 
+  local targ = script:Target('first')
+  targ:Entry(function()
+    local script = eowu.script()
+    script:Render('fixation')
+  end)
+
+  targ:Exit(function()
+    local script = eowu.script()
+    script:Render('another')
+  end)
+
   state:Variable('fixation_acquired'):Reset()
+end
+
+function state.Exit()
+  local targ = eowu.script():Target('first')
+  targ:Reset()
+end
+
+local function another()
+  local script = eowu.script()
+  local stim = script:Stimulus('sq')
+
+  stim:Color({1, 1, 1})
+
+  local pos = stim.position
+  pos.x = pos.x - 0.001
+  stim.position = pos
+  
+  stim:Draw()
 end
 
 local function render()
@@ -41,7 +74,8 @@ local function render()
 end
 
 state.Render = {
-  fixation = render
+  fixation = render,
+  another = another
 }
 
 return state

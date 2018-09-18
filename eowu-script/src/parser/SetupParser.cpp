@@ -420,6 +420,7 @@ eowu::parser::ParseResult<eowu::schema::Target> eowu::parser::target(const luabr
     result.result.source_id = get_string_or_error(kv, "source");
     result.result.window_id = get_string_or_error(kv, "window");
     result.result.padding = get_numeric_vector_or_type_error<double>(kv, "padding", result.result.padding);
+    result.result.is_hidden = get_numeric_value_or<bool>(kv, "hidden", false);
     
     if (kv.count("stimulus") > 0) {
       result.result.model_id = get_string_or_error(kv, "stimulus");

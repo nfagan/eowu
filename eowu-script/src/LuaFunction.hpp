@@ -17,8 +17,11 @@ namespace eowu {
 
 class eowu::LuaFunction {
 public:
+  LuaFunction(lua_State *L);
   LuaFunction(const luabridge::LuaRef &ref);
   LuaFunction(const eowu::LuaFunction &other);
+  
+  LuaFunction& operator=(const eowu::LuaFunction& other);
   
   void Set(const eowu::LuaFunction &other);
   void Set(const luabridge::LuaRef &func);

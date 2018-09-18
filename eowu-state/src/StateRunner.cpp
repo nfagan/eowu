@@ -8,9 +8,8 @@
 #include "StateRunner.hpp"
 #include "State.hpp"
 
-eowu::StateRunner::StateRunner() {
-  is_new_state = false;
-  active_state = nullptr;
+eowu::StateRunner::StateRunner() : active_state(nullptr), is_new_state(false) {
+  //
 }
 
 void eowu::StateRunner::Begin(eowu::State *state) {
@@ -25,6 +24,8 @@ bool eowu::StateRunner::Update() {
     return true;
   }
   
+  //  If entering, loop will be called right afterwards.
+  //  But if exiting, loop won't be called afterwards.
   if (IsNewState()) {
     active_state->OnEntry();
     is_new_state = false;
@@ -46,6 +47,10 @@ const eowu::Timer& eowu::StateRunner::GetTimer() const {
 
 bool eowu::StateRunner::IsNewState() const {
   return is_new_state;
+}
+
+bool eowu::StateRunner::ActiveStateWillExit() const {
+  return active_state != nullptr && active_state->ShouldExit();
 }
 
 void eowu::StateRunner::next(eowu::State *state) {

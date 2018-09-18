@@ -17,55 +17,79 @@
 #include <iostream>
 #endif
 
-eowu::thread::SharedState::SharedState() :
-task_thread_initialized(false), render_thread_initialized(false), threads_should_continue(true) {
+eowu::thread::SharedState::SharedState(const eowu::Timer *task_timer) :
+task_thread_initialized(false), render_thread_initialized(false), threads_should_continue(true), timing(task_timer) {
   //
 }
 
-void eowu::thread::targets(eowu::thread::SharedState &state, const std::vector<std::shared_ptr<eowu::XYTarget>> &targets) {
+void eowu::thread::task(eowu::thread::SharedState &state,
+                        eowu::StateRunner &state_runner,
+                        const std::vector<std::shared_ptr<eowu::XYTarget>> &targets) {
   
-  while (!state.render_thread_initialized || !state.task_thread_initialized) {
-    //
-  }
-  
-  std::size_t sz = targets.size();
-  
-  while (state.threads_should_continue) {
-    for (std::size_t i = 0; i < sz; i++) {
-      const auto &targ = targets[i];
-      targ->Update();
-    }
-  }
-}
-
-void eowu::thread::task(eowu::thread::SharedState &state, eowu::StateRunner &state_runner) {
   state.task_thread_initialized.store(true);
   
-  const auto &state_runner_timer = state_runner.GetTimer();
-  
   while (!state.render_thread_initialized) {
-    EOWU_LOG_INFO("Task thread: Awaiting render thread initialization.");
+    //
   }
   
   bool should_proceed = true;
   
   while (state.threads_should_continue && should_proceed) {
     
-    //  try to call the lua function (entry, loop, or exit)
-    //  for this frame, and abort on error in the script.
-    try {
-      should_proceed = !state_runner.Update();
-    } catch (const std::exception &e) {
-      std::cout << "ERROR: Task: " << e.what() << std::endl;
-      
-      should_proceed = false;
+    //  If the current state will exit on this frame, update the targets
+    //  before calling the user-supplied exit() function. Otherwise, update
+    //  the targets *after* the user-supplied entry() or loop() functions.
+    bool active_state_will_exit = state_runner.ActiveStateWillExit();
+    
+    if (active_state_will_exit) {
+      should_proceed = eowu::thread::try_update_targets(targets);
     }
     
-    double ellapsed = state_runner_timer.Ellapsed().count();
-    state.timing.task.Update(ellapsed);
+    should_proceed = eowu::thread::try_update_task(state_runner);
+    
+    if (should_proceed && !active_state_will_exit) {
+      should_proceed = eowu::thread::try_update_targets(targets);
+    }
   }
   
   state.threads_should_continue = false;
+}
+
+bool eowu::thread::try_update_task(eowu::StateRunner &state_runner) {
+  //  try to call the lua function (entry, loop, or exit)
+  //  for this frame, and abort on error in the script.
+  
+  //  Note that the state runner timer is updated in Update().
+  bool should_proceed;
+  
+  try {
+    should_proceed = !state_runner.Update();
+    
+  } catch (const std::exception &e) {
+    std::cout << "ERROR: Task: " << e.what() << std::endl;
+    
+    should_proceed = false;
+  }
+  
+  return should_proceed;
+}
+
+bool eowu::thread::try_update_targets(const std::vector<std::shared_ptr<eowu::XYTarget>> &targets) {
+  std::size_t sz = targets.size();
+  
+  for (std::size_t i = 0; i < sz; i++) {
+    const auto &targ = targets[i];
+    
+    try {
+      targ->Update();
+    } catch (const std::exception &e) {
+      std::cout << "ERROR: Target: " << e.what() << std::endl;
+      
+      return false;
+    }
+  }
+  
+  return true;
 }
 
 void eowu::thread::render(eowu::thread::SharedState &state,
@@ -77,7 +101,7 @@ void eowu::thread::render(eowu::thread::SharedState &state,
   auto gl_context_manager = pipeline->GetContextManager();
   auto gl_windows = gl_context_manager->GetWindows();
   auto &render_time = state.timing.render;
-  auto &task_time = state.timing.task;
+  const auto *task_timer = state.timing.task;
   
   state.render_thread_initialized = true;
   
@@ -90,7 +114,7 @@ void eowu::thread::render(eowu::thread::SharedState &state,
   
   //  update the time relative to the task time
   renderer->SetOnBufferSwap([&](auto &win) -> void {
-    render_time.SetCurrentTime(win->GetAlias(), task_time.GetCurrentTime());
+    render_time.SetCurrentTime(win->GetAlias(), task_timer->Ellapsed().count());
   });
   
   //  main loop

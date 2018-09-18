@@ -22,8 +22,9 @@ namespace eowu {
       std::vector<double> padding;
       
       bool provided_model_id;
+      bool is_hidden;
       
-      Target() : padding({0, 0, 0}), provided_model_id(false) {
+      Target() : padding({0, 0, 0}), provided_model_id(false), is_hidden(false) {
         //
       }
     };

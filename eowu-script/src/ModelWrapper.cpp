@@ -41,7 +41,6 @@ int eowu::ModelWrapper::name(lua_State *L) { \
 }
 
 
-
 eowu::ModelWrapper::ModelWrapper(std::shared_ptr<eowu::Model> model,
                                  std::shared_ptr<eowu::Renderer> renderer,
                                  std::shared_ptr<eowu::WindowContainerMap> window_container,

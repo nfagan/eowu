@@ -9,6 +9,11 @@
 #include "LuaNoop.hpp"
 #include "Error.hpp"
 
+eowu::LuaFunction::LuaFunction(lua_State *L) :
+did_call(false), function_reference(get_no_op(L).GetReference()) {
+  //
+}
+
 eowu::LuaFunction::LuaFunction(const luabridge::LuaRef &ref) :
 did_call(false), function_reference(ref) {
   //
@@ -17,6 +22,19 @@ did_call(false), function_reference(ref) {
 eowu::LuaFunction::LuaFunction(const eowu::LuaFunction &other) :
 did_call(other.did_call.load()), function_reference(other.GetReference()) {
   //
+}
+
+eowu::LuaFunction& eowu::LuaFunction::operator=(const eowu::LuaFunction &other) {
+  if (this != &other) {
+    std::lock(mut, other.mut);
+    std::lock_guard<std::recursive_mutex> own_lock(mut);
+    std::lock_guard<std::recursive_mutex> other_lock(other.mut);
+    
+    did_call = other.did_call.load();
+    function_reference = other.GetReference();
+  }
+  
+  return *this;
 }
 
 void eowu::LuaFunction::Set(const eowu::LuaFunction &other) {

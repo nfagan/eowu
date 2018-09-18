@@ -38,7 +38,7 @@ eowu::Transform::Transform(eowu::Transform &&other) noexcept {
   units = std::move(other.units.load());
 }
 
-eowu::Transform& eowu::Transform::operator=(eowu::Transform&& other) noexcept {
+eowu::Transform& eowu::Transform::operator=(eowu::Transform &&other) noexcept {
   position = std::move(other.GetPosition());
   rotation = std::move(other.GetRotation());
   scale = std::move(other.GetScale());
@@ -49,7 +49,7 @@ eowu::Transform& eowu::Transform::operator=(eowu::Transform&& other) noexcept {
   return *this;
 }
 
-eowu::Transform& eowu::Transform::operator=(const eowu::Transform& other) {
+eowu::Transform& eowu::Transform::operator=(const eowu::Transform &other) {
   eowu::Transform tmp(other);
   *this = std::move(tmp);
   return *this;
@@ -105,32 +105,55 @@ glm::vec2 eowu::Transform::GetScreenDimensions() const {
 
 glm::vec3 eowu::Transform::GetUnitsPosition() const {
   auto pos = GetPosition();
+  auto dims = GetScreenDimensions();
   
   auto un = units.load();
   
   if (un == eowu::units::normalized || un == eowu::units::mixed) {
-    pos.x *= screen_dimensions.x;
-    pos.y *= screen_dimensions.y;
+    pos.x *= dims.x;
+    pos.y *= dims.y;
   }
+  
+  return pos;
+}
+
+glm::vec3 eowu::Transform::GetYInvertedUnitsPosition() const {
+  auto pos = GetPosition();
+  auto dims = GetScreenDimensions();
+  auto un = units.load();
+  
+  if (un == eowu::units::normalized || un == eowu::units::mixed) {
+    pos.y *= dims.y;
+    pos.x *= dims.x;
+  }
+  
+  pos.y = dims.y - pos.y;
   
   return pos;
 }
 
 glm::vec3 eowu::Transform::GetUnitsScale() const {
   auto scl = GetScale();
+  auto dims = GetScreenDimensions();
   
   if (units.load() == eowu::units::normalized) {
-    scl.x *= screen_dimensions.x;
-    scl.y *= screen_dimensions.y;
+    scl.x *= dims.x;
+    scl.y *= dims.y;
   }
   
   return scl;
 }
 
-glm::vec4 eowu::Transform::GetBoundingRect() const {
+glm::vec4 eowu::Transform::GetBoundingRect(bool inverted_y) const {
   glm::vec4 rect;
+  glm::vec3 pos;
   
-  auto pos = GetUnitsPosition();
+  if (inverted_y) {
+    pos = GetYInvertedUnitsPosition();
+  } else {
+    pos = GetPosition();
+  }
+  
   auto scl = GetUnitsScale();
   
   float half_width = scl.x / 2.0;

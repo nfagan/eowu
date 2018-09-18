@@ -39,6 +39,7 @@ void eowu::init::init_state_schema(lua_State *L) {
   eowu::VariableWrapper::CreateLuaSchema(L);
   eowu::VariablesWrapper::CreateLuaSchema(L);
   eowu::MathWrapper::CreateLuaSchema(L);
+  eowu::TargetWrapper::CreateLuaSchema(L);
 }
 
 EOWU_GET_LUA_FUNCTION_CONTAINER(get_render_functions, render_functions)

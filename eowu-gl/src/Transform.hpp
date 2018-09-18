@@ -41,8 +41,9 @@ public:
   glm::vec3 GetScale() const;
   glm::vec2 GetScreenDimensions() const;
   glm::vec3 GetUnitsPosition() const;
+  glm::vec3 GetYInvertedUnitsPosition() const;
   glm::vec3 GetUnitsScale() const;
-  glm::vec4 GetBoundingRect() const;
+  glm::vec4 GetBoundingRect(bool inverted_y = false) const;
   
   glm::mat4 GetTransformationMatrix() const;
 private:

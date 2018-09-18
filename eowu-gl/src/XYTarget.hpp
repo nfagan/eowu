@@ -34,6 +34,13 @@ namespace eowu {
     bool circle_in_bounds(eowu::XYTarget *target, eowu::Coordinate coord);
     bool rect_in_bounds(eowu::XYTarget *target, eowu::Coordinate coord);
   }
+  
+  namespace padding {
+    double get_radius(const glm::vec3 &scale, const glm::vec2 &padding);
+    
+    glm::vec3 get_circ_scale(const glm::vec3 &scale, const glm::vec2 &padding);
+    glm::vec3 get_rect_scale(const glm::vec3 &scale, const glm::vec2 &padding);
+  }
 }
 
 class eowu::XYTarget {

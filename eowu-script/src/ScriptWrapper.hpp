@@ -8,7 +8,9 @@
 #pragma once
 
 #include "Init.hpp"
+#include "TargetWrapper.hpp"
 #include <memory>
+#include <unordered_map>
 #include <string>
 #include <vector>
 
@@ -21,7 +23,9 @@ namespace eowu {
   class LockedLuaRenderFunctions;
   class ModelWrapper;
   class StateWrapper;
+  class TargetWrapper;
   class VariableWrapper;
+  class XYTarget;
   
   namespace data {
     class Store;
@@ -41,10 +45,13 @@ public:
   ~ScriptWrapper() = default;
   
   void SetStateWrapperContainer(eowu::StateWrapperContainerType states);
+  void SetTargetWrapperContainer(const std::unordered_map<std::string, std::shared_ptr<eowu::TargetWrapper>> &targets);
+  
   void SetGLPipeline(std::shared_ptr<eowu::GLPipeline> pipeline);
   void SetRenderFunctions(eowu::LuaFunctionContainerType render_functions);
   void SetFlipFunctions(eowu::LuaFunctionContainerType render_functions);
   void SetLuaRenderFunctionPair(std::shared_ptr<eowu::LockedLuaRenderFunctions> lua_render_functions);
+  
   void SetVariables(const std::unordered_map<std::string, eowu::data::Commitable> &variables);
   void SetTaskDataStore(std::shared_ptr<eowu::data::Store> task_data_store);
   void SetLockedRenderFunctions(std::shared_ptr<eowu::LockedLuaRenderFunctions> locked_functions);
@@ -53,6 +60,7 @@ public:
   
   int SetRenderFunctionPair(lua_State *L);
   eowu::StateWrapper* GetStateWrapper(const std::string &id) const;
+  eowu::TargetWrapper* GetTargetWrapper(const std::string &id);
   eowu::RendererWrapper GetRendererWrapper() const;
   eowu::ModelWrapper GetModelWrapper(const std::string &id) const;
   eowu::VariableWrapper GetVariable(const std::string &id);
@@ -69,7 +77,9 @@ public:
     std::unordered_map<std::string, eowu::data::Commitable> active;
     std::unordered_map<std::string, eowu::data::Commitable> defaults;
   };
+  
 private:
+  static std::unordered_map<std::string, std::shared_ptr<eowu::TargetWrapper>> targets;
   static eowu::LuaFunctionContainerType render_functions;
   static eowu::LuaFunctionContainerType flip_functions;
   static eowu::StateWrapperContainerType states;

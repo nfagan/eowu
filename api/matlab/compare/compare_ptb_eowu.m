@@ -6,7 +6,7 @@ eowu.util.try_add_ptoolbox();
 
 n_trials = 1e3;
 state_dur = 200;
-do_save = true;
+do_save = false;
 
 outs = compare_image_fix( n_trials, state_dur );
 
@@ -18,7 +18,9 @@ end
 
 %%  -- eowu: read
 
-e_datedir = '09-16-2018 13-45-10';
+% e_datedir = '09-16-2018 13-45-10';
+% e_datedir = '09-17-2018 11-04-47';
+e_datedir = '09-17-2018 21-03-25';
 p_fname = '091618__25__42.mat';
 
 ptb_fname = fullfile( eowu.apidir(), 'compare', 'data', p_fname );
@@ -26,6 +28,7 @@ ptb_fname = fullfile( eowu.apidir(), 'compare', 'data', p_fname );
 file = fullfile( eowu.rootdir(), 'data', e_datedir, 'task.dat' );
 
 s = eowu.read( file );
+load( ptb_fname );
 
 %%
 
@@ -53,7 +56,7 @@ res.ptb.img = outs.image_frames;
 
 res.ptb.diffed_img_onsets = diff( outs.image_onsets ) * 1e3;
 res.ptb.diffed_state_entries = diff( outs.image_state_times(:, 1) * 1e3 );
-res.ptb.n_trials = n_trials;
+res.ptb.n_trials = outs.trial_number;
 
 %%
 

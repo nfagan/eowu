@@ -75,21 +75,30 @@ int eowu::Runtime::Main(const std::string &file) {
     return 1;
   }
   
+  //  maps each target to an id.
+  const auto &target_map = target_status.result.targets;
+  const auto &target_models = target_status.result.target_models;
+  const auto &targets_hidden = target_status.result.hidden;
+
+  //  maps each target id to a target wrapper.
+  auto target_wrappers = eowu::init::make_target_wrappers(lua_runtime.lua_contexts.task,
+                                                          target_map, target_models, targets_hidden, gl_pipeline);
+  
+  script_wrapper.SetTargetWrapperContainer(target_wrappers);
+  
   //
   //
   //  otherwise, the gl pipeline and sources are ok.
   lua_runtime.InitializeScriptWrapper(script_wrapper, file, gl_pipeline);
   
-  eowu::thread::SharedState thread_state;
-  
-  // Target thread
-  auto vec_targets = eowu::validate::get_values(target_status.result.targets);
-  auto targets_thread = std::thread(eowu::thread::targets, std::ref(thread_state), std::ref(vec_targets));
+  eowu::thread::SharedState thread_state(&state_runner.GetTimer());
   
   //  Task thread
+  auto vec_targets = eowu::validate::get_values(target_map);
   state_runner.Begin(lua_runtime.GetFirstState());
   
-  auto task_thread = std::thread(eowu::thread::task, std::ref(thread_state), std::ref(state_runner));
+  auto task_thread = std::thread(eowu::thread::task, std::ref(thread_state),
+                                 std::ref(state_runner), std::ref(vec_targets));
   
   //  Render thread
   auto locked_lua_functions = script_wrapper.GetLockedRenderFunctions();
@@ -98,7 +107,6 @@ int eowu::Runtime::Main(const std::string &file) {
   eowu::thread::render(thread_state, lua_render_context, locked_lua_functions, gl_pipeline);
   
   task_thread.join();
-  targets_thread.join();
   
   return 0;
 }

@@ -39,6 +39,9 @@ std::shared_ptr<eowu::data::Store> eowu::ScriptWrapper::task_data_store = nullpt
 //
 //  variables
 eowu::ScriptWrapper::Variables eowu::ScriptWrapper::variables{};
+//
+//  targets
+std::unordered_map<std::string, std::shared_ptr<eowu::TargetWrapper>> eowu::ScriptWrapper::targets{};
 
 bool eowu::ScriptWrapper::IsComplete() const {
 #ifdef EOWU_DEBUG
@@ -86,6 +89,10 @@ void eowu::ScriptWrapper::SetFlipFunctions(eowu::LuaFunctionContainerType flip_f
   eowu::ScriptWrapper::flip_functions = std::move(flip_functions);
 }
 
+void eowu::ScriptWrapper::SetTargetWrapperContainer(const std::unordered_map<std::string, std::shared_ptr<eowu::TargetWrapper>> &targets) {
+  eowu::ScriptWrapper::targets = targets;
+}
+
 int eowu::ScriptWrapper::SetRenderFunctionPair(lua_State *L) {
   int n_inputs = lua_gettop(L);
   
@@ -121,6 +128,18 @@ eowu::ModelWrapper eowu::ScriptWrapper::GetModelWrapper(const std::string &id) c
   eowu::ModelWrapper model_wrapper(model, renderer, window_container, texture_manager);
   
   return model_wrapper;
+}
+
+eowu::TargetWrapper* eowu::ScriptWrapper::GetTargetWrapper(const std::string &id) {
+  assert(IsComplete());
+  
+  const auto &it = targets.find(id);
+  
+  if (it == targets.end()) {
+    throw eowu::NonexistentResourceError::MessageKindId("Target", id);
+  }
+  
+  return it->second.get();
 }
 
 eowu::StateWrapper* eowu::ScriptWrapper::GetStateWrapper(const std::string &id) const {
@@ -246,6 +265,7 @@ void eowu::ScriptWrapper::CreateLuaSchema(lua_State *L) {
   .addConstructor<void(*)(void)>()
   .addFunction("Commit", &eowu::ScriptWrapper::CommitData)
   .addFunction("Stimulus", &eowu::ScriptWrapper::GetModelWrapper)
+  .addFunction("Target", &eowu::ScriptWrapper::GetTargetWrapper)
   .addFunction("State", &eowu::ScriptWrapper::GetStateWrapper)
   .addFunction("Render", &eowu::ScriptWrapper::SetRenderFunctionPair)
   .addFunction("Renderer", &eowu::ScriptWrapper::GetRendererWrapper)

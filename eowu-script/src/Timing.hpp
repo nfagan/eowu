@@ -11,10 +11,15 @@
 #include "RenderTiming.hpp"
 
 namespace eowu {
+  class Timer;
+  
   namespace time {
+    
     struct Timing {
-      eowu::time::TaskTiming task;
       eowu::time::RenderTiming render;
+      const eowu::Timer *task;
+      
+      Timing(const eowu::Timer *task_timer) : task(task_timer) {}
     };
   }
 }

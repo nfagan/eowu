@@ -28,6 +28,30 @@ namespace priv {
   }
 }
 
+double eowu::padding::get_radius(const glm::vec3 &scale, const glm::vec2 &padding) {
+  auto x_scale = (scale.x + padding.x) / 2.0;
+  auto y_scale = (scale.y + padding.y) / 2.0;
+  //  radius is greater of x-scale or y-scale
+  double radius = x_scale > y_scale ? x_scale : y_scale;
+  
+  return radius;
+}
+
+glm::vec3 eowu::padding::get_circ_scale(const glm::vec3 &scale, const glm::vec2 &padding) {
+  double diam = get_radius(scale, padding) * 2.0;
+  
+  return glm::vec3(diam, diam, scale.z);
+}
+
+glm::vec3 eowu::padding::get_rect_scale(const glm::vec3 &scale, const glm::vec2 &padding) {
+  glm::vec3 result(scale);
+  
+  result.x += padding.x;
+  result.y += padding.y;
+  
+  return result;
+}
+
 void eowu::target_functions::reset(eowu::XYTarget *target) {
   target->Reset();
 }
@@ -37,7 +61,9 @@ void eowu::target_functions::update_on_in_bounds(eowu::XYTarget *target) {
 }
 
 bool eowu::bounds_functions::rect_in_bounds(eowu::XYTarget *target, eowu::Coordinate coord) {
-  auto rect = target->GetTransform().GetBoundingRect();
+  bool is_inverted = true;
+  
+  auto rect = target->GetTransform().GetBoundingRect(is_inverted);
   auto pad = target->GetUnitsPadding();
   
   double half_x = pad.x / 2.0;
@@ -57,24 +83,32 @@ bool eowu::bounds_functions::rect_in_bounds(eowu::XYTarget *target, eowu::Coordi
 bool eowu::bounds_functions::circle_in_bounds(eowu::XYTarget *target, eowu::Coordinate coord) {
   const auto &transform = target->GetTransform();
   
-  auto pos = transform.GetUnitsPosition();
+  auto pos = transform.GetYInvertedUnitsPosition();
   auto scl = transform.GetUnitsScale();
   auto pad = target->GetUnitsPadding();
   
-  auto x_scale = (scl.x + pad.x) / 2.0;
-  auto y_scale = (scl.y + pad.y) / 2.0;
-  //  radius is greater of x-scale or y-scale
-  auto radius = x_scale > y_scale ? x_scale : y_scale;
+  double x = coord.x;
+  double y = coord.y;
   
-  auto x_delta = pos.x - coord.x;
-  auto y_delta = pos.y - coord.y;
+  double h = pos.x;
+  double k = pos.y;
   
-  auto x_delta2 = x_delta * x_delta;
-  auto y_delta2 = y_delta * y_delta;
+  double rx = (scl.x + pad.x) / 2.0;
+  double ry = (scl.y + pad.y) / 2.0;
   
-  auto d = std::sqrt(x_delta2 + y_delta2);
+  double rx2 = rx * rx;
+  double ry2 = ry * ry;
   
-  return d <= radius;
+  double xd = x - h;
+  double yd = y - k;
+  
+  double xd2 = xd * xd;
+  double yd2 = yd * yd;
+  
+  double x_component = xd2 / rx2;
+  double y_component = yd2 / ry2;
+  
+  return x_component + y_component <= 1;
 }
 
 eowu::XYTarget::XYTarget() : source(nullptr), window(nullptr), padding({0, 0}), linked_model(nullptr) {
@@ -247,15 +281,11 @@ void eowu::XYTarget::out_of_bounds() {
 }
 
 void eowu::XYTarget::entry() {
-  std::cout << "Entered! " << std::endl;
-  
   entered = true;
   on_entry(this);
 }
 
 void eowu::XYTarget::exit() {
-  std::cout << "Exited! " << std::endl;
-  
   on_exit(this);
   entered = false;
   exited = true;

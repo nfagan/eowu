@@ -34,6 +34,8 @@ local function render()
   local pos = stim.position
   pos.x = pos.x + 0.001
 
+  stim:Color({0, 0, 1})
+
   stim.position = pos
   stim:Draw()
 end

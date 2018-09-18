@@ -30,11 +30,8 @@ namespace eowu {
       
       eowu::time::Timing timing;
       
-      SharedState();
+      SharedState(const eowu::Timer *task_timer);
     };
-    
-    void targets(eowu::thread::SharedState &state,
-                 const std::vector<std::shared_ptr<eowu::XYTarget>> &targets);
     
     void render(eowu::thread::SharedState &state,
                 std::shared_ptr<eowu::LuaContext> lua_context,
@@ -49,6 +46,12 @@ namespace eowu {
                        const eowu::WindowContainerType &gl_windows,
                        const eowu::time::RenderTiming &render_time);
     
-    void task(eowu::thread::SharedState &state, eowu::StateRunner &state_runner);
+    void task(eowu::thread::SharedState &state,
+              eowu::StateRunner &state_runner,
+              const std::vector<std::shared_ptr<eowu::XYTarget>> &targets);
+    
+    bool try_update_task(eowu::StateRunner &state_runner);
+    
+    bool try_update_targets(const std::vector<std::shared_ptr<eowu::XYTarget>> &targets);
   }
 }

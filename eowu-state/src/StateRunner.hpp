@@ -24,9 +24,11 @@ public:
   
   void Begin(eowu::State *state);
   bool Update();
-  bool IsNewState() const;
-  const eowu::Timer& GetTimer() const;
   
+  bool IsNewState() const;
+  bool ActiveStateWillExit() const;
+  
+  const eowu::Timer& GetTimer() const;
 private:
   eowu::State *active_state;
   bool is_new_state;
