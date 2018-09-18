@@ -204,7 +204,13 @@ void eowu::glfw::window_key_press_callback(GLFWwindow *window, int key, int scan
   
   auto win = context->get_window_with_trap(window);
   
-  std::cout << std::boolalpha << (action == GLFW_REPEAT) << std::endl;
+  if (action == GLFW_REPEAT) {
+    std::cout << "Repeat" << std::endl;
+  } else if (action == GLFW_PRESS) {
+    std::cout << "Press" << std::endl;
+  } else if (action == GLFW_RELEASE) {
+    std::cout << "Release" << std::endl;
+  }
 }
 
 //  window close

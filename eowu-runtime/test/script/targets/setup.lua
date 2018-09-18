@@ -5,10 +5,15 @@ Setup = {}
 
 Setup.Windows = {
   main = {
-    width = 600,
+    width = 800,
     height = 400,
-    resizeable = false
+    resizeable = true
   }
+}
+
+Setup.Lifecycle = {
+  Startup = function() end,
+  Shutdown = function() end
 }
 
 Setup.Sources = {
@@ -42,7 +47,7 @@ Setup.Stimuli = {
 }
 
 Setup.Targets = {
-  first = {
+  t1 = {
     source = 'position',
     window = 'main',
     type = 'Circle',
@@ -50,7 +55,7 @@ Setup.Targets = {
     padding = { 50, 100 },
     hidden = false
   },
-  sec = {
+  t2 = {
     source = 'position',
     window = 'main',
     type = 'Circle',

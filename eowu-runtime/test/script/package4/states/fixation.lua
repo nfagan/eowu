@@ -21,6 +21,7 @@ function state.Entry()
   script:Render('fixation')
 
   local targ = script:Target('first')
+  
   targ:Entry(function()
     local script = eowu.script()
     script:Render('fixation')

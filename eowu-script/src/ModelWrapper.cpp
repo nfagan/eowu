@@ -106,6 +106,7 @@ void eowu::ModelWrapper::SetUnits(const std::string &units) {
 
 int eowu::ModelWrapper::SetColor(lua_State *L) {
   assert_material();
+  
   auto nums = eowu::parser::get_numeric_vector_from_state(L, -1);
   auto vec = eowu::util::require_vec3(nums);
   model->GetMaterial()->SetFaceColor(vec);

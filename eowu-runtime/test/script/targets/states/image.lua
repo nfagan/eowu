@@ -3,7 +3,7 @@ local image = {}
 function image.Entry()
   local script = eowu.script()
   local state = script:State('image')
-  local targ = script:Target('first')
+  local targ = script:Target('t1')
 
   state:Next('fixation')
   script:Render('image')
