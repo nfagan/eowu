@@ -52,5 +52,11 @@ private:
   bool is_hidden;
   
   void configure_target_callbacks();
+  void configure_entry_callback();
+  void configure_exit_callback();
+  
   void configure_model();
+  
+  void assert_not_part_of_set(const std::string &kind);
+  static std::string get_part_of_set_error_message(const std::string &id, const std::string &kind);
 };

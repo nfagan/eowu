@@ -26,6 +26,10 @@ const eowu::Identifier& eowu::Window::GetIdentifier() const {
   return id;
 }
 
+eowu::Keyboard& eowu::Window::GetKeyboard() {
+  return keyboard;
+}
+
 const eowu::XYSource& eowu::Window::GetMouse() const {
   return mouse;
 }

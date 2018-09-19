@@ -14,6 +14,7 @@
 #include <eowu-script/eowu-script.hpp>
 #include <eowu-gl/eowu-gl.hpp>
 #include <eowu-state/eowu-state.hpp>
+#include <eowu-common/Timer.hpp>
 #include <Lua.hpp>
 #include <iostream>
 #include <thread>
@@ -85,6 +86,7 @@ int eowu::Runtime::Main(const std::string &file) {
                                                           target_map, target_models, targets_hidden, gl_pipeline);
   
   script_wrapper.SetTargetWrapperContainer(target_wrappers);
+  script_wrapper.SetXYTargets(target_map);
   
   //
   //
@@ -104,9 +106,23 @@ int eowu::Runtime::Main(const std::string &file) {
   auto locked_lua_functions = script_wrapper.GetLockedRenderFunctions();
   const auto &lua_render_context = lua_runtime.lua_contexts.render;
   
-  eowu::thread::render(thread_state, lua_render_context, locked_lua_functions, gl_pipeline);
+  auto render_thread = std::thread(eowu::thread::render, std::ref(thread_state),
+                                   lua_render_context, locked_lua_functions, gl_pipeline);
   
-  task_thread.join();
+  //  Main thread event loop
+  eowu::thread::events(thread_state, gl_pipeline->GetContextManager());
+  
+  //  When the events thread is finished (e.g., when the escape key is pressed),
+  //  attempt to wait for the render and task threads to finish. If they don't complete
+  //  within N seconds, throw an error.
+  try {
+    eowu::thread::try_await_thread_finish(thread_state, std::chrono::seconds(10));
+    
+    render_thread.join();
+    task_thread.join();
+  } catch (const std::exception &e) {
+    std::cout << "WARN: " << e.what() << std::endl;
+  }
   
   return 0;
 }

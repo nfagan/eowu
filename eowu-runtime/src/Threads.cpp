@@ -12,13 +12,15 @@
 #include <eowu-common/config.hpp>
 #include <stdexcept>
 #include <cstddef>
+#include <chrono>
 
 #ifdef EOWU_DEBUG
 #include <iostream>
 #endif
 
 eowu::thread::SharedState::SharedState(const eowu::Timer *task_timer) :
-task_thread_initialized(false), render_thread_initialized(false), threads_should_continue(true), timing(task_timer) {
+task_thread_initialized(false), render_thread_initialized(false), threads_should_continue(true),
+task_thread_completed(false), render_thread_completed(false), timing(task_timer) {
   //
 }
 
@@ -53,6 +55,7 @@ void eowu::thread::task(eowu::thread::SharedState &state,
   }
   
   state.threads_should_continue = false;
+  state.task_thread_completed = true;
 }
 
 bool eowu::thread::try_update_task(eowu::StateRunner &state_runner) {
@@ -133,10 +136,9 @@ void eowu::thread::render(eowu::thread::SharedState &state,
         return;
       }
       
-      //  draw, empty queue, update window events
+      //  draw, empty queue
       renderer->Draw();
       renderer->ClearQueue();
-      gl_context_manager->PollEvents();
       
       //  call flip function for this frame
       bool flip_res = eowu::thread::try_call_flip(lua_context, flip, gl_windows, render_time);
@@ -154,6 +156,7 @@ void eowu::thread::render(eowu::thread::SharedState &state,
   gl_context_manager->CloseWindows();
   
   state.threads_should_continue = false;
+  state.render_thread_completed = true;
 }
 
 bool eowu::thread::try_call_flip(const std::shared_ptr<eowu::LuaContext> &lua_context,
@@ -186,7 +189,6 @@ bool eowu::thread::try_call_flip(const std::shared_ptr<eowu::LuaContext> &lua_co
     
   } catch (const std::exception &e) {
     std::cout << "ERROR: Flip: " << e.what() << std::endl;
-    
     success = false;
   }
   
@@ -208,9 +210,51 @@ bool eowu::thread::try_call_render(const std::shared_ptr<eowu::LuaContext> &lua_
     
   } catch (const std::exception &e) {
     std::cout << "ERROR: Render: " << e.what() << std::endl;
-    
     success = false;
   }
   
   return success;
+}
+
+void eowu::thread::events(eowu::thread::SharedState &state, std::shared_ptr<eowu::ContextManager> context_manager) {
+  int key_code = eowu::Keyboard::GetKeyCode("escape");
+  auto &kb = context_manager->GetKeyboard();
+  
+  //  main events loop
+  while (state.threads_should_continue) {
+    context_manager->PollEvents();
+    
+    if (kb.IsPressed(key_code)) {
+      state.threads_should_continue = false;
+    }
+  }
+}
+
+void eowu::thread::try_await_thread_finish(const eowu::thread::SharedState &state,
+                                           eowu::time::DurationType timeout) {
+  
+  eowu::Timer timer;
+  bool threads_completed = state.render_thread_completed && state.task_thread_completed;
+  bool did_warn = false;
+  
+  while (!threads_completed && timer.Ellapsed() < timeout) {
+    threads_completed = state.render_thread_completed && state.task_thread_completed;
+    timer.Update();
+    
+    if (!did_warn && timer.Ellapsed() >= std::chrono::seconds(1)) {
+      std::cout << "WARN: More than 1 second ellapsed waiting for render and/or task threads to complete." << std::endl;
+      did_warn = true;
+    }
+  }
+  
+  if (!threads_completed) {
+    std::chrono::duration<double, std::milli> ms = timeout;
+    std::string t = std::to_string(ms.count());
+    
+    std::string base_msg = "The render and/or task threads failed to complete in: " + t + " ms.";
+    std::string rest_msg = "Check your script(s) to see whether your code includes an infinite while loop. Terminating ...";
+    std::string full_msg = base_msg + " " + rest_msg;
+    
+    throw std::runtime_error(full_msg);
+  }
 }

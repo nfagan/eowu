@@ -8,12 +8,15 @@
 #include "ScriptWrapper.hpp"
 #include "StateWrapper.hpp"
 #include "ModelWrapper.hpp"
+#include "KeyboardWrapper.hpp"
 #include "RendererWrapper.hpp"
 #include "VariableWrapper.hpp"
 #include "Constants.hpp"
 #include "LockedLuaRenderFunctions.hpp"
 #include "Lua.hpp"
 #include "Error.hpp"
+#include "RuntimeUtil.hpp"
+#include "parser/ParseUtil.hpp"
 #include <eowu-common/config.hpp>
 #include <eowu-gl/eowu-gl.hpp>
 #include <eowu-data.hpp>
@@ -40,8 +43,20 @@ std::shared_ptr<eowu::data::Store> eowu::ScriptWrapper::task_data_store = nullpt
 //  variables
 eowu::ScriptWrapper::Variables eowu::ScriptWrapper::variables{};
 //
-//  targets
-std::unordered_map<std::string, std::shared_ptr<eowu::TargetWrapper>> eowu::ScriptWrapper::targets{};
+//  target-wrappers
+std::unordered_map<std::string, std::shared_ptr<eowu::TargetWrapper>> eowu::ScriptWrapper::target_wrappers{};
+//
+//  xy-targets
+std::unordered_map<std::string, std::shared_ptr<eowu::XYTarget>> eowu::ScriptWrapper::xy_targets{};
+//
+//  target sets
+std::unordered_map<std::string, std::unique_ptr<eowu::TargetSetWrapper>> eowu::ScriptWrapper::target_sets{};
+//
+//  keyboard
+std::unique_ptr<eowu::KeyboardWrapper> eowu::ScriptWrapper::keyboard = nullptr;
+//
+//  lua task context
+std::shared_ptr<eowu::LuaContext> eowu::ScriptWrapper::lua_task_context = nullptr;
 
 bool eowu::ScriptWrapper::IsComplete() const {
 #ifdef EOWU_DEBUG
@@ -49,15 +64,24 @@ bool eowu::ScriptWrapper::IsComplete() const {
   bool pc = pipeline != nullptr;
   bool rc = render_functions != nullptr;
   bool lc = lua_render_thread_functions != nullptr;
+  bool kc = keyboard != nullptr;
   
-  return sc && pc && rc && lc;
+  return sc && pc && rc && lc && kc;
 #else
   return true;
 #endif
 }
 
+void eowu::ScriptWrapper::SetLuaTaskContext(std::shared_ptr<eowu::LuaContext> context) {
+  eowu::ScriptWrapper::lua_task_context = context;
+}
+
 void eowu::ScriptWrapper::SetTaskDataStore(std::shared_ptr<eowu::data::Store> store) {
   task_data_store = store;
+}
+
+void eowu::ScriptWrapper::SetKeyboardWrapper(std::unique_ptr<eowu::KeyboardWrapper> keyboard) {
+  eowu::ScriptWrapper::keyboard = std::move(keyboard);
 }
 
 void eowu::ScriptWrapper::SetLockedRenderFunctions(std::shared_ptr<eowu::LockedLuaRenderFunctions> locked_functions) {
@@ -90,23 +114,28 @@ void eowu::ScriptWrapper::SetFlipFunctions(eowu::LuaFunctionContainerType flip_f
 }
 
 void eowu::ScriptWrapper::SetTargetWrapperContainer(const std::unordered_map<std::string, std::shared_ptr<eowu::TargetWrapper>> &targets) {
-  eowu::ScriptWrapper::targets = targets;
+  eowu::ScriptWrapper::target_wrappers = targets;
+}
+
+void eowu::ScriptWrapper::SetXYTargets(const std::unordered_map<std::string, std::shared_ptr<eowu::XYTarget>> &targets) {
+  eowu::ScriptWrapper::xy_targets = targets;
 }
 
 int eowu::ScriptWrapper::SetRenderFunctionPair(lua_State *L) {
+  const char* const func_id = "Render";
+  
   int n_inputs = lua_gettop(L);
   
   eowu::LuaFunction *render_func = nullptr;
   eowu::LuaFunction *flip_func = nullptr;
   
-  if (n_inputs == 0) {
-    throw eowu::LuaError("Render: Expected 1 or 2 input arguments; got 0");
+  if (n_inputs == 1) {
+    const auto msg = eowu::util::get_message_not_enough_inputs(func_id, 1, 0);
+    throw eowu::LuaError(msg);
   }
   
-  if (n_inputs > 1) {
-    int input_index = n_inputs > 2 ? -2 : -1;
-    render_func = get_function_from_state(L, input_index, render_functions.get(), "render");
-  }
+  int input_index = n_inputs > 2 ? -2 : -1;
+  render_func = get_function_from_state(L, input_index, render_functions.get(), "render");
   
   if (n_inputs > 2) {
     flip_func = get_function_from_state(L, -1, flip_functions.get(), "flip");
@@ -133,13 +162,19 @@ eowu::ModelWrapper eowu::ScriptWrapper::GetModelWrapper(const std::string &id) c
 eowu::TargetWrapper* eowu::ScriptWrapper::GetTargetWrapper(const std::string &id) {
   assert(IsComplete());
   
-  const auto &it = targets.find(id);
+  const auto &it = target_wrappers.find(id);
   
-  if (it == targets.end()) {
+  if (it == target_wrappers.end()) {
     throw eowu::NonexistentResourceError::MessageKindId("Target", id);
   }
   
   return it->second.get();
+}
+
+eowu::KeyboardWrapper* eowu::ScriptWrapper::GetKeyboardWrapper() const {
+  assert(IsComplete());
+  
+  return keyboard.get();
 }
 
 eowu::StateWrapper* eowu::ScriptWrapper::GetStateWrapper(const std::string &id) const {
@@ -176,6 +211,44 @@ eowu::VariableWrapper eowu::ScriptWrapper::GetVariable(const std::string &id) {
   eowu::VariableWrapper wrapper(active, defaults);
   
   return wrapper;
+}
+
+eowu::TargetSetWrapper* eowu::ScriptWrapper::MakeTargetSet(const std::string &id, lua_State *L) {
+  const char* const func_id = "MakeTargetSet";
+  
+  int n_inputs = lua_gettop(L);
+  
+  if (n_inputs != 3) {
+    throw eowu::LuaError(eowu::util::get_message_wrong_number_of_inputs(func_id, 2, n_inputs-1));
+  }
+  
+  std::vector<std::string> target_ids;
+  
+  try {
+    target_ids = eowu::parser::get_string_vector_from_state(L, -1);
+  } catch (const std::exception &e) {
+    std::string msg = eowu::util::get_message_wrong_input_type(func_id, "string-array", lua_typename(L, -1));
+    throw eowu::LuaError(msg);
+  }
+
+  std::vector<eowu::XYTarget*> target_ptrs;
+
+  for (const auto &targ_id : target_ids) {
+    const auto &it = xy_targets.find(targ_id);
+    
+    if (it == xy_targets.end()) {
+      auto msg = eowu::util::get_message_nonexistent_resource(func_id, "Target", targ_id);
+      throw eowu::NonexistentResourceError(msg);
+    }
+    
+    target_ptrs.push_back(it->second.get());
+  }
+  
+  auto target_set = std::make_unique<eowu::TargetSetWrapper>(lua_task_context, target_ptrs);
+  eowu::TargetSetWrapper *ptr = target_set.get();
+  target_sets[id] = std::move(target_set);
+  
+  return ptr;
 }
 
 std::shared_ptr<eowu::LockedLuaRenderFunctions> eowu::ScriptWrapper::GetLockedRenderFunctions() const {
@@ -241,7 +314,10 @@ void eowu::ScriptWrapper::commit_variables(std::vector<char> &into) const {
   }
 }
 
-eowu::LuaFunction* eowu::ScriptWrapper::get_function_from_state(lua_State *L, int stack_index, eowu::LuaFunctionMapType *funcs, const std::string &kind) {
+eowu::LuaFunction* eowu::ScriptWrapper::get_function_from_state(lua_State *L,
+                                                                int stack_index,
+                                                                eowu::LuaFunctionMapType *funcs,
+                                                                const std::string &kind) {
   auto ref = luabridge::LuaRef::fromStack(L, stack_index);
   
   if (!ref.isString()) {
@@ -270,6 +346,8 @@ void eowu::ScriptWrapper::CreateLuaSchema(lua_State *L) {
   .addFunction("Render", &eowu::ScriptWrapper::SetRenderFunctionPair)
   .addFunction("Renderer", &eowu::ScriptWrapper::GetRendererWrapper)
   .addFunction("Variable", &eowu::ScriptWrapper::GetVariable)
+  .addFunction("Keyboard", &eowu::ScriptWrapper::GetKeyboardWrapper)
+  .addFunction("MakeTargetSet", &eowu::ScriptWrapper::MakeTargetSet)
   .endClass()
   .endNamespace();
 }

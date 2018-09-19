@@ -5,10 +5,12 @@ local fixation = {}
 local function entry()
   local script = eowu.script()
   local trial = script:Variable('trial')
+  local frames = script:Variable('frames')
   local state = script:State('fixation')
   local tn = trial:Get()
 
   trial:Set(tn + 1)
+  frames:Reset()
   script:Render('fixation')
   state:Next('fixation')
 
@@ -21,10 +23,16 @@ local function exit()
   local script = eowu.script()
   local state = script:State('fixation')
   local trial = script:Variable('trial')
+  local frames = script:Variable('frames')
   local tn = trial:Get()
+  local f = frames:Get()
   local t = state:Ellapsed()
 
-  print('Finished trial: ' .. tn .. '; lasted: ' .. t .. ' (s)')
+  local trial_info = 'Completed trial: ' .. tn
+  local time_info = '; time: ' .. t .. ' (s)'
+  local frame_info = '; frames: ' .. f
+
+  print(trial_info .. time_info .. frame_info)
 end
 
 --  render function: Called each render-frame.
@@ -33,9 +41,18 @@ local function render()
   local script = eowu.script()
   local stim = script:Stimulus('example')
   local tn = script:Variable('trial'):Get()
+  local frames = script:Variable('frames')
+  local kb = script:Keyboard()
 
   local rot = stim.rotation
-  rot.z = rot.z + 0.01
+  local rot_amt = 0.01
+
+  if kb:Down('space') then
+    rot.z = rot.z - rot_amt * 4
+  else
+    rot.z = rot.z + rot_amt
+  end
+
   stim.rotation = rot
 
   if tn % 2 == 0 then 
@@ -49,6 +66,8 @@ local function render()
   stim:Position({0.5, 0.5})
   stim:Size({0.5, 0.5})
   stim:Draw()
+
+  frames:Set(frames:Get() + 1)
 end
 
 fixation.First = true       -- begin in this state

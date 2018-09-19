@@ -56,10 +56,6 @@ void eowu::target_functions::reset(eowu::XYTarget *target) {
   target->Reset();
 }
 
-void eowu::target_functions::update_on_in_bounds(eowu::XYTarget *target) {
-  target->IncrementTotalTimeInBounds();
-}
-
 bool eowu::bounds_functions::rect_in_bounds(eowu::XYTarget *target, eowu::Coordinate coord) {
   bool is_inverted = true;
   
@@ -111,12 +107,13 @@ bool eowu::bounds_functions::circle_in_bounds(eowu::XYTarget *target, eowu::Coor
   return x_component + y_component <= 1;
 }
 
-eowu::XYTarget::XYTarget() : source(nullptr), window(nullptr), padding({0, 0}), linked_model(nullptr) {
+eowu::XYTarget::XYTarget() :
+source(nullptr), window(nullptr), padding({0, 0}), linked_model(nullptr), is_part_of_set(false) {
   set_default_callbacks();
   Reset();
 }
 
-eowu::XYTarget::XYTarget(const eowu::XYTarget &other) : timer(other.GetTimer()) {
+eowu::XYTarget::XYTarget(const eowu::XYTarget &other) : timer(other.timer) {
   std::unique_lock<std::mutex> lock(other.mut);
   
   source = other.source;
@@ -132,12 +129,16 @@ eowu::XYTarget::XYTarget(const eowu::XYTarget &other) : timer(other.GetTimer()) 
   on_entry = other.on_entry;
   on_exit = other.on_exit;
   
+  is_part_of_set = other.is_part_of_set.load();
+  
   on_ib = other.on_ib;
   on_oob = other.on_oob;
   
   bounds_function = other.bounds_function;
   
   total_time_in_bounds = other.total_time_in_bounds.load();
+  
+  alias = other.alias;
 }
 
 void eowu::XYTarget::LinkModel(std::shared_ptr<eowu::Model> model) {
@@ -150,10 +151,13 @@ void eowu::XYTarget::Reset() {
   entered = false;
   exited = false;
   total_time_in_bounds = eowu::time::zero();
+  timer.Reset();
 }
 
 void eowu::XYTarget::Update() {
   std::unique_lock<std::mutex> lock(mut);
+  
+  timer.Update();
   
   if (source == nullptr || !source->IsValid()) {
     return;
@@ -169,13 +173,10 @@ void eowu::XYTarget::Update() {
   
   auto coord = source->GetLatestSample();
   bool entered = Entered();
-  bool exited = Exited();
   
   if (bounds_function(this, coord)) {
     if (!entered) {
       entry();
-    } else if (exited) {
-      //  @TODO: Handle reentry.
     }
     
     in_bounds();
@@ -188,11 +189,6 @@ void eowu::XYTarget::Update() {
   }
 }
 
-void eowu::XYTarget::IncrementTotalTimeInBounds() {
-  total_time_in_bounds = total_time_in_bounds.load() + timer.Ellapsed();
-  timer.Reset();
-}
-
 bool eowu::XYTarget::Entered() const {
   return entered;
 }
@@ -201,10 +197,20 @@ bool eowu::XYTarget::Exited() const {
   return exited;
 }
 
+bool eowu::XYTarget::IsPartOfSet() const {
+  return is_part_of_set;
+}
+
 EOWU_TARGET_CB_IMPL(SetOnEntry, on_entry);
 EOWU_TARGET_CB_IMPL(SetOnExit, on_exit);
 EOWU_TARGET_CB_IMPL(SetOnInBounds, on_ib);
 EOWU_TARGET_CB_IMPL(SetOnOutOfBounds, on_oob);
+
+void eowu::XYTarget::SetAlias(const std::string &alias_) {
+  std::unique_lock<std::mutex> lock(mut);
+  
+  alias = alias_;
+}
 
 void eowu::XYTarget::SetPadding(const glm::vec2 &padding_) {
   std::unique_lock<std::mutex> lock(mut);
@@ -238,16 +244,12 @@ const eowu::Transform& eowu::XYTarget::GetTransform() const {
   return transform;
 }
 
-eowu::Timer& eowu::XYTarget::GetTimer() {
-  return timer;
-}
-
-const eowu::Timer& eowu::XYTarget::GetTimer() const {
-  return timer;
-}
-
 const eowu::XYSource* eowu::XYTarget::GetSource() const {
   return source;
+}
+
+std::string eowu::XYTarget::GetAlias() const {
+  return alias;
 }
 
 glm::vec2 eowu::XYTarget::GetUnitsPadding() const {
@@ -273,6 +275,7 @@ eowu::time::DurationType eowu::XYTarget::GetTotalTimeInBounds() const {
 }
 
 void eowu::XYTarget::in_bounds() {
+  total_time_in_bounds = timer.Ellapsed();
   on_ib(this);
 }
 
@@ -282,6 +285,7 @@ void eowu::XYTarget::out_of_bounds() {
 
 void eowu::XYTarget::entry() {
   entered = true;
+  reset_time();
   on_entry(this);
 }
 
@@ -289,6 +293,7 @@ void eowu::XYTarget::exit() {
   on_exit(this);
   entered = false;
   exited = true;
+  reset_time();
 }
 
 void eowu::XYTarget::set_default_callbacks() {
@@ -297,6 +302,10 @@ void eowu::XYTarget::set_default_callbacks() {
   on_exit = priv::target_noop;
   on_ib = priv::target_noop;
   on_oob = priv::target_noop;
+}
+
+void eowu::XYTarget::set_part_of_set(bool is_part_of_set_) {
+  is_part_of_set = is_part_of_set_;
 }
 
 void eowu::XYTarget::match_to_linked_model() {
@@ -309,4 +318,9 @@ void eowu::XYTarget::match_to_linked_model() {
 
 bool eowu::XYTarget::has_linked_model() const {
   return linked_model != nullptr;
+}
+
+void eowu::XYTarget::reset_time() {
+  timer.Reset();
+  total_time_in_bounds = eowu::time::zero();
 }

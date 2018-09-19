@@ -19,6 +19,7 @@ namespace eowu {
   class LuaContext;
   class LuaFunction;
   class LockedLuaRenderFunctions;
+  class ContextManager;
   class GLPipeline;
   class Window;
   
@@ -27,6 +28,8 @@ namespace eowu {
       std::atomic<bool> task_thread_initialized;
       std::atomic<bool> render_thread_initialized;
       std::atomic<bool> threads_should_continue;
+      std::atomic<bool> task_thread_completed;
+      std::atomic<bool> render_thread_completed;
       
       eowu::time::Timing timing;
       
@@ -51,7 +54,11 @@ namespace eowu {
               const std::vector<std::shared_ptr<eowu::XYTarget>> &targets);
     
     bool try_update_task(eowu::StateRunner &state_runner);
-    
     bool try_update_targets(const std::vector<std::shared_ptr<eowu::XYTarget>> &targets);
+    
+    void events(eowu::thread::SharedState &state, std::shared_ptr<eowu::ContextManager> context_manager);
+    
+    void try_await_thread_finish(const eowu::thread::SharedState &state,
+                              eowu::time::DurationType timeout);
   }
 }

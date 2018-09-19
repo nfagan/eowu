@@ -7,7 +7,8 @@ Setup.Windows = {
   main = {
     width = 800,
     height = 400,
-    resizeable = true
+    resizeable = true,
+    fullscreen = true
   }
 }
 
@@ -40,7 +41,7 @@ Setup.Stimuli = {
   stim2 = {
     geometry = 'circ',
     units = 'mixed',
-    size = { 200, 300 },
+    size = { 200, 100 },
     color = { 1, 0, 0 },
     position = { 2/3, 0.5 }
   }
@@ -52,7 +53,7 @@ Setup.Targets = {
     window = 'main',
     type = 'Circle',
     stimulus = 'stim',
-    padding = { 50, 100 },
+    padding = { 50, 50 },
     hidden = false
   },
   t2 = {

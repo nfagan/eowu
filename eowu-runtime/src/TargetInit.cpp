@@ -121,6 +121,7 @@ eowu::init::TargetResult eowu::init::initialize_targets(const eowu::schema::Targ
     target->SetSource(source);
     target->SetPadding(padding);
     target->SetWindow(win.get());
+    target->SetAlias(target_id);
     
     result.result.targets.emplace(target_id, target);
     

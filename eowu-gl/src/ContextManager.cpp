@@ -126,6 +126,10 @@ eowu::WindowType eowu::ContextManager::OpenWindow(const eowu::WindowProperties &
   
 }
 
+eowu::Keyboard& eowu::ContextManager::GetKeyboard() {
+  return keyboard;
+}
+
 GLFWmonitor* eowu::ContextManager::get_monitor_with_trap(unsigned int index) const {
   int count;
   
@@ -204,12 +208,15 @@ void eowu::glfw::window_key_press_callback(GLFWwindow *window, int key, int scan
   
   auto win = context->get_window_with_trap(window);
   
-  if (action == GLFW_REPEAT) {
-    std::cout << "Repeat" << std::endl;
-  } else if (action == GLFW_PRESS) {
-    std::cout << "Press" << std::endl;
+  auto &win_kb = win->GetKeyboard();
+  auto &ctx_kb = context->GetKeyboard();
+  
+  if (action == GLFW_PRESS) {
+    win_kb.mark_pressed(key);
+    ctx_kb.mark_pressed(key);
   } else if (action == GLFW_RELEASE) {
-    std::cout << "Release" << std::endl;
+    win_kb.mark_released(key);
+    ctx_kb.mark_released(key);
   }
 }
 

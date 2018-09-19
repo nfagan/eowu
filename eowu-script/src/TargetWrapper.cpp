@@ -34,19 +34,25 @@ void eowu::TargetWrapper::Reset() {
 }
 
 void eowu::TargetWrapper::SetOnEntry(luabridge::LuaRef func) {
+  assert_not_part_of_set("Entry");
+  
   if (!func.isFunction()) {
     throw eowu::LuaError("Argument to 'Entry' must be a function.");
   }
   
   on_entry.Set(func);
+  configure_entry_callback();
 }
 
 void eowu::TargetWrapper::SetOnExit(luabridge::LuaRef func) {
+  assert_not_part_of_set("Exit");
+  
   if (!func.isFunction()) {
     throw eowu::LuaError("Argument to 'Exit' must be a function.");
   }
   
   on_exit.Set(func);
+  configure_exit_callback();
 }
 
 void eowu::TargetWrapper::Hide() {
@@ -90,14 +96,21 @@ int eowu::TargetWrapper::Draw(lua_State *L) {
   return 0;
 }
 
-void eowu::TargetWrapper::configure_target_callbacks() {
+void eowu::TargetWrapper::configure_entry_callback() {
   target->SetOnEntry([&](auto *target) -> void {
     lua_context->Call(on_entry);
   });
-  
+}
+
+void eowu::TargetWrapper::configure_exit_callback() {
   target->SetOnExit([&](auto *target) -> void {
     lua_context->Call(on_exit);
   });
+}
+
+void eowu::TargetWrapper::configure_target_callbacks() {
+  configure_entry_callback();
+  configure_exit_callback();
 }
 
 void eowu::TargetWrapper::configure_model() {
@@ -114,6 +127,16 @@ void eowu::TargetWrapper::configure_model() {
   model_trans.SetPosition(pos);
   model_trans.SetScale(scl);
   model_trans.SetUnits(eowu::units::pixels);
+}
+
+void eowu::TargetWrapper::assert_not_part_of_set(const std::string &kind) {
+  if (target->IsPartOfSet()) {
+    throw eowu::LuaError(get_part_of_set_error_message(target->GetAlias(), kind));
+  }
+}
+
+std::string eowu::TargetWrapper::get_part_of_set_error_message(const std::string &id, const std::string &kind) {
+  return "Cannot set a callback of type: '" + kind + "' to target: '" + id + "' because it is part of a TargetSet.";
 }
 
 void eowu::TargetWrapper::CreateLuaSchema(lua_State *L) {

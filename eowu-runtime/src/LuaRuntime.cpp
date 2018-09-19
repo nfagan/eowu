@@ -6,6 +6,7 @@
 //
 
 #include "LuaRuntime.hpp"
+#include <eowu-gl/eowu-gl.hpp>
 #include <iostream>
 #include <eowu-common/logging.hpp>
 
@@ -114,6 +115,7 @@ void eowu::LuaRuntime::InitializeScriptWrapper(eowu::ScriptWrapper &script_wrapp
   auto states = init::get_states(setup_schema.states, lua_contexts.task, state_manager, state_runner);
   
   auto lua_render_functions = std::make_shared<eowu::LockedLuaRenderFunctions>(nullptr, nullptr);
+  auto keyboard_wrapper = create_keyboard(gl_pipeline->GetContextManager());
   
   script_wrapper.SetVariables(setup_schema.variables.mapping);
   script_wrapper.SetStateWrapperContainer(std::move(states));
@@ -121,6 +123,8 @@ void eowu::LuaRuntime::InitializeScriptWrapper(eowu::ScriptWrapper &script_wrapp
   script_wrapper.SetRenderFunctions(std::move(render_functions));
   script_wrapper.SetFlipFunctions(std::move(flip_functions));
   script_wrapper.SetLuaRenderFunctionPair(lua_render_functions);
+  script_wrapper.SetKeyboardWrapper(std::move(keyboard_wrapper));
+  script_wrapper.SetLuaTaskContext(lua_contexts.task);
 }
 
 eowu::State* eowu::LuaRuntime::GetFirstState() {
@@ -147,4 +151,8 @@ void eowu::LuaRuntime::initialize_schemas(lua_State *L) {
   eowu::init::init_state_schema(L);
   eowu::init::init_render_schema(L);
   eowu::ScriptWrapper::CreateLuaSchema(L);
+}
+
+std::unique_ptr<eowu::KeyboardWrapper> eowu::LuaRuntime::create_keyboard(std::shared_ptr<eowu::ContextManager> context_manager) {
+  return std::make_unique<eowu::KeyboardWrapper>(context_manager->GetKeyboard());
 }

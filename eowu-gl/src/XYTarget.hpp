@@ -13,12 +13,14 @@
 #include <eowu-common/Timer.hpp>
 #include <glm/glm.hpp>
 #include <functional>
+#include <string>
 #include <mutex>
 #include <atomic>
 #include <memory>
 
 namespace eowu {
   class XYTarget;
+  class XYTargetSet;
   class Model;
   class Window;
   
@@ -27,7 +29,6 @@ namespace eowu {
   
   namespace target_functions {
     void reset(eowu::XYTarget* target);
-    void update_on_in_bounds(eowu::XYTarget* target);
   }
   
   namespace bounds_functions {
@@ -44,6 +45,8 @@ namespace eowu {
 }
 
 class eowu::XYTarget {
+  friend class eowu::XYTargetSet;
+  
 public:
   XYTarget();
   XYTarget(const eowu::XYTarget &other);
@@ -51,8 +54,8 @@ public:
   
   void Reset();
   void Update();
-  void IncrementTotalTimeInBounds();
   
+  void SetAlias(const std::string &alias);
   void SetPadding(const glm::vec2 &padding);
   void SetSource(const eowu::XYSource *source);
   void SetWindow(const eowu::Window *window);
@@ -62,6 +65,8 @@ public:
   void SetOnInBounds(const eowu::TargetCallbackType &func);
   void SetOnOutOfBounds(const eowu::TargetCallbackType &func);
   
+  bool IsPartOfSet() const;
+  
   void LinkModel(std::shared_ptr<eowu::Model> model);
   
   bool Entered() const;
@@ -69,11 +74,10 @@ public:
   
   eowu::Transform& GetTransform();
   const eowu::Transform& GetTransform() const;
-  eowu::Timer& GetTimer();
-  const eowu::Timer& GetTimer() const;
   eowu::time::DurationType GetTotalTimeInBounds() const;
   const eowu::XYSource* GetSource() const;
   glm::vec2 GetUnitsPadding() const;
+  std::string GetAlias() const;
   
 private:
   mutable std::mutex mut;
@@ -86,6 +90,7 @@ private:
   
   std::shared_ptr<eowu::Model> linked_model;
   
+  std::atomic<bool> is_part_of_set;
   std::atomic<bool> entered;
   std::atomic<bool> exited;
   
@@ -99,12 +104,18 @@ private:
   eowu::Timer timer;
   std::atomic<eowu::time::DurationType> total_time_in_bounds;
   
+  std::string alias;
+  
   void set_default_callbacks();
   void entry();
   void exit();
   void in_bounds();
   void out_of_bounds();
   
+  void set_part_of_set(bool is_part_of_set);
+  
   void match_to_linked_model();
   bool has_linked_model() const;
+  
+  void reset_time();
 };

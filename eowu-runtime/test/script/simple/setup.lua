@@ -3,7 +3,8 @@ local fixation = require('states.fixation')
 Setup = {}
 
 Setup.Variables = {
-  trial = 0
+  trial = 0,
+  frames = 0
 }
 
 Setup.Windows = {

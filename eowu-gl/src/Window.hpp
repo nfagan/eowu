@@ -9,6 +9,7 @@
 
 #include "Identifier.hpp"
 #include "XYSource.hpp"
+#include "Keyboard.hpp"
 #include <eowu-common/types.hpp>
 #include <glm/glm.hpp>
 #include <string>
@@ -56,9 +57,12 @@ public:
   unsigned int GetHeight() const;
   const eowu::Identifier& GetIdentifier() const;
   const eowu::XYSource& GetMouse() const;
+  eowu::Keyboard& GetKeyboard();
+  const std::string& GetAlias() const;
   
   void Close();
   
+  void SetAlias(const std::string &alias);
   void SetHeight(unsigned int height);
   void SetWidth(unsigned int width);
   void SetPosition(unsigned int x, unsigned int y);
@@ -76,9 +80,6 @@ public:
   void MakeCurrent() const;
   void Show() const;
   
-  void SetAlias(const std::string &alias);
-  const std::string& GetAlias() const;
-  
   friend void eowu::glfw::window_close_callback(GLFWwindow *window);
   
 private:
@@ -89,6 +90,7 @@ private:
   GLFWwindow *window;
   
   eowu::XYSource mouse;
+  eowu::Keyboard keyboard;
   
   std::atomic<unsigned int> width;
   std::atomic<unsigned int> height;

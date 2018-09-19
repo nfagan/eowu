@@ -8,6 +8,7 @@
 #pragma once
 
 #include "LuaRuntime.hpp"
+#include <eowu-common/time.hpp>
 #include <string>
 #include <memory>
 
@@ -16,6 +17,10 @@ struct lua_State;
 namespace eowu {
   class Runtime;
   class GLPipeline;
+  
+  namespace thread {
+    struct SharedState;
+  }
 }
 
 class eowu::Runtime {

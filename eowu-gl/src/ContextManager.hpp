@@ -8,6 +8,7 @@
 #pragma once
 
 #include "Window.hpp"
+#include "Keyboard.hpp"
 #include <memory>
 #include <vector>
 #include <cstddef>
@@ -48,6 +49,7 @@ public:
   
   const WindowContainerType& GetWindows() const;
   const WindowType& GetWindowByAlias(const std::string &alias) const;
+  eowu::Keyboard& GetKeyboard();
   
   friend void eowu::glfw::window_size_callback(GLFWwindow *window, int width, int height);
   friend void eowu::glfw::window_close_callback(GLFWwindow *window);
@@ -61,6 +63,7 @@ private:
   GLFWmonitor* get_primary_monitor_with_trap() const;
   
   WindowContainerType windows;
+  eowu::Keyboard keyboard;
   
   std::size_t find_window_with_trap(GLFWwindow *win);
   eowu::WindowType get_window_with_trap(GLFWwindow *win);

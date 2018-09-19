@@ -34,3 +34,4 @@
 #include "../../src/WindowContainerMap.hpp"
 #include "../../src/XYSource.hpp"
 #include "../../src/XYTarget.hpp"
+#include "../../src/XYTargetSet.hpp"

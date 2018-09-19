@@ -17,6 +17,9 @@ struct lua_State;
 
 namespace eowu {
   class LuaRuntime;
+  class ContextManager;
+  class KeyboardWrapper;
+  class GLPipeline;
 }
 
 class eowu::LuaRuntime {
@@ -51,6 +54,7 @@ private:
   eowu::LuaFunctionContainerType get_flip_functions(const eowu::schema::States &schema);
   eowu::SetupStatus parse_schemas(const std::string &file);
   eowu::SetupStatus validate_schemas(const eowu::schema::Setup &schema, const std::string &file);
+  std::unique_ptr<eowu::KeyboardWrapper> create_keyboard(std::shared_ptr<eowu::ContextManager> context_manager);
   
   static std::shared_ptr<eowu::LuaContext> get_new_lua_context();
   static lua_State* get_new_lua_state();

@@ -16,6 +16,7 @@
 #include "../../src/StateWrapper.hpp"
 #include "../../src/RendererWrapper.hpp"
 #include "../../src/ScriptWrapper.hpp"
+#include "../../src/KeyboardWrapper.hpp"
 #include "../../src/Init.hpp"
 #include "../../src/Parser.hpp"
 #include "../../src/Timing.hpp"
