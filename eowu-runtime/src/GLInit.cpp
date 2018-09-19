@@ -39,16 +39,26 @@ eowu::SetupStatus eowu::init::initialize_gl_pipeline(std::shared_ptr<eowu::GLPip
   return result;
 }
 
-eowu::SetupStatus eowu::init::create_textures(std::shared_ptr<eowu::GLPipeline> gl_pipeline, const eowu::schema::Setup &schema) {
+std::string eowu::init::get_message_n_of_n(std::size_t iter, std::size_t size) {
+  return std::to_string(iter) + " of " + std::to_string(size);
+}
+
+eowu::SetupStatus eowu::init::create_textures(std::shared_ptr<eowu::GLPipeline> gl_pipeline,
+                                              const eowu::schema::Setup &schema) {
   eowu::SetupStatus result;
   
   auto texture_manager = gl_pipeline->GetTextureManager();
   
   const auto &textures = schema.textures.mapping;
   
+  const std::size_t n_textures = textures.size();
+  std::size_t current_texture = 1;
+  
   for (const auto &it : textures) {
     const std::string &id = it.first;
     const std::string &filename = it.second;
+    
+    EOWU_LOG_INFO("init::create_texture: Loading file " + get_message_n_of_n(current_texture, n_textures));
     
     try {
       texture_manager->LoadImage(filename, id);
@@ -58,6 +68,8 @@ eowu::SetupStatus eowu::init::create_textures(std::shared_ptr<eowu::GLPipeline> 
       
       return result;
     }
+    
+    current_texture++;
   }
   
   result.success = true;

@@ -11,6 +11,7 @@ local function entry()
   local targ2 = script:Target('t2')
 
   local set1 = script:MakeTargetSet('id1', {'t1', 't2'})
+
   set1:Duration(100)
 
   set1:Entry(function(name)
@@ -19,7 +20,7 @@ local function entry()
   end)
 
   set1:Select(function(name)
-    print('Selected!' .. name)
+    print('Selected: ' .. name)
 
     current_time = state:Ellapsed()
 
@@ -35,7 +36,7 @@ local function entry()
   end)
 
   set1:Exit(function(name)
-    print('Exited!' .. name)
+    print('Exited: ' .. name)
     script:Render('out_of_bounds')
   end)
 

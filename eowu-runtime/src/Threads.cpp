@@ -19,8 +19,9 @@
 #endif
 
 eowu::thread::SharedState::SharedState(const eowu::Timer *task_timer) :
-task_thread_initialized(false), render_thread_initialized(false), threads_should_continue(true),
-task_thread_completed(false), render_thread_completed(false), timing(task_timer) {
+assigned_thread_ids(false), task_thread_initialized(false), render_thread_initialized(false),
+threads_should_continue(true), task_thread_completed(false), render_thread_completed(false),
+timing(task_timer) {
   //
 }
 
@@ -30,7 +31,9 @@ void eowu::thread::task(eowu::thread::SharedState &state,
   
   state.task_thread_initialized.store(true);
   
-  while (!state.render_thread_initialized) {
+  //  Wait for the render thread to initialize and for thread ids to be
+  //  assigned to the script wrapper.
+  while (!state.render_thread_initialized || !state.assigned_thread_ids) {
     //
   }
   
@@ -69,7 +72,7 @@ bool eowu::thread::try_update_task(eowu::StateRunner &state_runner) {
     should_proceed = !state_runner.Update();
     
   } catch (const std::exception &e) {
-    std::cout << "ERROR: Task: " << e.what() << std::endl;
+    eowu::thread::print_error("TASK", e.what());
     
     should_proceed = false;
   }
@@ -86,7 +89,7 @@ bool eowu::thread::try_update_targets(const std::vector<std::shared_ptr<eowu::XY
     try {
       targ->Update();
     } catch (const std::exception &e) {
-      std::cout << "ERROR: Target: " << e.what() << std::endl;
+      eowu::thread::print_error("TARGET", e.what());
       
       return false;
     }
@@ -108,10 +111,9 @@ void eowu::thread::render(eowu::thread::SharedState &state,
   
   state.render_thread_initialized = true;
   
-  //  wait for task thread to begin. this can theoretically
-  //  fail, but if so the task won't have started, so all
-  //  should be ok anyway.
-  while (!state.task_thread_initialized) {
+  //  wait for task thread to begin and for thread ids to be assigned.
+  //  this can theoretically fail, but if so the task won't have started.
+  while (!state.task_thread_initialized || !state.assigned_thread_ids) {
     //
   }
   
@@ -188,7 +190,7 @@ bool eowu::thread::try_call_flip(const std::shared_ptr<eowu::LuaContext> &lua_co
     success = true;
     
   } catch (const std::exception &e) {
-    std::cout << "ERROR: Flip: " << e.what() << std::endl;
+    eowu::thread::print_error("FLIP", e.what());
     success = false;
   }
   
@@ -209,7 +211,7 @@ bool eowu::thread::try_call_render(const std::shared_ptr<eowu::LuaContext> &lua_
     success = true;
     
   } catch (const std::exception &e) {
-    std::cout << "ERROR: Render: " << e.what() << std::endl;
+    eowu::thread::print_error("RENDER", e.what());
     success = false;
   }
   
@@ -221,7 +223,7 @@ void eowu::thread::events(eowu::thread::SharedState &state, std::shared_ptr<eowu
   auto &kb = context_manager->GetKeyboard();
   
   //  main events loop
-  while (state.threads_should_continue) {
+  while (state.threads_should_continue && !context_manager->AllShouldClose()) {
     context_manager->PollEvents();
     
     if (kb.IsPressed(key_code)) {
@@ -257,4 +259,9 @@ void eowu::thread::try_await_thread_finish(const eowu::thread::SharedState &stat
     
     throw std::runtime_error(full_msg);
   }
+}
+
+void eowu::thread::print_error(const std::string &thread_type, const std::string &message) {
+  const std::string base = "\033[1;31mERROR [" + thread_type + "]: \033[0m";
+  std::cout << std::endl << base << message << std::endl << std::endl;
 }

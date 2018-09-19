@@ -35,3 +35,8 @@ std::string eowu::util::get_message_nonexistent_resource(const std::string &func
   
   return func + ": No '" + kind + "' exists with id '" + id + "'.";
 }
+
+std::string eowu::util::get_message_wrong_thread(const std::string &func,
+                                                 const std::string &kind) {
+  return func + ": This function cannot be called from the '" + kind + "' thread.";
+}

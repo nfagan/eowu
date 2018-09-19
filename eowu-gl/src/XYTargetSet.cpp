@@ -31,6 +31,8 @@ eowu::XYTargetSet::~XYTargetSet() {
 }
 
 void eowu::XYTargetSet::Begin() {
+  std::unique_lock<std::recursive_mutex> lock(mut);
+  
   configure_targets();
 }
 

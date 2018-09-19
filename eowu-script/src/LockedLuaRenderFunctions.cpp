@@ -25,7 +25,7 @@ bool eowu::LockedLuaRenderFunctions::DidUse() const {
 }
 
 void eowu::LockedLuaRenderFunctions::Flush() {
-  std::unique_lock<std::mutex> lock(mut);
+  std::unique_lock<std::recursive_mutex> lock(mut);
   
   is_queued = false;
   did_use = true;
@@ -51,14 +51,14 @@ void eowu::LockedLuaRenderFunctions::Queue(eowu::LuaFunction *render, eowu::LuaF
 }
 
 void eowu::LockedLuaRenderFunctions::Set(eowu::LuaFunction *render, eowu::LuaFunction *flip) {
-  std::unique_lock<std::mutex> lock(mut);
+  std::unique_lock<std::recursive_mutex> lock(mut);
   
   render_function = render;
   flip_function = flip;
 }
 
 void eowu::LockedLuaRenderFunctions::Use(const std::function<void(eowu::LuaFunction*, eowu::LuaFunction*)> &cb) {
-  std::unique_lock<std::mutex> lock(mut);
+  std::unique_lock<std::recursive_mutex> lock(mut);
   
   if (is_queued && did_use) {    
     render_function = queued_render_function;

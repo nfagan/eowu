@@ -14,6 +14,7 @@
 #include <unordered_map>
 #include <string>
 #include <vector>
+#include <thread>
 
 struct lua_State;
 
@@ -61,6 +62,7 @@ public:
   void SetVariables(const std::unordered_map<std::string, eowu::data::Commitable> &variables);
   void SetTaskDataStore(std::shared_ptr<eowu::data::Store> task_data_store);
   void SetLockedRenderFunctions(std::shared_ptr<eowu::LockedLuaRenderFunctions> locked_functions);
+  void SetThreadIds(const std::thread::id &render, const std::thread::id &task);
   
   eowu::TargetSetWrapper* MakeTargetSet(const std::string &id, lua_State *L);
   
@@ -88,6 +90,11 @@ public:
   };
   
 private:
+  struct ThreadIds {
+    std::thread::id render;
+    std::thread::id task;
+  };
+  
   static std::unordered_map<std::string, std::shared_ptr<eowu::TargetWrapper>> target_wrappers;
   static eowu::LuaFunctionContainerType render_functions;
   static eowu::LuaFunctionContainerType flip_functions;
@@ -100,9 +107,16 @@ private:
   static std::unordered_map<std::string, std::shared_ptr<eowu::XYTarget>> xy_targets;
   static std::unique_ptr<eowu::KeyboardWrapper> keyboard;
   static std::shared_ptr<eowu::LuaContext> lua_task_context;
+  static ThreadIds thread_ids;
   
   void commit_variables(std::vector<char> &into) const;
   void commit_states(std::vector<char> &into) const;
   
-  eowu::LuaFunction* get_function_from_state(lua_State *L, int stack_index, eowu::LuaFunctionMapType *funcs, const std::string &kind);
+  eowu::LuaFunction* get_function_from_state(lua_State *L,
+                                             int stack_index,
+                                             eowu::LuaFunctionMapType *funcs,
+                                             const std::string &kind);
+  
+  bool is_render_thread();
+  bool is_task_thread();
 };

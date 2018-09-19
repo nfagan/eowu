@@ -9,6 +9,7 @@ function image.Entry()
   made_choice:Reset()
 
   local choice1 = script:MakeChoice('c1', {'t1', 't2'})
+  local x = script:MakeTimeout('t1')
 
   choice1:Entry(function(id)
     print('entered: ' .. id)

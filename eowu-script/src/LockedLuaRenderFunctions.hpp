@@ -30,7 +30,7 @@ public:
   bool DidUse() const;
   
 private:
-  mutable std::mutex mut;
+  mutable std::recursive_mutex mut;
   
   eowu::LuaFunction *render_function;
   eowu::LuaFunction *flip_function;

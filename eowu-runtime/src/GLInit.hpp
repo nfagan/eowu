@@ -29,6 +29,7 @@ namespace eowu {
     eowu::SetupStatus open_windows(std::shared_ptr<eowu::GLPipeline> gl_pipeline, const eowu::schema::Setup &schema);
     
     std::unordered_map<std::string, eowu::init::MeshFactoryFunction> get_geometry_to_mesh_factory_map();
+    std::string get_message_n_of_n(std::size_t iter, std::size_t size);
   }
 }
 

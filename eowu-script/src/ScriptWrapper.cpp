@@ -57,6 +57,9 @@ std::unique_ptr<eowu::KeyboardWrapper> eowu::ScriptWrapper::keyboard = nullptr;
 //
 //  lua task context
 std::shared_ptr<eowu::LuaContext> eowu::ScriptWrapper::lua_task_context = nullptr;
+//
+//  thread ids
+eowu::ScriptWrapper::ThreadIds eowu::ScriptWrapper::thread_ids{};
 
 bool eowu::ScriptWrapper::IsComplete() const {
 #ifdef EOWU_DEBUG
@@ -74,6 +77,11 @@ bool eowu::ScriptWrapper::IsComplete() const {
 
 void eowu::ScriptWrapper::SetLuaTaskContext(std::shared_ptr<eowu::LuaContext> context) {
   eowu::ScriptWrapper::lua_task_context = context;
+}
+
+void eowu::ScriptWrapper::SetThreadIds(const std::thread::id &render, const std::thread::id &task) {
+  eowu::ScriptWrapper::thread_ids.render = render;
+  eowu::ScriptWrapper::thread_ids.task = task;
 }
 
 void eowu::ScriptWrapper::SetTaskDataStore(std::shared_ptr<eowu::data::Store> store) {
@@ -141,7 +149,13 @@ int eowu::ScriptWrapper::SetRenderFunctionPair(lua_State *L) {
     flip_func = get_function_from_state(L, -1, flip_functions.get(), "flip");
   }
   
-  lua_render_thread_functions->Queue(render_func, flip_func);
+  //  If this is the render thread, don't attempt
+  //  to queue the functions -- just set them on the next frame.
+  if (is_render_thread()) {
+    lua_render_thread_functions->Set(render_func, flip_func);
+  } else {
+    lua_render_thread_functions->Queue(render_func, flip_func);
+  }
   
   return 0;
 }
@@ -216,6 +230,11 @@ eowu::VariableWrapper eowu::ScriptWrapper::GetVariable(const std::string &id) {
 eowu::TargetSetWrapper* eowu::ScriptWrapper::MakeTargetSet(const std::string &id, lua_State *L) {
   const char* const func_id = "MakeTargetSet";
   
+  //  Ensure we're calling from the task thread.
+  if (!is_task_thread()) {
+    throw eowu::LuaError(eowu::util::get_message_wrong_thread(func_id, "Render"));
+  }
+  
   int n_inputs = lua_gettop(L);
   
   if (n_inputs != 3) {
@@ -227,7 +246,8 @@ eowu::TargetSetWrapper* eowu::ScriptWrapper::MakeTargetSet(const std::string &id
   try {
     target_ids = eowu::parser::get_string_vector_from_state(L, -1);
   } catch (const std::exception &e) {
-    std::string msg = eowu::util::get_message_wrong_input_type(func_id, "string-array", lua_typename(L, -1));
+    int type = lua_type(L, -1);
+    std::string msg = eowu::util::get_message_wrong_input_type(func_id, "string-array", lua_typename(L, type));
     throw eowu::LuaError(msg);
   }
 
@@ -318,10 +338,13 @@ eowu::LuaFunction* eowu::ScriptWrapper::get_function_from_state(lua_State *L,
                                                                 int stack_index,
                                                                 eowu::LuaFunctionMapType *funcs,
                                                                 const std::string &kind) {
+  using eowu::util::get_message_wrong_input_type;
+  
   auto ref = luabridge::LuaRef::fromStack(L, stack_index);
   
   if (!ref.isString()) {
-    throw eowu::LuaError("Render: '" + kind + "' function id must be a string.");
+    const std::string msg = get_message_wrong_input_type("Render", "function", lua_typename(L, ref.type()));
+    throw eowu::LuaError(msg);
   }
   
   const std::string func_id = ref.cast<std::string>();
@@ -332,6 +355,14 @@ eowu::LuaFunction* eowu::ScriptWrapper::get_function_from_state(lua_State *L,
   }
   
   return &it->second;
+}
+
+bool eowu::ScriptWrapper::is_render_thread() {
+  return std::this_thread::get_id() == eowu::ScriptWrapper::thread_ids.render;
+}
+
+bool eowu::ScriptWrapper::is_task_thread() {
+  return std::this_thread::get_id() == eowu::ScriptWrapper::thread_ids.task;
 }
 
 void eowu::ScriptWrapper::CreateLuaSchema(lua_State *L) {

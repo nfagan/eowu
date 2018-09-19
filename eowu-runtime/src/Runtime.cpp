@@ -109,6 +109,10 @@ int eowu::Runtime::Main(const std::string &file) {
   auto render_thread = std::thread(eowu::thread::render, std::ref(thread_state),
                                    lua_render_context, locked_lua_functions, gl_pipeline);
   
+  //  Assign thread ids
+  script_wrapper.SetThreadIds(render_thread.get_id(), task_thread.get_id());
+  thread_state.assigned_thread_ids = true;
+  
   //  Main thread event loop
   eowu::thread::events(thread_state, gl_pipeline->GetContextManager());
   

@@ -8,7 +8,6 @@ Setup.Windows = {
     width = 800,
     height = 400,
     resizeable = true,
-    fullscreen = true
   }
 }
 
@@ -67,3 +66,25 @@ Setup.Targets = {
 }
 
 Setup.States = { fixation, image }
+-- Setup.Textures = {}
+
+-- local function split(str, sep)
+--   local result = {}
+--   local regex = ("([^%s]+)"):format(sep)
+--   for each in str:gmatch(regex) do
+--      table.insert(result, each)
+--   end
+--   return result
+-- end
+
+-- local p = '/Volumes/My Passport/NICK/Chang Lab 2016/hwwba/stimuli/sm/cued-image/nonsocial/'
+-- local escaped_p = '"' .. p .. '"'
+-- local ls = io.popen('ls ' .. escaped_p)
+-- local res = ls:read('*a')
+-- ls:close()
+
+-- local files = split(res, '\n')
+
+-- for i = 1, #files do
+--   Setup.Textures['first' .. i] = p .. files[i]
+-- end

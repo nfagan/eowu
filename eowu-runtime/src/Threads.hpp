@@ -25,6 +25,7 @@ namespace eowu {
   
   namespace thread {
     struct SharedState {
+      std::atomic<bool> assigned_thread_ids;
       std::atomic<bool> task_thread_initialized;
       std::atomic<bool> render_thread_initialized;
       std::atomic<bool> threads_should_continue;
@@ -60,5 +61,7 @@ namespace eowu {
     
     void try_await_thread_finish(const eowu::thread::SharedState &state,
                               eowu::time::DurationType timeout);
+    
+    void print_error(const std::string &thread_type, const std::string &message);
   }
 }

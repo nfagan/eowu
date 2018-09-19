@@ -22,6 +22,7 @@ end
 % e_datedir = '09-17-2018 11-04-47';
 % e_datedir = '09-17-2018 21-03-25';
 e_datedir = '09-17-2018 23-47-53';
+% e_datedir = '09-19-2018 11-52-31';
 p_fname = '091618__25__42.mat';
 
 ptb_fname = fullfile( eowu.apidir(), 'compare', 'data', p_fname );
