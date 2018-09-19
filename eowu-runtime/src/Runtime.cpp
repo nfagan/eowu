@@ -101,6 +101,10 @@ int eowu::Runtime::Main(const std::string &file) {
   
   auto task_thread = std::thread(eowu::thread::task, std::ref(thread_state),
                                  std::ref(state_runner), std::ref(vec_targets));
+
+	//	Detach gl-context from main thread.
+	auto context_manager = gl_pipeline->GetContextManager();
+	context_manager->DetachCurrentContext();
   
   //  Render thread
   auto locked_lua_functions = script_wrapper.GetLockedRenderFunctions();
@@ -114,7 +118,7 @@ int eowu::Runtime::Main(const std::string &file) {
   thread_state.assigned_thread_ids = true;
   
   //  Main thread event loop
-  eowu::thread::events(thread_state, gl_pipeline->GetContextManager());
+  eowu::thread::events(thread_state, context_manager);
   
   //  When the events thread is finished (e.g., when the escape key is pressed),
   //  attempt to wait for the render and task threads to finish. If they don't complete

@@ -14,8 +14,8 @@ Setup.Variables = {
 }
 
 Setup.Paths = {
-  -- Data = 'C:\\Users\\changLab\\Documents\\eowu\\'
-  data = '/Users/Nick/repositories/cpp/eowu/data/'
+  data = 'C:\\Users\\changLab\\Repositories\\cpp\\eowu\\data\\'
+  -- data = '/Users/Nick/repositories/cpp/eowu/data/'
 }
 
 Setup.Save = {

@@ -11,7 +11,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#ifdef EOWU_IS_WINDOWS
+#ifdef EOWU_IS_WIN
 #include <windows.h>
 #endif
 
@@ -168,14 +168,14 @@ std::string eowu::fs::full_file(const std::vector<std::string> &components) {
 }
 
 bool eowu::fs::require_directory(const std::string &path) {
-#ifdef EOWU_IS_WINDOWS
+#ifdef EOWU_IS_WIN
   return eowu::fs::priv::require_directory_windows(path);
 #else
   return eowu::fs::priv::require_directory_unix(path);
 #endif
 }
 
-#ifdef EOWU_IS_WINDOWS
+#ifdef EOWU_IS_WIN
 bool eowu::fs::priv::require_directory_windows(const std::string &path) {
   const char *path_str = path.c_str();
   

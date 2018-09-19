@@ -36,6 +36,10 @@ void eowu::ContextManager::Initialize() {
   is_initialized = true;
 }
 
+void eowu::ContextManager::DetachCurrentContext() const {
+	glfwMakeContextCurrent(NULL);
+}
+
 void eowu::ContextManager::CloseWindows() {
   for (auto &win : windows) {
     win->Close();

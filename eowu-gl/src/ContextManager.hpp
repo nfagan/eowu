@@ -46,6 +46,8 @@ public:
   void CloseWindows();
   bool AnyShouldClose() const;
   bool AllShouldClose() const;
+
+	void DetachCurrentContext() const;
   
   const WindowContainerType& GetWindows() const;
   const WindowType& GetWindowByAlias(const std::string &alias) const;
@@ -60,7 +62,6 @@ private:
   bool loaded_gl_pointers;
   
   GLFWmonitor* get_monitor_with_trap(unsigned int index) const;
-  GLFWmonitor* get_primary_monitor_with_trap() const;
   
   WindowContainerType windows;
   eowu::Keyboard keyboard;

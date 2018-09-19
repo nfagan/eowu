@@ -15,7 +15,7 @@ eowu::Coordinate::Coordinate() : x(0.0), y(0.0) {
   //
 }
 
-eowu::XYSource::XYSource() : is_valid(true), new_sample_available(false) {
+eowu::XYSource::XYSource() : is_valid(true), new_sample_available(false), coordinate(eowu::Coordinate(0.0, 0.0)) {
   //
 }
 

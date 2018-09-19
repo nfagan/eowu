@@ -20,7 +20,7 @@ void test_window_creation();
 void test_window_out_of_bounds();
 
 void test_window_out_of_bounds() {
-  auto manager = eowu::ContextManager();
+  eowu::ContextManager manager;
   
   manager.Initialize();
   
@@ -33,7 +33,7 @@ void test_window_out_of_bounds() {
 }
 
 void test_window_creation() {
-  auto manager = eowu::ContextManager();
+	eowu::ContextManager manager;
   
   manager.Initialize();
   
@@ -47,7 +47,7 @@ void test_window_creation() {
 
 void test_context_initialization() {
   
-  auto manager = eowu::ContextManager();
+	eowu::ContextManager manager;
   
   try {
     manager.Initialize();
