@@ -1,6 +1,7 @@
-function outs = compare_image_fix(n_trials, state_dur)
+function outs = compare_image_fix(n_trials, n_stim, state_dur)
 
-n_stim = 100;
+Screen( 'Preference', 'SkipSyncTests', 1 );
+
 win_size = 400;
 rect_frac = 0.01;
 
@@ -94,8 +95,8 @@ Screen( 'Close', W );
 outs.image_state_times = img_times(1:TN-1, :);
 outs.fixation_state_times = fix_times(1:TN-1, :);
 outs.image_onsets = time_stamps(1:TN-1, :);
-outs.image_frames = img_frames;
-outs.fixation_frames = fix_frames;
+outs.image_frames = img_frames(1:TN-1);
+outs.fixation_frames = fix_frames(1:TN-1);
 outs.trial_number = TN-1;
 
 end
