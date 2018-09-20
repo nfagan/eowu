@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <Lua.hpp>
+#include "Lua.hpp"
 #include <mutex>
 #include <atomic>
 

@@ -123,13 +123,12 @@ int eowu::Runtime::Main(const std::string &file) {
   //  When the events thread is finished (e.g., when the escape key is pressed),
   //  attempt to wait for the render and task threads to finish. If they don't complete
   //  within N seconds, throw an error.
-  try {
-    eowu::thread::try_await_thread_finish(thread_state, std::chrono::seconds(10));
-    
+  
+  bool threads_completed = eowu::thread::try_await_thread_finish(thread_state, std::chrono::seconds(10));
+  
+  if (threads_completed) {
     render_thread.join();
     task_thread.join();
-  } catch (const std::exception &e) {
-    std::cout << "WARN: " << e.what() << std::endl;
   }
   
   return 0;

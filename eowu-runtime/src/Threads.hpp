@@ -59,7 +59,7 @@ namespace eowu {
     
     void events(eowu::thread::SharedState &state, std::shared_ptr<eowu::ContextManager> context_manager);
     
-    void try_await_thread_finish(const eowu::thread::SharedState &state,
+    bool try_await_thread_finish(const eowu::thread::SharedState &state,
                               eowu::time::DurationType timeout);
     
     void print_error(const std::string &thread_type, const std::string &message);

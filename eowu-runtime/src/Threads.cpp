@@ -48,6 +48,7 @@ void eowu::thread::task(eowu::thread::SharedState &state,
     
     if (active_state_will_exit) {
       should_proceed = eowu::thread::try_update_targets(targets);
+//      should_proceed = eowu::thread::try_update_timeouts(timeouts); //  should go after targets so they can cancel.
     }
     
     should_proceed = eowu::thread::try_update_task(state_runner);
@@ -232,7 +233,7 @@ void eowu::thread::events(eowu::thread::SharedState &state, std::shared_ptr<eowu
   }
 }
 
-void eowu::thread::try_await_thread_finish(const eowu::thread::SharedState &state,
+bool eowu::thread::try_await_thread_finish(const eowu::thread::SharedState &state,
                                            eowu::time::DurationType timeout) {
   
   eowu::Timer timer;
@@ -257,8 +258,10 @@ void eowu::thread::try_await_thread_finish(const eowu::thread::SharedState &stat
     std::string rest_msg = "Check your script(s) to see whether your code includes an infinite while loop. Terminating ...";
     std::string full_msg = base_msg + " " + rest_msg;
     
-    throw std::runtime_error(full_msg);
+    eowu::thread::print_error("CLEANUP", full_msg);
   }
+  
+  return threads_completed;
 }
 
 void eowu::thread::print_error(const std::string &thread_type, const std::string &message) {

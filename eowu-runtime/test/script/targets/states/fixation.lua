@@ -11,6 +11,7 @@ local function entry()
   local targ2 = script:Target('t2')
 
   local set1 = script:MakeTargetSet('id1', {'t1', 't2'})
+  local timeout = script:MakeTimeout('id1')
 
   set1:Duration(100)
 
@@ -41,7 +42,7 @@ local function entry()
   end)
 
   set1:Begin()
-  -- set1:Reset()
+  set1:Reset()
 
   if first_entry then 
     script:Render('out_of_bounds') 

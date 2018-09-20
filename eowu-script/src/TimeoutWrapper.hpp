@@ -7,15 +7,23 @@
 
 #pragma once
 
+#include "LuaFunction.hpp"
+#include <eowu-common/Timeout.hpp>
+
 namespace eowu {
   class TimeoutWrapper;
 }
 
 class eowu::TimeoutWrapper {
 public:
-  TimeoutWrapper();
+  TimeoutWrapper() = default;
   ~TimeoutWrapper() = default;
   
-private:
+  void Update();
+  void Reset();
   
+  static void CreateLuaSchema(lua_State *L);
+private:
+  eowu::Timeout timeout;
+  eowu::LuaFunction on_ellapsed;
 };
