@@ -51,7 +51,7 @@ public:
   Window(GLFWmonitor *monitor, GLFWwindow *window, unsigned int width, unsigned int height);
   ~Window();
   
-  glm::vec2 GetFramebufferSize() const;
+  glm::ivec2 GetFramebufferSize() const;
   glm::vec2 GetDimensions() const;
   unsigned int GetWidth() const;
   unsigned int GetHeight() const;

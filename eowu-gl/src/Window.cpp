@@ -50,7 +50,7 @@ void eowu::Window::ApplySwapInterval() const {
   glfwSwapInterval(swap_interval);
 }
 
-glm::vec2 eowu::Window::GetFramebufferSize() const {
+glm::ivec2 eowu::Window::GetFramebufferSize() const {
   assert(window);
   
   int width;
@@ -58,7 +58,7 @@ glm::vec2 eowu::Window::GetFramebufferSize() const {
   
   glfwGetFramebufferSize(window, &width, &height);
   
-  return glm::vec2(width, height);
+  return glm::ivec2(width, height);
 }
 
 glm::vec2 eowu::Window::GetDimensions() const {
