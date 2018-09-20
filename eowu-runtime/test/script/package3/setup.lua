@@ -19,7 +19,7 @@ Setup.Paths = {
 }
 
 Setup.Save = {
-  states = true
+  states = false
 }
 
 Setup.Windows = {

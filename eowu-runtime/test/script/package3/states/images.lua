@@ -89,7 +89,7 @@ local function render()
   local frames = state:Variable('frames')
   local stim = script:Stimulus('sq')
 
-  for i = 1, 100 do
+  for i = 1, 1000 do
     local s = script:Stimulus('sq' .. i)
     s:Units('normalized')
     s:Position({math.random(), math.random()})
@@ -110,7 +110,7 @@ local function render()
   stim:Rotation({0, 0, rot.z + 0.05})
   stim.size = sz
 
-  stim:Draw()
+  -- stim:Draw()
 
   frames:Set(frames:Get()+1)
 end

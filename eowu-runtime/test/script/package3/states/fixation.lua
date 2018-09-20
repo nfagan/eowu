@@ -33,6 +33,8 @@ local function render()
   local state = script:State('fixation')
   local frames = state:Variable('frames')
 
+  print(renderer:Delta() * 1000 .. ' ms')
+
   frames:Set(frames:Get()+1)
 
   stim:Units('normalized')
@@ -47,7 +49,7 @@ local function render()
 
   stim:Size({0.5, 0.5})
 
-  for i = 1, 100 do
+  for i = 1, 1000 do
     local s = script:Stimulus('sq' .. i)
     s:Units('normalized')
     s:Position({math.random(), math.random()})
@@ -56,7 +58,7 @@ local function render()
     s:Draw()
   end
 
-  stim:Draw()
+  -- stim:Draw()
 end
 
 state.Render = {

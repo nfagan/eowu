@@ -11,7 +11,6 @@ local function entry()
   local targ2 = script:Target('t2')
 
   local set1 = script:MakeTargetSet('id1', {'t1', 't2'})
-  local timeout = script:MakeTimeout('id1')
 
   set1:Duration(100)
 

@@ -91,7 +91,7 @@ void eowu::Renderer::draw(eowu::WindowType window) {
   }
   
   glClearColor(clear_color.x, clear_color.y, clear_color.z, 1.0);
-  glClear(GL_COLOR_BUFFER_BIT);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   
   auto &models_container = get_models_container(window);
   
@@ -119,7 +119,7 @@ void eowu::Renderer::next_frame() {
   frame_timing.timer.Update();
 }
 
-void eowu::Renderer::Draw() {
+void eowu::Renderer::Draw() {  
   for (const auto &it : windows) {
     draw(it.second);
   }
@@ -128,7 +128,6 @@ void eowu::Renderer::Draw() {
 }
 
 void eowu::Renderer::draw_one_model(const eowu::WindowType& window, const eowu::Model &model) {
-  
   auto mesh = model.GetMesh();
   auto material = model.GetMaterial();
   auto transform = model.GetTransform();
@@ -154,8 +153,6 @@ void eowu::Renderer::draw_one_model(const eowu::WindowType& window, const eowu::
   if (material_needs_check) {
     //  analyze material to see whether we need to make
     //  a new shader
-//    EOWU_LOG_INFO("Renderer::draw_one_model: Analyzing material.");
-    
     const eowu::Mesh &ref_mesh = *(mesh.get());
     const eowu::Material &ref_mat = *(material.get());
     
@@ -169,17 +166,20 @@ void eowu::Renderer::draw_one_model(const eowu::WindowType& window, const eowu::
     
     if (prog_exists) {
       prog = programs.at(hash_code);
-//      EOWU_LOG_INFO("Renderer::draw_one_model: Using cached shader.");
+      
+      bool is_new_prog = !last_program || last_program->GetIdentifier() != prog->GetIdentifier();
+      bool is_new_window = !last_window || last_window->GetIdentifier() != window_id;
+      
+      prog_need_bind = is_new_prog || is_new_window;
     } else {
-//      EOWU_LOG_INFO("Renderer::draw_one_model: Generating new program.");
       prog = eowu::builder::from_source(v_src, f_src);
+      prog_need_bind = true;
     }
     
     programs[hash_code] = prog;
     programs_by_material_id[material_id] = hash_code;
     analyzed_material_ids.emplace(material_id);
     
-    prog_need_bind = true;
   } else {
     prog = programs.at(programs_by_material_id.at(material_id));
     
