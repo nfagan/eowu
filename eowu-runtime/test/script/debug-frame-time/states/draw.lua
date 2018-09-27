@@ -34,6 +34,7 @@ end
 
 local function entry()
   local script = eowu.script()
+
   script:Render('draw')
 end
 
@@ -44,10 +45,12 @@ local first_frame = true
 local function render()
   local script = eowu.script()
   local renderer = script:Renderer()
+  local kb = script:Keyboard()
 
   local tn = script:Variable('trial'):Get()
   local frames = script:Variable('frames')
   local delta = script:Variable('delta')
+  local props = script:Variable('props')
   local n_frames = frames:Get()
 
   if n_frames == 120 then
@@ -71,15 +74,38 @@ local function render()
 
   first_frame = false
 
+  key_down = kb:Down('space')
+
+  local new_props = {
+    colors = {},
+    positions = {}
+  }
+
+  local last_props = props:Get()
+
   for i = 1, 100 do
-    local stim = script:Stimulus('s' .. i)
-    stim:Units('normalized')
-    stim:Position({math.random(), math.random()})
-    stim:Size({0.05, 0.05})
-    stim:Color({math.random(), math.random(), math.random()})
+    local id = 's' .. i    
+    local stim = script:Stimulus(id)
+    local pos = { math.random(), math.random() }
+    local color = { math.random(), math.random(), math.random() }
+
+    stim:Units('mixed')
+    stim:Size({40, 40})
+
+    if key_down then
+      pos = last_props.positions[id]
+      color = last_props.colors[id]
+    end
+
+    stim:Color(color)
+    stim:Position(pos)
     stim:Draw()
+
+    new_props.positions[id] = pos
+    new_props.colors[id] = color
   end
 
+  props:Set(new_props)
   frames:Set(frames:Get() + 1)
 end
 

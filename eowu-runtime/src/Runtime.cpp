@@ -68,7 +68,8 @@ int eowu::Runtime::Main(const std::string &file) {
   //  targets
   const auto &xy_sources = source_status.result.xy_sources;
   const auto &target_schema = lua_runtime.setup_schema.targets;
-  auto target_status = eowu::init::initialize_targets(target_schema, xy_sources, gl_pipeline);
+  auto lua_task_context = lua_runtime.lua_contexts.task;
+  auto target_status = eowu::init::initialize_targets(target_schema, xy_sources, lua_task_context, gl_pipeline);
   
   if (!target_status.status.success) {
     target_status.status.file = file;
@@ -78,12 +79,7 @@ int eowu::Runtime::Main(const std::string &file) {
   
   //  maps each target to an id.
   const auto &target_map = target_status.result.targets;
-  const auto &target_models = target_status.result.target_models;
-  const auto &targets_hidden = target_status.result.hidden;
-
-  //  maps each target id to a target wrapper.
-  auto target_wrappers = eowu::init::make_target_wrappers(lua_runtime.lua_contexts.task,
-                                                          target_map, target_models, targets_hidden, gl_pipeline);
+  const auto &target_wrappers = target_status.result.target_wrappers;
   
   script_wrapper.SetTargetWrapperContainer(target_wrappers);
   script_wrapper.SetXYTargets(target_map);

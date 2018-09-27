@@ -5,13 +5,18 @@ Setup = {}
 Setup.Variables = {
   trial = 0,
   frames = 0,
-  delta = 0/0
+  delta = 0/0,
+  props = {
+    colors = {},
+    positions = {}
+  }
 }
 
 Setup.Windows = {
   main = {
     width = 400,
     height = 400,
+    resizeable = true
   }
 }
 
