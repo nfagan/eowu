@@ -56,12 +56,20 @@ eowu::parser::ParseResult<eowu::schema::Setup> eowu::parser::setup(const luabrid
   
   //  Windows
   EOWU_PARSER_EARLY_RETURN(windows, windows_, wref, "Windows", eowu::parser::windows);
-  //  Geometry
-  EOWU_PARSER_EARLY_RETURN(geometry, geometry_, gref, "Geometry", eowu::parser::geometry);
-  //  Stimuli
-  EOWU_PARSER_EARLY_RETURN(stimuli, stim_, sref, "Stimuli", eowu::parser::stimuli);
   //  States
   EOWU_PARSER_EARLY_RETURN(states, states_, ssref, "States", eowu::parser::states);
+  
+  //  Stimuli
+  if (kv.count("Stimuli") > 0) {
+    auto stim_result = eowu::parser::stimuli(kv.at("Stimuli"));
+    EOWU_PARSER_EARLY_RETURN_ALLOW_MISSING(stim_result, result, stimuli);
+  }
+  
+  //  Geometry
+  if (kv.count("Geometry") > 0) {
+    auto geom_result = eowu::parser::geometry(kv.at("Geometry"));
+    EOWU_PARSER_EARLY_RETURN_ALLOW_MISSING(geom_result, result, geometry);
+  }
   
   //  Sources
   if (kv.count("Sources") > 0) {

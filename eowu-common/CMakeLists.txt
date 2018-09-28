@@ -4,7 +4,8 @@ project(eowu-common VERSION 0.1 LANGUAGES CXX)
 file(GLOB_RECURSE LIB_SRC 
   src/*.cpp
   src/*.h
-  src/*.hpp,
+  src/*.hpp
+  src/*.hh
   include/*.hpp
 )
 

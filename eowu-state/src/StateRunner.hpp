@@ -11,6 +11,7 @@
 #include <unordered_map>
 #include <string>
 #include <memory>
+#include <atomic>
 
 namespace eowu {
   class StateRunner;
@@ -23,6 +24,7 @@ public:
   ~StateRunner() = default;
   
   void Begin(eowu::State *state);
+  void Exit();
   bool Update();
   
   bool IsNewState() const;
@@ -33,6 +35,8 @@ private:
   eowu::State *active_state;
   bool is_new_state;
   eowu::Timer timer;
+  
+  std::atomic<bool> runner_should_exit;
   
   void next(eowu::State *state);
 };

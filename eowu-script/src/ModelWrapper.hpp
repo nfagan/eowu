@@ -42,6 +42,12 @@ public:
   void SetRotation(const eowu::VectorWrapper &vec);
   void SetScale(const eowu::VectorWrapper &vec);
   void SetUnits(const std::string &units);
+  void SetZRotation(double value);
+  
+  int Move(lua_State *L);
+  int Rotate(lua_State *L);
+  int Scale(lua_State *L);
+  void ZRotate(double amount);
   
   int Draw(lua_State *L);
   

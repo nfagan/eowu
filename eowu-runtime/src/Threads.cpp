@@ -27,7 +27,8 @@ timing(task_timer) {
 
 void eowu::thread::task(eowu::thread::SharedState &state,
                         eowu::StateRunner &state_runner,
-                        const std::vector<std::shared_ptr<eowu::XYTarget>> &targets) {
+                        const std::vector<std::shared_ptr<eowu::XYTarget>> &targets,
+                        eowu::TimeoutWrapperContainerType timeouts) {
   
   state.task_thread_initialized.store(true);
   
@@ -48,18 +49,45 @@ void eowu::thread::task(eowu::thread::SharedState &state,
     
     if (active_state_will_exit) {
       should_proceed = eowu::thread::try_update_targets(targets);
-//      should_proceed = eowu::thread::try_update_timeouts(timeouts); //  should go after targets so they can cancel.
+      
+      if (should_proceed) {
+        should_proceed = eowu::thread::try_update_timeouts(timeouts); //  should go after targets so they can cancel.
+      }
     }
     
-    should_proceed = eowu::thread::try_update_task(state_runner);
+    if (should_proceed) {
+      should_proceed = eowu::thread::try_update_task(state_runner);
+    }
     
     if (should_proceed && !active_state_will_exit) {
       should_proceed = eowu::thread::try_update_targets(targets);
+      
+      if (should_proceed) {
+        should_proceed = eowu::thread::try_update_timeouts(timeouts);
+      }
     }
   }
   
   state.threads_should_continue = false;
   state.task_thread_completed = true;
+}
+
+bool eowu::thread::try_update_timeouts(const eowu::TimeoutWrapperContainerType &timeouts) {
+  bool should_proceed = true;
+  
+  timeouts->Use([&should_proceed](auto &timeout_map) -> void {
+    for (auto &it : timeout_map) {
+      try {
+        it.second->Update();
+      } catch (const std::exception &e) {
+        eowu::thread::print_error("TIMEOUT", e.what());
+        should_proceed = false;
+        return;
+      }
+    }
+  });
+  
+  return should_proceed;
 }
 
 bool eowu::thread::try_update_task(eowu::StateRunner &state_runner) {

@@ -14,6 +14,7 @@
 #include "RendererWrapper.hpp"
 #include "TargetWrapper.hpp"
 #include "TargetSetWrapper.hpp"
+#include "TimeoutWrapper.hpp"
 #include "VariableWrapper.hpp"
 #include "VariablesWrapper.hpp"
 #include "VectorWrapper.hpp"
