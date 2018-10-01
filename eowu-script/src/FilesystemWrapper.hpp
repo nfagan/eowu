@@ -24,4 +24,5 @@ public:
   
 private:
   static std::string get_eowu_root_directory();
+  static std::string full_file(lua_State *L);
 };

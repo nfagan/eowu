@@ -8,9 +8,10 @@
 #include "SetupParser.hpp"
 #include "ParseUtil.hpp"
 #include "Lua.hpp"
-#include "init.hpp"
+#include "../init/init.hpp"
 #include <eowu-common/fs.hpp>
 #include <eowu-common/platform.hpp>
+#include <stdexcept>
 
 eowu::parser::ParseResult<bool> eowu::parser::insert_package_path(lua_State *L, const std::string &file) {
   eowu::parser::ParseResult<bool> result;
@@ -76,8 +77,16 @@ eowu::parser::ParseResult<eowu::schema::EntryScript> eowu::parser::entry_script(
     
     return entry_script;
   }
-  
-  lua_status = lua_pcall(L, 0, 0, 0);
+ 
+  //  attempt to run the setup file
+  try {
+    lua_status = lua_pcall(L, 0, 0, 0);
+    
+  } catch (const std::exception &e) {
+    entry_script.message = std::string("Loading entry script failed with message: ") + e.what();
+    
+    return entry_script;
+  }
   
   //  error calling file
   if (lua_status != 0) {
