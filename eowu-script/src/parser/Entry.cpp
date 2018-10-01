@@ -8,6 +8,7 @@
 #include "SetupParser.hpp"
 #include "ParseUtil.hpp"
 #include "Lua.hpp"
+#include "init.hpp"
 #include <eowu-common/fs.hpp>
 #include <eowu-common/platform.hpp>
 
@@ -60,6 +61,10 @@ eowu::parser::ParseResult<eowu::schema::EntryScript> eowu::parser::entry_script(
     return entry_script;
   }
 #endif
+  
+  //  insert schemas that do not depend on setup resources,
+  //  such as the fileystem wrapper
+  eowu::init::init_static_schemas(L);
   
   lua_status = luaL_loadfile(L, file.c_str());
   

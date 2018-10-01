@@ -131,8 +131,8 @@ void eowu::mesh_factory::make_triangle(eowu::Mesh *mesh) {
   
   static const std::array<float, 24> vertex_data = {
     -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-    1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-    0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f
+    1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+    0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f
   };
   
   for (unsigned i = 0; i < 3; i++) {

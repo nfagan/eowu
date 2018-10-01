@@ -20,11 +20,11 @@ Setup.Geometry = {
 Setup.Stimuli = {
   s1 = { geometry = 'rect' },
   s2 = { geometry = 'circ' },
-  s3 = { geometry = 'tri' }
+  s3 = { geometry = 'rect' }
 }
 
 Setup.Textures = {
-  t1 = '/Users/Nick/Desktop/eg.png'
+  t1 = eowu.fs.root() .. '/res/textures/eg.png'
 }
 
 Setup.States = { state1 }
