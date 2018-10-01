@@ -7,6 +7,7 @@
 
 #include "SetupStatus.hpp"
 #include <iostream>
+#include <eowu-common/debug.hpp>
 
 eowu::SetupStatus::SetupStatus() : success(false) {}
 
@@ -22,7 +23,10 @@ void eowu::SetupStatus::print() const {
     return;
   }
   
-  std::cout << std::endl << "Failed to initialize script: '" << file << "'" << std::endl << std::endl;
+  std::cout << std::endl;
+  eowu::debug::print_error("");
+  
+  std::cout << "Failed to initialize script: '" << file << "'" << std::endl << std::endl;
   std::cout << message << std::endl << std::endl;
   
   if (context != "") {

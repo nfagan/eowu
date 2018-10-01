@@ -5,7 +5,7 @@ state1.First = true
 
 function state1.Entry()
   local script = eowu.script()
-  script:Render('state1')
+  script:Render('setup')
 end
 
 local function position_stimulus(kb, stim, mv_amt)
@@ -13,6 +13,23 @@ local function position_stimulus(kb, stim, mv_amt)
   if kb:Down('right') then stim:Move({mv_amt, 0}) end
   if kb:Down('up') then stim:Move({0, mv_amt}) end
   if kb:Down('down') then stim:Move({0, -mv_amt}) end
+  if kb:Down('c') then stim:Position({0.5, 0.5}) end
+end
+
+local function render_once()
+  local script = eowu.script()
+  local s1 = script:Stimulus('s1')
+  local s3 = script:Stimulus('s3')
+
+  s1:Units('normalized')
+  s1:Size({0.5, 0.5})
+  s1:Position({0.5, 0.5})
+
+  s3:Size({1, 1})
+  s3:Position({0.5, 0.5})
+  s3:Units('normalized')
+
+  script:Render('state1')
 end
 
 local function default_render()
@@ -22,16 +39,8 @@ local function default_render()
   local s2 = script:Stimulus('s2')
   local s3 = script:Stimulus('s3')
 
-  s1:Units('normalized')
-  s1:Size({0.5, 0.5})
-  s1:Position({0.5, 0.5})
   s1:Texture('t1')
-
   s2:Like(s1)
-
-  s3:Size({1, 1})
-  s3:Position({0.5, 0.5})
-  s3:Units('normalized')
   s3:Texture('t1')
 
   if kb:Down('space') then
@@ -50,6 +59,7 @@ local function default_render()
 end
 
 state1.Render = {
+  setup = render_once,
   state1 = default_render
 }
 

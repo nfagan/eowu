@@ -5,15 +5,15 @@ Setup = {}
 Setup.Windows = {
   main = {
     width = 400,
-    height = 400
+    height = 400,
+    resizeable = true
   }
 }
 
 Setup.Geometry = {
   Builtin = {
     rect = 'Rectangle',
-    circ = 'Circle',
-    tri = 'Triangle'
+    circ = 'Circle'
   }
 }
 
@@ -24,7 +24,7 @@ Setup.Stimuli = {
 }
 
 Setup.Textures = {
-  t1 = eowu.fs.root() .. '/res/textures/eg.png'
+  t1 = eowu.fs.fullfile({eowu.fs.root(), 'res/textures/eg.png'})
 }
 
 Setup.States = { state1 }
