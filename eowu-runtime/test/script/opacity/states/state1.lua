@@ -28,8 +28,11 @@ local function default_render()
   s1:Texture('t1')
 
   s2:Like(s1)
-  -- s2:Color({0.4, 1, 1})
-  s3:Like(s2)
+
+  s3:Size({1, 1})
+  s3:Position({0.5, 0.5})
+  s3:Units('normalized')
+  s3:Texture('t1')
 
   if kb:Down('space') then
     s1:Opacity(0.8)

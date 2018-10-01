@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include "FilesystemWrapper.hpp"
 #include "StateWrapper.hpp"
 #include "KeyboardWrapper.hpp"
 #include "MathWrapper.hpp"
