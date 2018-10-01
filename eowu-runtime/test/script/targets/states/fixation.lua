@@ -41,7 +41,7 @@ local function entry()
   end)
 
   set1:Begin()
-  set1:Reset()
+  -- set1:Reset()
 
   if first_entry then 
     script:Render('out_of_bounds') 
