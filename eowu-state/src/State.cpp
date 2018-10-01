@@ -87,7 +87,8 @@ void eowu::State::Exit(eowu::State *state) {
 }
 
 void eowu::State::Exit() {
-  Exit(nullptr);
+//  Exit(nullptr);
+  called_next = true;
 }
 
 eowu::State* eowu::State::GetNext() {

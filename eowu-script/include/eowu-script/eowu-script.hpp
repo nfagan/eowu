@@ -19,5 +19,6 @@
 #include "../../src/KeyboardWrapper.hpp"
 #include "../../src/Init.hpp"
 #include "../../src/Parser.hpp"
+#include "../../src/TimeoutWrapper.hpp"
 #include "../../src/Timing.hpp"
 #include "../../src/Validator.hpp"

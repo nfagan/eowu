@@ -92,6 +92,8 @@ void eowu::Renderer::draw(eowu::WindowType window) {
   
   glClearColor(clear_color.x, clear_color.y, clear_color.z, 1.0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glEnable(GL_BLEND);
   
   auto &models_container = get_models_container(window);
   

@@ -9,6 +9,7 @@
 #include "VariableWrapper.hpp"
 #include "Constants.hpp"
 #include "Error.hpp"
+#include "RuntimeUtil.hpp"
 #include <eowu-state/eowu-state.hpp>
 #include <chrono>
 
@@ -84,8 +85,29 @@ double eowu::StateWrapper::Ellapsed() const {
   return state->GetTimer().Ellapsed().count();
 }
 
-void eowu::StateWrapper::Exit() {
-  state->Exit();
+int eowu::StateWrapper::Exit(lua_State *L) {
+  int n_inputs = lua_gettop(L);
+  
+  if (n_inputs == 1) {
+    //  state:Exit()
+    state->Exit();
+  } else {
+    //  state:Exit('to_state')
+    auto ref = luabridge::LuaRef::fromStack(L, -1);
+    
+    if (!ref.isString()) {
+      auto type = ref.type();
+      auto msg = eowu::util::get_message_wrong_input_type("State::Exit", "string", lua_typename(L, type));
+      
+      throw eowu::LuaError(msg);
+    }
+    
+    auto next_state = ref.cast<std::string>();
+    
+    state->Exit(state->GetState(next_state));
+  }
+  
+  return 0;
 }
 
 void eowu::StateWrapper::SetDuration(int duration) {
@@ -110,17 +132,17 @@ void eowu::StateWrapper::setup_variable_wrappers() {
 
 void eowu::StateWrapper::setup_state_callbacks() {
   //  entry
-  state->SetOnEntry([&](auto* state) {
+  state->SetOnEntry([&](auto *state) {
     lua_context->Call(state_functions->on_entry);
   });
   
   //  loop
-  state->SetOnLoop([&](auto* state) {
+  state->SetOnLoop([&](auto *state) {
     lua_context->Call(state_functions->on_loop);
   });
   
   //  exit
-  state->SetOnExit([&](auto* state) {
+  state->SetOnExit([&](auto *state) {
     lua_context->Call(state_functions->on_exit);
   });
 }

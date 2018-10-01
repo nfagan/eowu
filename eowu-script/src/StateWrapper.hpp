@@ -46,7 +46,7 @@ public:
   void SetDuration(int duration);
   void SetNextState(const std::string &next);
   double Ellapsed() const;
-  void Exit();
+  int Exit(lua_State *L);
   
   const std::string& GetName() const;
   

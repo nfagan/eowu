@@ -40,6 +40,21 @@ int eowu::ModelWrapper::name(lua_State *L) { \
   return 0; \
 }
 
+#define EOWU_VEC_FUNC_UPDATER(name, getter, setter, context) \
+int eowu::ModelWrapper::name(lua_State *L) { \
+  std::vector<double> nums; \
+  try { \
+    nums = eowu::parser::get_numeric_vector_from_state(L, -1); \
+  } catch (const std::exception &e) { \
+    throw eowu::LuaError(std::string(context) + "(): " + e.what()); \
+  } \
+  auto vec = eowu::util::require_vec3(nums); \
+  auto &trans = model->GetTransform(); \
+  auto current = trans.getter(); \
+  trans.setter(current + vec); \
+  return 0; \
+}
+
 
 eowu::ModelWrapper::ModelWrapper(std::shared_ptr<eowu::Model> model,
                                  std::shared_ptr<eowu::Renderer> renderer,
@@ -91,6 +106,10 @@ EOWU_VEC_FUNC_SETTER(SetPositionVector, SetPosition, "Position");
 EOWU_VEC_FUNC_SETTER(SetRotationVector, SetRotation, "Rotation");
 EOWU_VEC_FUNC_SETTER(SetScaleVector, SetScale, "Scale");
 
+EOWU_VEC_FUNC_UPDATER(Move, GetPosition, SetPosition, "Move");
+EOWU_VEC_FUNC_UPDATER(Rotate, GetRotation, SetRotation, "Rotate");
+EOWU_VEC_FUNC_UPDATER(Scale, GetScale, SetScale, "Scale");
+
 EOWU_VEC_GETTER(GetScale);
 EOWU_VEC_GETTER(GetPosition);
 EOWU_VEC_GETTER(GetRotation);
@@ -114,10 +133,38 @@ int eowu::ModelWrapper::SetColor(lua_State *L) {
   return 0;
 }
 
+void eowu::ModelWrapper::SetOpacity(double value) {
+  assert_material();
+  
+  model->GetMaterial()->SetOpacity(float(value));
+}
+
 void eowu::ModelWrapper::SetTexture(const std::string &id) {
   assert_material();
   const auto tex = texture_manager->Get(id);
   model->GetMaterial()->SetFaceColor(tex);
+}
+
+void eowu::ModelWrapper::SetZRotation(double value) {
+  auto &trans = model->GetTransform();
+  auto rotation = trans.GetRotation();
+  rotation.z = value;
+  trans.SetRotation(rotation);
+}
+
+void eowu::ModelWrapper::ZRotate(double amount) {
+  auto &trans = model->GetTransform();
+  auto rotation = trans.GetRotation();
+  rotation.z += amount;
+  trans.SetRotation(rotation);
+}
+
+void eowu::ModelWrapper::MakeLike(const eowu::ModelWrapper *other) {
+  auto &own_trans = model->GetTransform();
+  auto &other_trans = other->model->GetTransform();
+  
+  own_trans.MakeLike(other_trans);
+  model->GetMaterial()->MakeLike(*other->model->GetMaterial());
 }
 
 void eowu::ModelWrapper::CreateLuaSchema(lua_State *L) {
@@ -129,11 +176,17 @@ void eowu::ModelWrapper::CreateLuaSchema(lua_State *L) {
   .addProperty("rotation", &eowu::ModelWrapper::GetRotation, &eowu::ModelWrapper::SetRotation)
   .addFunction("Texture", &eowu::ModelWrapper::SetTexture)
   .addFunction("Units", &eowu::ModelWrapper::SetUnits)
+  .addFunction("Opacity", &eowu::ModelWrapper::SetOpacity)
+  .addFunction("Like", &eowu::ModelWrapper::MakeLike)
   .addCFunction("Draw", &eowu::ModelWrapper::Draw)
   .addCFunction("Position", &eowu::ModelWrapper::SetPositionVector)
   .addCFunction("Rotation", &eowu::ModelWrapper::SetRotationVector)
+  .addFunction("ZRotation", &eowu::ModelWrapper::SetZRotation)
   .addCFunction("Size", &eowu::ModelWrapper::SetScaleVector)
   .addCFunction("Color", &eowu::ModelWrapper::SetColor)
+  .addCFunction("Move", &eowu::ModelWrapper::Move)
+  .addCFunction("Rotate", &eowu::ModelWrapper::Rotate)
+  .addFunction("ZRotate", &eowu::ModelWrapper::ZRotate)
   .endClass()
   .endNamespace();
 }

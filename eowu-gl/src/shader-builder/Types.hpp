@@ -21,7 +21,8 @@ namespace eowu {
       vec3,
       vec4,
       mat4,
-      sampler2D
+      sampler2D,
+      float_t
     };
     
     std::string get_string_type(eowu::glsl::Types type);
@@ -73,6 +74,11 @@ namespace eowu {
     template<>
     struct TypeMap<eowu::Texture> {
       static constexpr eowu::glsl::Types value = eowu::glsl::sampler2D;
+    };
+    
+    template<>
+    struct TypeMap<float> {
+      static constexpr eowu::glsl::Types value = eowu::glsl::float_t;
     };
   }
   

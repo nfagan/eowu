@@ -25,6 +25,8 @@ std::string eowu::glsl::get_string_type(eowu::glsl::Types type) {
       return "mat4";
     case sampler2D:
       return "sampler2D";
+    case float_t:
+      return "float";
     default:
       return "";
   }

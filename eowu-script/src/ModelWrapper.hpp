@@ -33,6 +33,8 @@ public:
   
   int SetColor(lua_State *L);
   void SetTexture(const std::string &id);
+  void SetOpacity(double value);
+  void MakeLike(const eowu::ModelWrapper *other);
   
   int SetPositionVector(lua_State *L);
   int SetRotationVector(lua_State *L);
@@ -42,6 +44,12 @@ public:
   void SetRotation(const eowu::VectorWrapper &vec);
   void SetScale(const eowu::VectorWrapper &vec);
   void SetUnits(const std::string &units);
+  void SetZRotation(double value);
+  
+  int Move(lua_State *L);
+  int Rotate(lua_State *L);
+  int Scale(lua_State *L);
+  void ZRotate(double amount);
   
   int Draw(lua_State *L);
   

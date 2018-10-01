@@ -9,6 +9,7 @@
 
 #include "Timing.hpp"
 #include <eowu-gl/eowu-gl.hpp>
+#include <eowu-script/eowu-script.hpp>
 #include <atomic>
 #include <memory>
 #include <vector>
@@ -52,10 +53,12 @@ namespace eowu {
     
     void task(eowu::thread::SharedState &state,
               eowu::StateRunner &state_runner,
-              const std::vector<std::shared_ptr<eowu::XYTarget>> &targets);
+              const std::vector<std::shared_ptr<eowu::XYTarget>> &targets,
+              eowu::TimeoutWrapperContainerType timeouts);
     
     bool try_update_task(eowu::StateRunner &state_runner);
     bool try_update_targets(const std::vector<std::shared_ptr<eowu::XYTarget>> &targets);
+    bool try_update_timeouts(const eowu::TimeoutWrapperContainerType &timeouts);
     
     void events(eowu::thread::SharedState &state, std::shared_ptr<eowu::ContextManager> context_manager);
     

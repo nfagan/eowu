@@ -44,16 +44,11 @@ local function render()
   local frames = script:Variable('frames')
   local kb = script:Keyboard()
 
-  local rot = stim.rotation
-  local rot_amt = 0.01
-
   if kb:Down('space') then
-    rot.z = rot.z - rot_amt * 4
+    stim:ZRotate(-0.04)
   else
-    rot.z = rot.z + rot_amt
+    stim:ZRotate(0.01)
   end
-
-  stim.rotation = rot
 
   if tn % 2 == 0 then 
     --  even number trial

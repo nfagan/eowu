@@ -8,7 +8,7 @@
 #include "StateRunner.hpp"
 #include "State.hpp"
 
-eowu::StateRunner::StateRunner() : active_state(nullptr), is_new_state(false) {
+eowu::StateRunner::StateRunner() : active_state(nullptr), is_new_state(false), runner_should_exit(false) {
   //
 }
 
@@ -20,7 +20,7 @@ void eowu::StateRunner::Begin(eowu::State *state) {
 bool eowu::StateRunner::Update() {
   timer.Update();
   
-  if (active_state == nullptr) {
+  if (active_state == nullptr || runner_should_exit) {
     return true;
   }
   
@@ -39,6 +39,10 @@ bool eowu::StateRunner::Update() {
   }
   
   return false;
+}
+
+void eowu::StateRunner::Exit() {
+  runner_should_exit = true;
 }
 
 const eowu::Timer& eowu::StateRunner::GetTimer() const {

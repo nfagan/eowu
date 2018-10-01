@@ -19,6 +19,7 @@
 #include "parser/ParseUtil.hpp"
 #include <eowu-common/config.hpp>
 #include <eowu-gl/eowu-gl.hpp>
+#include <eowu-state/eowu-state.hpp>
 #include <eowu-data.hpp>
 #include <assert.h>
 
@@ -52,6 +53,9 @@ std::unordered_map<std::string, std::shared_ptr<eowu::XYTarget>> eowu::ScriptWra
 //  target sets
 std::unordered_map<std::string, std::unique_ptr<eowu::TargetSetWrapper>> eowu::ScriptWrapper::target_sets{};
 //
+//  timeouts
+eowu::TimeoutWrapperContainerType eowu::ScriptWrapper::timeout_wrappers = nullptr;
+//
 //  keyboard
 std::unique_ptr<eowu::KeyboardWrapper> eowu::ScriptWrapper::keyboard = nullptr;
 //
@@ -60,6 +64,9 @@ std::shared_ptr<eowu::LuaContext> eowu::ScriptWrapper::lua_task_context = nullpt
 //
 //  thread ids
 eowu::ScriptWrapper::ThreadIds eowu::ScriptWrapper::thread_ids{};
+//
+//  state runner
+eowu::StateRunner *eowu::ScriptWrapper::state_runner = nullptr;
 
 bool eowu::ScriptWrapper::IsComplete() const {
 #ifdef EOWU_DEBUG
@@ -68,8 +75,9 @@ bool eowu::ScriptWrapper::IsComplete() const {
   bool rc = render_functions != nullptr;
   bool lc = lua_render_thread_functions != nullptr;
   bool kc = keyboard != nullptr;
+  bool src = state_runner != nullptr;
   
-  return sc && pc && rc && lc && kc;
+  return sc && pc && rc && lc && kc && src;
 #else
   return true;
 #endif
@@ -86,6 +94,10 @@ void eowu::ScriptWrapper::SetThreadIds(const std::thread::id &render, const std:
 
 void eowu::ScriptWrapper::SetTaskDataStore(std::shared_ptr<eowu::data::Store> store) {
   task_data_store = store;
+}
+
+void eowu::ScriptWrapper::SetStateRunner(eowu::StateRunner *runner) {
+  eowu::ScriptWrapper::state_runner = runner;
 }
 
 void eowu::ScriptWrapper::SetKeyboardWrapper(std::unique_ptr<eowu::KeyboardWrapper> keyboard) {
@@ -125,6 +137,10 @@ void eowu::ScriptWrapper::SetTargetWrapperContainer(const std::unordered_map<std
   eowu::ScriptWrapper::target_wrappers = targets;
 }
 
+void eowu::ScriptWrapper::SetTimeoutWrapperContainer(eowu::TimeoutWrapperContainerType timeouts) {
+  eowu::ScriptWrapper::timeout_wrappers = timeouts;
+}
+
 void eowu::ScriptWrapper::SetXYTargets(const std::unordered_map<std::string, std::shared_ptr<eowu::XYTarget>> &targets) {
   eowu::ScriptWrapper::xy_targets = targets;
 }
@@ -160,6 +176,10 @@ int eowu::ScriptWrapper::SetRenderFunctionPair(lua_State *L) {
   return 0;
 }
 
+double eowu::ScriptWrapper::GetEllapsedTime() const {
+  return eowu::ScriptWrapper::state_runner->GetTimer().Ellapsed().count();
+}
+
 eowu::ModelWrapper eowu::ScriptWrapper::GetModelWrapper(const std::string &id) const {
   assert(IsComplete());
     
@@ -183,6 +203,24 @@ eowu::TargetWrapper* eowu::ScriptWrapper::GetTargetWrapper(const std::string &id
   }
   
   return it->second.get();
+}
+
+eowu::TimeoutWrapper* eowu::ScriptWrapper::GetTimeoutWrapper(const std::string &id) {
+  assert(IsComplete());
+  
+  eowu::TimeoutWrapper *wrapper = nullptr;
+  
+  timeout_wrappers->Use([&](auto *target_map) -> void {
+    const auto &it = target_map->find(id);
+    
+    if (it == target_map->end()) {
+      throw eowu::NonexistentResourceError::MessageKindId("Timeout", id);
+    }
+    
+    wrapper = it->second.get();
+  });
+  
+  return wrapper;
 }
 
 eowu::KeyboardWrapper* eowu::ScriptWrapper::GetKeyboardWrapper() const {
@@ -223,6 +261,38 @@ eowu::VariableWrapper eowu::ScriptWrapper::GetVariable(const std::string &id) {
   eowu::data::Commitable *defaults = &variables.defaults.at(id);
   
   eowu::VariableWrapper wrapper(active, defaults);
+  
+  return wrapper;
+}
+
+eowu::TimeoutWrapper* eowu::ScriptWrapper::MakeTimeout(const std::string &id, int ms, luabridge::LuaRef func) {
+  const char* const func_id = "MakeTimeout";
+  
+  //  Ensure we're calling from the task thread.
+  if (!is_task_thread()) {
+    throw eowu::LuaError(eowu::util::get_message_wrong_thread(func_id, "Render"));
+  }
+  
+  if (!func.isFunction()) {
+    lua_State *L = func.state();
+    auto type = func.type();
+    
+    std::string msg = eowu::util::get_message_wrong_input_type(func_id, "function", lua_typename(L, type));
+    
+    throw eowu::LuaError(msg);
+  }
+  
+  eowu::TimeoutWrapper *wrapper = nullptr;
+  eowu::time::DurationType duration = std::chrono::milliseconds(ms);
+  
+  eowu::ScriptWrapper::timeout_wrappers->Use([&](auto &timeout_map) -> void {
+    auto wrapper_to_store = std::make_unique<eowu::TimeoutWrapper>(lua_task_context, func, duration);
+    wrapper = wrapper_to_store.get();
+    
+    timeout_map[id] = std::move(wrapper_to_store);
+  });
+  
+  assert(wrapper);
   
   return wrapper;
 }
@@ -273,6 +343,12 @@ eowu::TargetSetWrapper* eowu::ScriptWrapper::MakeTargetSet(const std::string &id
 
 std::shared_ptr<eowu::LockedLuaRenderFunctions> eowu::ScriptWrapper::GetLockedRenderFunctions() const {
   return eowu::ScriptWrapper::lua_render_thread_functions;
+}
+
+void eowu::ScriptWrapper::Exit() {
+  assert(state_runner);
+  
+  state_runner->Exit();
 }
 
 void eowu::ScriptWrapper::CommitData() const {
@@ -373,12 +449,16 @@ void eowu::ScriptWrapper::CreateLuaSchema(lua_State *L) {
   .addFunction("Commit", &eowu::ScriptWrapper::CommitData)
   .addFunction("Stimulus", &eowu::ScriptWrapper::GetModelWrapper)
   .addFunction("Target", &eowu::ScriptWrapper::GetTargetWrapper)
+  .addFunction("Timeout", &eowu::ScriptWrapper::GetTimeoutWrapper)
   .addFunction("State", &eowu::ScriptWrapper::GetStateWrapper)
   .addFunction("Render", &eowu::ScriptWrapper::SetRenderFunctionPair)
   .addFunction("Renderer", &eowu::ScriptWrapper::GetRendererWrapper)
   .addFunction("Variable", &eowu::ScriptWrapper::GetVariable)
   .addFunction("Keyboard", &eowu::ScriptWrapper::GetKeyboardWrapper)
+  .addFunction("Ellapsed", &eowu::ScriptWrapper::GetEllapsedTime)
+  .addFunction("Exit", &eowu::ScriptWrapper::Exit)
   .addFunction("MakeTargetSet", &eowu::ScriptWrapper::MakeTargetSet)
+  .addFunction("MakeTimeout", &eowu::ScriptWrapper::MakeTimeout)
   .endClass()
   .endNamespace();
 }

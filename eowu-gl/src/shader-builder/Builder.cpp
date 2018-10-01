@@ -56,12 +56,16 @@ std::string eowu::builder::fragment(const eowu::Mesh &mesh, const eowu::Material
   
   auto material_schema = material.GetAttributeSchema();
   
+  if (!eowu::builder::has_identifier(material_schema, "opacity")) {
+    f_schema.main.push_back(eowu::components::declare_variable("opacity", eowu::glsl::float_t, "1.0f"));
+  }
+  
   for (const auto &uniform : material_schema) {
     f_schema.uniforms.push_back(uniform);
     
     if (uniform.name == eowu::uniforms::face_color) {
       auto face_color_extraction = eowu::components::to_vec3(uniform.name, uniform.type);
-      f_schema.main.push_back("FragColor = vec4(" + face_color_extraction + ", 1.0f);");
+      f_schema.main.push_back("FragColor = vec4(" + face_color_extraction + ", opacity);");
     }
   }
   
@@ -82,4 +86,14 @@ std::shared_ptr<eowu::Program> eowu::builder::from_source(const std::string &v_s
   prog->Link({&v_shader, &f_shader});
   
   return prog;
+}
+
+bool eowu::builder::has_identifier(const std::vector<eowu::schema::GLSLIdentifier> &identifiers, const char *name) {
+  for (const auto &id : identifiers) {
+    if (id.name == name) {
+      return true;
+    }
+  }
+  
+  return false;
 }

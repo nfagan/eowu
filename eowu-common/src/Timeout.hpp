@@ -19,6 +19,7 @@ namespace eowu {
 class eowu::Timeout {
 public:
   Timeout();
+  Timeout(const eowu::time::DurationType &duration);
   Timeout(const eowu::Timeout &other);
   ~Timeout() = default;
   
@@ -28,7 +29,7 @@ public:
   bool Ellapsed() const;
   
 private:
-  mutable std::mutex mut;
+  mutable std::recursive_mutex mut;
   
   eowu::Timer timer;
   std::atomic<eowu::time::DurationType> duration;

@@ -10,11 +10,14 @@
 #include "Init.hpp"
 #include "TargetWrapper.hpp"
 #include "TargetSetWrapper.hpp"
+#include "TimeoutWrapper.hpp"
+#include <eowu-common/LockedResource.hpp>
 #include <memory>
 #include <unordered_map>
 #include <string>
 #include <vector>
 #include <thread>
+#include <mutex>
 
 struct lua_State;
 
@@ -27,9 +30,9 @@ namespace eowu {
   class LockedLuaRenderFunctions;
   class ModelWrapper;
   class StateWrapper;
-  class TargetSetWrapper;
   class VariableWrapper;
   class XYTarget;
+  class StateRunner;
   
   namespace data {
     class Store;
@@ -50,6 +53,7 @@ public:
   
   void SetStateWrapperContainer(eowu::StateWrapperContainerType states);
   void SetTargetWrapperContainer(const std::unordered_map<std::string, std::shared_ptr<eowu::TargetWrapper>> &targets);
+  void SetTimeoutWrapperContainer(eowu::TimeoutWrapperContainerType timeout_wrappers);
   void SetXYTargets(const std::unordered_map<std::string, std::shared_ptr<eowu::XYTarget>> &targets);
   
   void SetGLPipeline(std::shared_ptr<eowu::GLPipeline> pipeline);
@@ -63,8 +67,10 @@ public:
   void SetTaskDataStore(std::shared_ptr<eowu::data::Store> task_data_store);
   void SetLockedRenderFunctions(std::shared_ptr<eowu::LockedLuaRenderFunctions> locked_functions);
   void SetThreadIds(const std::thread::id &render, const std::thread::id &task);
+  void SetStateRunner(eowu::StateRunner *runner);
   
   eowu::TargetSetWrapper* MakeTargetSet(const std::string &id, lua_State *L);
+  eowu::TimeoutWrapper* MakeTimeout(const std::string &id, int ms, luabridge::LuaRef func);
   
   bool IsComplete() const;
   
@@ -72,30 +78,33 @@ public:
   eowu::StateWrapper* GetStateWrapper(const std::string &id) const;
   eowu::KeyboardWrapper* GetKeyboardWrapper() const;
   eowu::TargetWrapper* GetTargetWrapper(const std::string &id);
+  eowu::TimeoutWrapper* GetTimeoutWrapper(const std::string &id);
   eowu::RendererWrapper GetRendererWrapper() const;
   eowu::ModelWrapper GetModelWrapper(const std::string &id) const;
   eowu::VariableWrapper GetVariable(const std::string &id);
   
+  double GetEllapsedTime() const;
+  void Exit();
+  
   std::shared_ptr<eowu::LockedLuaRenderFunctions> GetLockedRenderFunctions() const;
   
   std::size_t CountVariables() const;
-  
   void CommitData() const;
   
   static void CreateLuaSchema(lua_State *L);
-  
-  struct Variables {
-    std::unordered_map<std::string, eowu::data::Commitable> active;
-    std::unordered_map<std::string, eowu::data::Commitable> defaults;
-  };
-  
 private:
   struct ThreadIds {
     std::thread::id render;
     std::thread::id task;
   };
   
+  struct Variables {
+    std::unordered_map<std::string, eowu::data::Commitable> active;
+    std::unordered_map<std::string, eowu::data::Commitable> defaults;
+  };
+  
   static std::unordered_map<std::string, std::shared_ptr<eowu::TargetWrapper>> target_wrappers;
+  static eowu::TimeoutWrapperContainerType timeout_wrappers;
   static eowu::LuaFunctionContainerType render_functions;
   static eowu::LuaFunctionContainerType flip_functions;
   static eowu::StateWrapperContainerType states;
@@ -108,6 +117,7 @@ private:
   static std::unique_ptr<eowu::KeyboardWrapper> keyboard;
   static std::shared_ptr<eowu::LuaContext> lua_task_context;
   static ThreadIds thread_ids;
+  static eowu::StateRunner *state_runner;
   
   void commit_variables(std::vector<char> &into) const;
   void commit_states(std::vector<char> &into) const;

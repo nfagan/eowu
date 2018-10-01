@@ -7,8 +7,13 @@
 
 #include "XYTargetSet.hpp"
 #include "XYTarget.hpp"
+#include <eowu-common/config.hpp>
 #include <functional>
 #include <assert.h>
+
+#ifdef EOWU_DEBUG
+#include <iostream>
+#endif
 
 #define EOWU_TARGET_SET_CB_IMPL(name, member) \
   void eowu::XYTargetSet::name(const std::function<void(eowu::XYTarget*)> &cb) { \
@@ -136,9 +141,8 @@ void eowu::XYTargetSet::exit_handler(eowu::XYTarget *targ) {
     on_exit(targ);
     selected_target = nullptr;
     called_selected = false;
+    reset_targets();
   }
-  
-  reset_targets();
 }
 
 void eowu::XYTargetSet::target_noop(eowu::XYTarget *target) {

@@ -1,38 +1,35 @@
 //
 //  LockedResource.hpp
-//  eowu-common
+//  eowu
 //
-//  Created by Nick Fagan on 9/10/18.
+//  Created by Nick Fagan on 9/27/18.
 //
 
 #pragma once
 
-#include <mutex>
 #include <functional>
+#include <mutex>
 
 namespace eowu {
   template<typename T, typename Mutex = std::mutex>
   class LockedResource;
-  
-  template<typename T, typename M>
-  using LockedResourceCallbackType = std::function<void(LockedResource<T, M>*)>;
 }
 
 template<typename T, typename Mutex>
 class eowu::LockedResource {
 public:
+  LockedResource(const T &value);
   LockedResource() = default;
   ~LockedResource() = default;
   
-  void Use(const LockedResourceCallbackType<T, Mutex> &cb);
+  void Use(const std::function<void(T*)> &cb);
+  void Use(const std::function<void(const T&)> &cb) const;
+  void Use(const std::function<void(T&)> &cb);
   
 private:
   mutable Mutex mut;
+  
+  T value;
 };
 
-template<typename T, typename Mutex>
-void eowu::LockedResource<T, Mutex>::Use(const eowu::LockedResourceCallbackType<T, Mutex> &cb) {
-  std::unique_lock<Mutex> lock(mut);
-  
-  cb(this);
-}
+#include "LockedResource.hh"

@@ -68,7 +68,8 @@ int eowu::Runtime::Main(const std::string &file) {
   //  targets
   const auto &xy_sources = source_status.result.xy_sources;
   const auto &target_schema = lua_runtime.setup_schema.targets;
-  auto target_status = eowu::init::initialize_targets(target_schema, xy_sources, gl_pipeline);
+  auto lua_task_context = lua_runtime.lua_contexts.task;
+  auto target_status = eowu::init::initialize_targets(target_schema, xy_sources, lua_task_context, gl_pipeline);
   
   if (!target_status.status.success) {
     target_status.status.file = file;
@@ -78,45 +79,55 @@ int eowu::Runtime::Main(const std::string &file) {
   
   //  maps each target to an id.
   const auto &target_map = target_status.result.targets;
-  const auto &target_models = target_status.result.target_models;
-  const auto &targets_hidden = target_status.result.hidden;
-
-  //  maps each target id to a target wrapper.
-  auto target_wrappers = eowu::init::make_target_wrappers(lua_runtime.lua_contexts.task,
-                                                          target_map, target_models, targets_hidden, gl_pipeline);
+  const auto &target_wrappers = target_status.result.target_wrappers;
   
   script_wrapper.SetTargetWrapperContainer(target_wrappers);
   script_wrapper.SetXYTargets(target_map);
   
   //
+  //  make timeout wrappers
+  auto timeout_wrappers = std::make_shared<TimeoutWrapperLockedResourceType>();
+  script_wrapper.SetTimeoutWrapperContainer(timeout_wrappers);
+  
   //
   //  otherwise, the gl pipeline and sources are ok.
   lua_runtime.InitializeScriptWrapper(script_wrapper, file, gl_pipeline);
   
   eowu::thread::SharedState thread_state(&state_runner.GetTimer());
   
+  //
   //  Task thread
   auto vec_targets = eowu::validate::get_values(target_map);
   state_runner.Begin(lua_runtime.GetFirstState());
   
-  auto task_thread = std::thread(eowu::thread::task, std::ref(thread_state),
-                                 std::ref(state_runner), std::ref(vec_targets));
+  auto task_thread = std::thread(eowu::thread::task,
+                                 std::ref(thread_state),
+                                 std::ref(state_runner),
+                                 std::ref(vec_targets),
+                                 timeout_wrappers);
 
+  //
 	//	Detach gl-context from main thread.
 	auto context_manager = gl_pipeline->GetContextManager();
 	context_manager->DetachCurrentContext();
   
+  //
   //  Render thread
   auto locked_lua_functions = script_wrapper.GetLockedRenderFunctions();
   const auto &lua_render_context = lua_runtime.lua_contexts.render;
   
-  auto render_thread = std::thread(eowu::thread::render, std::ref(thread_state),
-                                   lua_render_context, locked_lua_functions, gl_pipeline);
+  auto render_thread = std::thread(eowu::thread::render,
+                                   std::ref(thread_state),
+                                   lua_render_context,
+                                   locked_lua_functions,
+                                   gl_pipeline);
   
+  //
   //  Assign thread ids
   script_wrapper.SetThreadIds(render_thread.get_id(), task_thread.get_id());
   thread_state.assigned_thread_ids = true;
   
+  //
   //  Main thread event loop
   eowu::thread::events(thread_state, context_manager);
   
