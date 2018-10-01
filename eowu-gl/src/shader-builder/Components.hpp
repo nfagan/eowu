@@ -8,6 +8,7 @@
 #pragma once
 
 #include "Types.hpp"
+#include <string>
 
 namespace eowu {
   namespace components {
@@ -15,6 +16,8 @@ namespace eowu {
     std::string declare_attribute(const std::string &loc, const std::string &name, eowu::glsl::Types type);
     std::string declare_uniform(const std::string &name, eowu::glsl::Types type);
     std::string declare_variable(const std::string &name, eowu::glsl::Types type);
+    std::string declare_variable(const std::string &name, eowu::glsl::Types type, const std::string &value);
+    
     std::string to_vec3(const std::string &name, eowu::glsl::Types type);
     
     std::string begin_main();

@@ -34,10 +34,14 @@ class eowu::MaterialAttribute {
 public:
   MaterialAttribute();
   MaterialAttribute(const eowu::MaterialAttribute<T...> &other);
+  eowu::MaterialAttribute<T...>& operator=(const eowu::MaterialAttribute<T...> &other);
   
   ~MaterialAttribute() = default;
   
+  bool IsEnabled() const;
+  
   void SetName(const std::string &name);
+  void SetEnabled(bool value);
   
   template<typename VT>
   void SetValue(const VT &value);
@@ -49,6 +53,9 @@ public:
   void SetContents(const std::string &name, const VT &value);
   
   bool TypeChanged() const;
+  bool EnabledChanged() const;
+  bool StateChanged() const;
+  
   void NextFrame();
   
   std::string GetName() const;
@@ -59,11 +66,14 @@ public:
 private:
   mutable std::shared_mutex mut;
   
+  std::atomic<bool> is_enabled;
+  
   std::string name;
   eowu::glsl::Types glsl_type;
   MaterialAttributeAggregateType<T...> value;
   
   std::atomic<bool> type_did_change;
+  std::atomic<bool> enabled_did_change;
 };
 
 //
@@ -71,18 +81,31 @@ private:
 //
 
 template<typename ...T>
-eowu::MaterialAttribute<T...>::MaterialAttribute() {
-  glsl_type = eowu::glsl::vec3;
-  type_did_change = false;
+eowu::MaterialAttribute<T...>::MaterialAttribute() :
+is_enabled(true), glsl_type(eowu::glsl::vec3), type_did_change(false), enabled_did_change(false) {
+  //
 }
 
 template<typename ...T>
-eowu::MaterialAttribute<T...>::MaterialAttribute(const eowu::MaterialAttribute<T...> &other) {
-  glsl_type = other.GetGLSLType();
-  name = other.GetName();
-  value = other.GetValue();
+eowu::MaterialAttribute<T...>::MaterialAttribute(const eowu::MaterialAttribute<T...> &other) :
+is_enabled(other.is_enabled.load()), name(other.GetName()),
+glsl_type(other.GetGLSLType()), value(other.GetValue()),
+type_did_change(other.type_did_change.load()), enabled_did_change(other.enabled_did_change.load()) {
+  //
+}
+
+template<typename ...T>
+eowu::MaterialAttribute<T...>& eowu::MaterialAttribute<T...>::operator=(const eowu::MaterialAttribute<T...> &other) {
+  std::unique_lock<std::shared_mutex> lock(other.mut);
   
-  type_did_change = false;
+  is_enabled = other.is_enabled.load();
+  name = other.name;
+  glsl_type = other.glsl_type;
+  value = other.value;
+  type_did_change = other.type_did_change.load();
+  enabled_did_change = other.enabled_did_change.load();
+  
+  return *this;
 }
 
 template<typename ...T>
@@ -91,8 +114,24 @@ bool eowu::MaterialAttribute<T...>::TypeChanged() const {
 }
 
 template<typename ...T>
+bool eowu::MaterialAttribute<T...>::EnabledChanged() const {
+  return enabled_did_change;
+}
+
+template<typename ...T>
+bool eowu::MaterialAttribute<T...>::StateChanged() const {
+  return TypeChanged() || EnabledChanged();
+}
+
+template<typename ...T>
+bool eowu::MaterialAttribute<T...>::IsEnabled() const {
+  return is_enabled;
+}
+
+template<typename ...T>
 void eowu::MaterialAttribute<T...>::NextFrame() {
   type_did_change = false;
+  enabled_did_change = false;
 }
 
 template<typename ...T>
@@ -129,6 +168,18 @@ void eowu::MaterialAttribute<T...>::SetName(const std::string &name) {
   std::unique_lock<std::shared_mutex> lock(mut);
   
   this->name = name;
+}
+
+template<typename ...T>
+void eowu::MaterialAttribute<T...>::SetEnabled(bool value) {
+  std::unique_lock<std::shared_mutex> lock(mut);
+  
+  bool was_enabled = is_enabled;
+  is_enabled = value;
+  
+  if (was_enabled != value) {
+    enabled_did_change = true;
+  }
 }
 
 template<typename ...T>

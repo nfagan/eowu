@@ -133,6 +133,12 @@ int eowu::ModelWrapper::SetColor(lua_State *L) {
   return 0;
 }
 
+void eowu::ModelWrapper::SetOpacity(double value) {
+  assert_material();
+  
+  model->GetMaterial()->SetOpacity(float(value));
+}
+
 void eowu::ModelWrapper::SetTexture(const std::string &id) {
   assert_material();
   const auto tex = texture_manager->Get(id);
@@ -153,6 +159,14 @@ void eowu::ModelWrapper::ZRotate(double amount) {
   trans.SetRotation(rotation);
 }
 
+void eowu::ModelWrapper::MakeLike(const eowu::ModelWrapper *other) {
+  auto &own_trans = model->GetTransform();
+  auto &other_trans = other->model->GetTransform();
+  
+  own_trans.MakeLike(other_trans);
+  model->GetMaterial()->MakeLike(*other->model->GetMaterial());
+}
+
 void eowu::ModelWrapper::CreateLuaSchema(lua_State *L) {
   luabridge::getGlobalNamespace(L)
   .beginNamespace(eowu::constants::eowu_namespace)
@@ -162,6 +176,8 @@ void eowu::ModelWrapper::CreateLuaSchema(lua_State *L) {
   .addProperty("rotation", &eowu::ModelWrapper::GetRotation, &eowu::ModelWrapper::SetRotation)
   .addFunction("Texture", &eowu::ModelWrapper::SetTexture)
   .addFunction("Units", &eowu::ModelWrapper::SetUnits)
+  .addFunction("Opacity", &eowu::ModelWrapper::SetOpacity)
+  .addFunction("Like", &eowu::ModelWrapper::MakeLike)
   .addCFunction("Draw", &eowu::ModelWrapper::Draw)
   .addCFunction("Position", &eowu::ModelWrapper::SetPositionVector)
   .addCFunction("Rotation", &eowu::ModelWrapper::SetRotationVector)

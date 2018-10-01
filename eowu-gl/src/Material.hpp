@@ -35,13 +35,17 @@ public:
   bool SchemaChanged() const;
   void NextFrame();
   
+  void MakeLike(const eowu::Material &other);
+  
   const eowu::Identifier& GetIdentifier() const;
   
   template<typename T>
   void SetFaceColor(const T &value);
+  void SetOpacity(float value);
   
 private:
   eowu::MaterialAttribute<glm::vec3, eowu::Texture> face_color;
+  eowu::MaterialAttribute<float> opacity;
   eowu::Identifier resource_id;
 };
 

@@ -35,6 +35,8 @@ public:
   void SetUnits(unsigned int units);
   void SetScreenDimensions(const glm::vec2 &dims);
   
+  void MakeLike(const eowu::Transform &other);
+  
   unsigned int GetUnits() const;
   glm::vec3 GetPosition() const;
   glm::vec3 GetRotation() const;

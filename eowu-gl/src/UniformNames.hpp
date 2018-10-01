@@ -9,10 +9,11 @@
 
 namespace eowu {
   namespace uniforms {
-    static const char *model = "model";
-    static const char *view = "view";
-    static const char *projection = "projection";
+    extern const char* const model;
+    extern const char* const view;
+    extern const char* const projection;
     
-    static const char *face_color = "face_color";
+    extern const char* const face_color;
+    extern const char* const opacity;
   }
 }

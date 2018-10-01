@@ -14,42 +14,75 @@
 
 eowu::Material::Material() {
   face_color.SetContents(eowu::uniforms::face_color, glm::vec3(0.0f));
+  opacity.SetContents(eowu::uniforms::opacity, 1.0f);
 }
 
-eowu::Material::Material(const eowu::Material &other) : face_color(other.face_color) {};
-eowu::Material::Material(const std::shared_ptr<eowu::Material> &other) : face_color(other->face_color) {};
+eowu::Material::Material(const eowu::Material &other) :
+face_color(other.face_color), opacity(other.opacity) {
+  //
+}
+
+eowu::Material::Material(const std::shared_ptr<eowu::Material> &other) :
+face_color(other->face_color), opacity(other->opacity) {
+  //
+}
+
+void eowu::Material::SetOpacity(float value) {
+  opacity.SetValue(value);
+  opacity.SetEnabled(true);
+}
 
 void eowu::Material::Configure(eowu::Program &prog) {
-  auto fv = face_color.GetValue();
-  auto fc = eowu::variant_cast(fv);
-  
-  unsigned int n_textures = 0;
-  
-  bool is_tex = eowu::uniform_is_texture(fv);
-  
-  if (is_tex) {
-    auto& val = mpark::get<eowu::Texture>(fv);
-    val.SetIndex(n_textures++);
-    val.Bind();
+  if (face_color.IsEnabled()) {
+    auto fv = face_color.GetValue();
+    auto fc = eowu::variant_cast(fv);
+    
+    unsigned int n_textures = 0;
+    
+    bool is_tex = eowu::uniform_is_texture(fv);
+    
+    if (is_tex) {
+      auto& val = mpark::get<eowu::Texture>(fv);
+      val.SetIndex(n_textures++);
+      val.Bind();
+    }
+    
+    prog.SetUniform(face_color.GetName(), fc);
   }
   
-  prog.SetUniform(face_color.GetName(), fc);
+  if (opacity.IsEnabled()) {
+    prog.SetUniform(opacity.GetName(), eowu::variant_cast(opacity.GetValue()));
+  }
 }
 
 std::vector<eowu::schema::GLSLIdentifier> eowu::Material::GetAttributeSchema() const {
-  auto face_color_schema = face_color.GetAttributeSchema();
+  std::vector<eowu::schema::GLSLIdentifier> schemas;
   
-  return {face_color_schema};
+  if (face_color.IsEnabled()) {
+    schemas.push_back(face_color.GetAttributeSchema());
+  }
+  
+  if (opacity.IsEnabled()) {
+    schemas.push_back(opacity.GetAttributeSchema());
+  }
+  
+  return schemas;
 }
 
 bool eowu::Material::SchemaChanged() const {
-  return face_color.TypeChanged();
+  return face_color.StateChanged() || opacity.StateChanged();
 }
 
 void eowu::Material::NextFrame() {
   face_color.NextFrame();
+  opacity.NextFrame();
 }
 
 const eowu::Identifier& eowu::Material::GetIdentifier() const {
   return resource_id;
+}
+
+void eowu::Material::MakeLike(const eowu::Material &other) {
+  face_color = other.face_color;
+  opacity = other.opacity;
 }

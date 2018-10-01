@@ -33,6 +33,8 @@ public:
   
   int SetColor(lua_State *L);
   void SetTexture(const std::string &id);
+  void SetOpacity(double value);
+  void MakeLike(const eowu::ModelWrapper *other);
   
   int SetPositionVector(lua_State *L);
   int SetRotationVector(lua_State *L);

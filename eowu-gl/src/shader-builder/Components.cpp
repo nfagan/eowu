@@ -11,6 +11,10 @@ std::string eowu::components::declare_variable(const std::string &name, eowu::gl
   return eowu::glsl::get_string_type(type) + " " + name + ";";
 }
 
+std::string eowu::components::declare_variable(const std::string &name, eowu::glsl::Types type, const std::string &value) {
+  return eowu::glsl::get_string_type(type) + " " + name + "=" + value + ";";
+}
+
 std::string eowu::components::declare_version(const std::string &version) {
   return "#version " + version;
 }

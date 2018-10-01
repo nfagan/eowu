@@ -181,3 +181,11 @@ glm::mat4 eowu::Transform::GetTransformationMatrix() const {
   
   return glm::scale(transform, scl);
 }
+
+void eowu::Transform::MakeLike(const eowu::Transform &other) {
+  SetPosition(other.GetPosition());
+  SetRotation(other.GetRotation());
+  SetScale(other.GetScale());
+  SetUnits(other.GetUnits());
+  SetScreenDimensions(other.GetScreenDimensions());
+}
