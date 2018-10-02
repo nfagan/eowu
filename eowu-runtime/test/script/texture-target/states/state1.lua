@@ -1,10 +1,9 @@
 local state1 = {}
+
 state1.Name = 's1'
 state1.Duration = -1
 state1.First = true
-state1.Variables = {
-  ib = false
-}
+state1.Variables = { ib = false }
 
 function state1.Entry()
   local script = eowu.script()
@@ -58,11 +57,10 @@ local function default_render()
   s3:Texture('t1')
 
   if ib or kb:Down('space') then
-    s1:Opacity(0.4)
-    s2:Opacity(0.4)
-  else
     s1:Opacity(1)
     s2:Opacity(1)
+  else
+    s3:Color({0.5, 0.5, 1})
   end
 
   s3:Draw()
