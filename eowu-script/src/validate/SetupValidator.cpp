@@ -50,7 +50,7 @@ eowu::schema::validate::Setup eowu::validate::make_setup(const eowu::schema::Set
 eowu::schema::validate::Source eowu::validate::make_source(const eowu::schema::Setup &schema) {
   eowu::schema::validate::Source source_validator;
   
-  source_validator.source_types = { "Mouse", "Keyboard" };
+  source_validator.source_types = {"Mouse", "Keyboard"};
   source_validator.window_ids = eowu::validate::get_keys(schema.windows.windows);
   
   return source_validator;
@@ -64,10 +64,9 @@ eowu::schema::validate::Target eowu::validate::make_target(const eowu::schema::S
   eowu::schema::validate::Target target_validator;
   
   //  target validator
-  target_validator.kinds = { "Circle", "Rectangle" };
+  target_validator.kinds = {"Circle", "Rectangle"};
   target_validator.source_ids = eowu::validate::get_keys(schema.sources.sources);
   target_validator.model_ids = eowu::validate::get_keys(schema.stimuli.stimuli);
-  target_validator.window_ids = eowu::validate::get_keys(schema.windows.windows);
   
   return target_validator;
 }
@@ -96,7 +95,7 @@ eowu::schema::validate::Stimulus eowu::validate::make_stimulus(const eowu::schem
 eowu::schema::validate::Geometry eowu::validate::make_geometry(const eowu::schema::Setup &schema) {
   eowu::schema::validate::Geometry geometry_validator;
   
-  geometry_validator.builtin_ids = { "Rectangle", "Circle", "Triangle", "RectangleFrame", "CircleFrame", "TriangleFrame" };
+  geometry_validator.builtin_ids = {"Rectangle", "Circle", "Triangle", "RectangleFrame", "CircleFrame", "TriangleFrame"};
   
   return geometry_validator;
 }
@@ -306,9 +305,6 @@ eowu::ValidationResult eowu::validate::target(const eowu::schema::Target &schema
     auto model_res = eowu::validate::check_unrecognized_one_of(validation.model_ids, schema.model_id, "stimulus");
     EOWU_RESULT_CONTEXT_EARLY_RETURN(model_res);
   }
-  
-  auto win_res = eowu::validate::check_unrecognized_one_of(validation.window_ids, schema.window_id, "window");
-  EOWU_RESULT_CONTEXT_EARLY_RETURN(win_res);
   
   result.success = true;
   

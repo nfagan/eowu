@@ -108,7 +108,8 @@ bool eowu::bounds_functions::circle_in_bounds(eowu::XYTarget *target, eowu::Coor
 }
 
 eowu::XYTarget::XYTarget() :
-source(nullptr), window(nullptr), padding({0, 0}), linked_model(nullptr), is_part_of_set(false) {
+source(nullptr), window(nullptr), padding({0, 0}), linked_model(nullptr), is_part_of_set(false),
+entered(false), exited(false), is_in_bounds(false) {
   set_default_callbacks();
   Reset();
 }
@@ -125,6 +126,7 @@ eowu::XYTarget::XYTarget(const eowu::XYTarget &other) : timer(other.timer) {
   
   entered = other.entered.load();
   exited = other.exited.load();
+  is_in_bounds = other.is_in_bounds.load();
   
   on_entry = other.on_entry;
   on_exit = other.on_exit;
@@ -195,6 +197,10 @@ bool eowu::XYTarget::Entered() const {
 
 bool eowu::XYTarget::Exited() const {
   return exited;
+}
+
+bool eowu::XYTarget::IsInBounds() const {
+  return is_in_bounds;
 }
 
 bool eowu::XYTarget::IsPartOfSet() const {
@@ -275,11 +281,13 @@ eowu::time::DurationType eowu::XYTarget::GetTotalTimeInBounds() const {
 }
 
 void eowu::XYTarget::in_bounds() {
+  is_in_bounds = true;
   total_time_in_bounds = timer.Ellapsed();
   on_ib(this);
 }
 
 void eowu::XYTarget::out_of_bounds() {
+  is_in_bounds = false;
   on_oob(this);
 }
 

@@ -11,6 +11,7 @@
 #include <unordered_map>
 #include <string>
 #include <vector>
+#include <unordered_set>
 
 struct lua_State;
 
@@ -39,6 +40,7 @@ namespace eowu {
     
     std::string get_type_error_message(const std::string &key, const std::string &type);
     std::string get_array_size_error_message(const std::string &key, int expected_size, int given_size);
+    std::string get_extraneous_key_error_message(const std::string &key, const std::unordered_set<std::string> &allowed);
     
     template<typename T>
     T get_numeric_value_or(const eowu::parser::MapTableType &table, const std::string &key, T deflt);
@@ -63,5 +65,15 @@ namespace eowu {
     std::string get_string_or_type_error(const eowu::parser::MapTableType &table, const std::string &key, const std::string &dflt);
     
     std::string get_string_or_error(const eowu::parser::MapTableType &table, const std::string &key);
+    
+    struct ExtraneousKeyResult {
+      std::string name;
+      bool has_extraneous;
+      
+      ExtraneousKeyResult() : has_extraneous(false) {}
+    };
+    
+    ExtraneousKeyResult has_extraneous_key(const std::unordered_set<std::string> &allowed,
+                                           const std::unordered_set<std::string> &test);
   }
 }

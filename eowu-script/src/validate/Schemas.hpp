@@ -21,7 +21,6 @@ struct Geometry {
 
 struct Target {
   std::unordered_set<std::string> source_ids;
-  std::unordered_set<std::string> window_ids;
   std::unordered_set<std::string> model_ids;
   std::unordered_set<std::string> kinds;
 };

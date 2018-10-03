@@ -21,6 +21,7 @@
 
 eowu::init::TargetResult eowu::init::initialize_targets(const eowu::schema::Targets &schema,
                                                         const eowu::init::XYSourceMapType &xy_sources,
+                                                        const std::unordered_map<std::string, std::string> &xy_source_window_mapping,
                                                         std::shared_ptr<eowu::LuaContext> lua_context,
                                                         std::shared_ptr<eowu::GLPipeline> gl_pipeline) {
   eowu::init::TargetResult result;
@@ -41,7 +42,6 @@ eowu::init::TargetResult eowu::init::initialize_targets(const eowu::schema::Targ
     const auto &target_id = target_schema.target_id;
     const auto &target_type = target_schema.type;
     const auto &model_id = target_schema.model_id;
-    const auto &window_id = target_schema.window_id;
     const bool provided_model_id = target_schema.provided_model_id;
     const bool is_hidden = target_schema.is_hidden;
     
@@ -110,6 +110,10 @@ eowu::init::TargetResult eowu::init::initialize_targets(const eowu::schema::Targ
     std::shared_ptr<eowu::Window> win;
     
     try {
+      //  try to get the window associated with this source.
+      //  Again, validation should be handled previously, but this will
+      //  still catch an invalid window id.
+      const auto &window_id = xy_source_window_mapping.at(source_id);
       win = context_manager->GetWindowByAlias(window_id);
     } catch (const std::exception &e) {
       result.status.message = e.what();

@@ -6,7 +6,7 @@ Setup.Windows = {
   main = {
     width = 400,
     height = 600,
-    resizeable = true
+    resizeable = true,
   }
 }
 
@@ -38,7 +38,6 @@ Setup.Targets = {
   t1 = {
     stimulus = 's1',
     source = 'mouse',
-    window = 'main',
     type = 'Circle'
   }
 }

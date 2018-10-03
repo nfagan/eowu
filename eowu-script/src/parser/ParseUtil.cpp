@@ -9,7 +9,9 @@
 #include "Lua.hpp"
 #include "Error.hpp"
 #include "../data/conversion.hpp"
+#include <eowu-common/string.hpp>
 #include <cstddef>
+#include <set>
 
 #define EOWU_get_numeric_value_or(type) \
   template type eowu::parser::get_numeric_value_or(const eowu::parser::MapTableType &table, const std::string &key, type deflt)
@@ -26,6 +28,15 @@ std::string eowu::parser::get_type_error_message(const std::string &key, const s
 
 std::string eowu::parser::get_array_size_error_message(const std::string &key, int expected_size, int given_size) {
   return "Key '" + key + "' refers to an array of " + std::to_string(given_size) + " elements; expected " + std::to_string(expected_size) + ".";
+}
+
+std::string eowu::parser::get_extraneous_key_error_message(const std::string &key,
+                                                           const std::unordered_set<std::string> &allowed) {
+  
+  std::set<std::string> sorted_allowed{allowed.begin(), allowed.end()};
+  std::string joined_allowed = eowu::util::join(sorted_allowed, ", ");
+  
+  return "Unrecognized key: '" + key + "'; options are: " + joined_allowed + ".";
 }
 
 eowu::parser::MapTableType eowu::parser::get_string_map_from_table(const luabridge::LuaRef &table) {
@@ -533,6 +544,22 @@ const luabridge::LuaRef& eowu::parser::get_function_or_type_error(const eowu::pa
   }
   
   return ref;
+}
+
+eowu::parser::ExtraneousKeyResult eowu::parser::has_extraneous_key(const std::unordered_set<std::string> &allowed,
+                                                                   const std::unordered_set<std::string> &test) {
+  eowu::parser::ExtraneousKeyResult result;
+  
+  for (const auto &val : test) {
+    if (allowed.count(val) == 0) {
+      result.has_extraneous = true;
+      result.name = val;
+      
+      return result;
+    }
+  }
+  
+  return result;
 }
 
 

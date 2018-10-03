@@ -71,6 +71,7 @@ public:
   
   bool Entered() const;
   bool Exited() const;
+  bool IsInBounds() const;
   
   eowu::Transform& GetTransform();
   const eowu::Transform& GetTransform() const;
@@ -93,6 +94,7 @@ private:
   std::atomic<bool> is_part_of_set;
   std::atomic<bool> entered;
   std::atomic<bool> exited;
+  std::atomic<bool> is_in_bounds;
   
   eowu::TargetCallbackType on_entry;
   eowu::TargetCallbackType on_exit;

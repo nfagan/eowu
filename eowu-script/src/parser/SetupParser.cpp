@@ -7,6 +7,7 @@
 
 #include "SetupParser.hpp"
 #include "ParseUtil.hpp"
+#include "validate/Util.hpp"
 #include "Lua.hpp"
 #include "../LuaFunction.hpp"
 #include "../data/conversion.hpp"
@@ -188,6 +189,8 @@ eowu::parser::ParseResult<eowu::schema::Windows> eowu::parser::windows(const lua
     return result;
   }
   
+  std::unordered_set<std::string> allowed_keys{"width", "height", "index", "fullscreen", "resizeable", "vsync", "title"};
+  
   for (const auto &it : kv) {
     const auto &id = it.first;
     const auto &ref = it.second;
@@ -203,6 +206,16 @@ eowu::parser::ParseResult<eowu::schema::Windows> eowu::parser::windows(const lua
     window.is_resizeable = get_numeric_value_or<bool>(subtable, "resizeable", false);
     window.is_vsynced = get_numeric_value_or<bool>(subtable, "vsync", true);
     window.title = get_string_or_type_error(subtable, "title", id);
+    
+    //  Ensure no extraneous keys are given.
+    auto extraneous_res = parser::has_extraneous_key(allowed_keys, validate::get_keys(subtable));
+    
+    if (extraneous_res.has_extraneous) {
+      result.message = parser::get_extraneous_key_error_message(extraneous_res.name, allowed_keys);
+      result.context = "Windows::" + id;
+      
+      return result;
+    }
     
     result.result.windows.emplace(it.first, window);
   }
@@ -387,6 +400,8 @@ eowu::parser::ParseResult<eowu::schema::Source> eowu::parser::source(const luabr
   
   auto kv = get_string_map_from_table(table);
   
+  std::unordered_set<std::string> allowed_keys{"type", "window"};
+  
   try {
     result.result.source_id = source_id;
     result.result.type = get_string_or_error(kv, "type");
@@ -395,6 +410,13 @@ eowu::parser::ParseResult<eowu::schema::Source> eowu::parser::source(const luabr
     if (kv.count("window") > 0) {
       result.result.window_id = get_string_or_type_error(kv, "window", "");
       result.result.provided_window_id = true;
+    }
+    
+    //  ensure no extraneous keys are provided.
+    auto extraneous_res = has_extraneous_key(allowed_keys, eowu::validate::get_keys(kv));
+    
+    if (extraneous_res.has_extraneous) {
+      throw std::runtime_error(get_extraneous_key_error_message(extraneous_res.name, allowed_keys));
     }
     
   } catch (const std::exception &e) {
@@ -426,7 +448,6 @@ eowu::parser::ParseResult<eowu::schema::Target> eowu::parser::target(const luabr
     result.result.target_id = target_id;
     result.result.type = get_string_or_error(kv, "type");
     result.result.source_id = get_string_or_error(kv, "source");
-    result.result.window_id = get_string_or_error(kv, "window");
     result.result.padding = get_numeric_vector_or_type_error<double>(kv, "padding", result.result.padding);
     result.result.is_hidden = get_numeric_value_or<bool>(kv, "hidden", false);
     
@@ -541,6 +562,11 @@ eowu::parser::ParseResult<eowu::schema::State> eowu::parser::state(const luabrid
   //  global noop function
   const auto &noop = eowu::LuaFunction::get_no_op(table.state()).GetReference();
   
+  std::unordered_set<std::string> allowed_keys{
+    "Name", "Duration", "Entry", "Loop", "Exit", "First",
+    "Variables", "Render", "Flip"
+  };
+  
   try {
     result.result.state_id = eowu::parser::get_string_or_error(kv, "Name");
     result.result.duration = eowu::parser::get_numeric_value_or<double>(kv, "Duration", 0.0);
@@ -577,6 +603,13 @@ eowu::parser::ParseResult<eowu::schema::State> eowu::parser::state(const luabrid
       
       result.result.flip_functions = flip_func_result.result;
     }
+    
+    auto extraneous_res = eowu::parser::has_extraneous_key(allowed_keys, eowu::validate::get_keys(kv));
+    
+    if (extraneous_res.has_extraneous) {
+      throw std::runtime_error(get_extraneous_key_error_message(extraneous_res.name, allowed_keys));
+    }
+    
   } catch (const std::exception &e) {
     result.message = e.what();
     result.context = "States::" + result.result.state_id;
