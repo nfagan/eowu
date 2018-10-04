@@ -2,7 +2,6 @@ local state1 = {}
 
 state1.Name = 's1'
 state1.Duration = -1
-state1.First = true
 
 function state1.Entry()
   local script = eowu.script()

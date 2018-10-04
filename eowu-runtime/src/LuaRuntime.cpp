@@ -125,6 +125,7 @@ void eowu::LuaRuntime::InitializeScriptWrapper(eowu::ScriptWrapper &script_wrapp
   script_wrapper.SetLuaRenderFunctionPair(lua_render_functions);
   script_wrapper.SetKeyboardWrapper(std::move(keyboard_wrapper));
   script_wrapper.SetLuaTaskContext(lua_contexts.task);
+  script_wrapper.SetLuaRenderContext(lua_contexts.render);
   script_wrapper.SetStateRunner(&state_runner);
 }
 

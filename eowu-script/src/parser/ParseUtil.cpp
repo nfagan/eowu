@@ -33,10 +33,16 @@ std::string eowu::parser::get_array_size_error_message(const std::string &key, i
 std::string eowu::parser::get_extraneous_key_error_message(const std::string &key,
                                                            const std::unordered_set<std::string> &allowed) {
   
-  std::set<std::string> sorted_allowed{allowed.begin(), allowed.end()};
-  std::string joined_allowed = eowu::util::join(sorted_allowed, ", ");
+  std::set<std::string> sorted_quoted_allowed;
   
-  return "Unrecognized key: '" + key + "'; options are: " + joined_allowed + ".";
+  for (const auto &one : allowed) {
+    std::string quoted = "'" + one + "'";
+    sorted_quoted_allowed.emplace(quoted);
+  }
+  
+  std::string joined_allowed = eowu::util::join(sorted_quoted_allowed, ", ");
+  
+  return "Unrecognized key: '" + key + "'; valid keys are: " + joined_allowed + ".";
 }
 
 eowu::parser::MapTableType eowu::parser::get_string_map_from_table(const luabridge::LuaRef &table) {

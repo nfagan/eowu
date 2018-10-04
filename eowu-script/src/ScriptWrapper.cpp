@@ -60,7 +60,7 @@ eowu::TimeoutWrapperContainerType eowu::ScriptWrapper::timeout_wrappers = nullpt
 std::unique_ptr<eowu::KeyboardWrapper> eowu::ScriptWrapper::keyboard = nullptr;
 //
 //  lua task context
-std::shared_ptr<eowu::LuaContext> eowu::ScriptWrapper::lua_task_context = nullptr;
+eowu::ScriptWrapper::LuaContexts eowu::ScriptWrapper::lua_contexts{};
 //
 //  thread ids
 eowu::ScriptWrapper::ThreadIds eowu::ScriptWrapper::thread_ids{};
@@ -84,7 +84,11 @@ bool eowu::ScriptWrapper::IsComplete() const {
 }
 
 void eowu::ScriptWrapper::SetLuaTaskContext(std::shared_ptr<eowu::LuaContext> context) {
-  eowu::ScriptWrapper::lua_task_context = context;
+  eowu::ScriptWrapper::lua_contexts.task = context;
+}
+
+void eowu::ScriptWrapper::SetLuaRenderContext(std::shared_ptr<eowu::LuaContext> context) {
+  eowu::ScriptWrapper::lua_contexts.render = context;
 }
 
 void eowu::ScriptWrapper::SetThreadIds(const std::thread::id &render, const std::thread::id &task) {
@@ -268,9 +272,14 @@ eowu::VariableWrapper eowu::ScriptWrapper::GetVariable(const std::string &id) {
 eowu::TimeoutWrapper* eowu::ScriptWrapper::MakeTimeout(const std::string &id, int ms, luabridge::LuaRef func) {
   const char* const func_id = "MakeTimeout";
   
-  //  Ensure we're calling from the task thread.
-  if (!is_task_thread()) {
-    throw eowu::LuaError(eowu::util::get_message_wrong_thread(func_id, "Render"));
+  std::shared_ptr<eowu::LuaContext> lua_context = nullptr;
+  
+  if (is_task_thread()) {
+    lua_context = lua_contexts.task;
+  } else if (is_render_thread()) {
+    lua_context = lua_contexts.render;
+  } else {
+    throw eowu::LuaError("Unrecognized thread type.");
   }
   
   if (!func.isFunction()) {
@@ -286,7 +295,7 @@ eowu::TimeoutWrapper* eowu::ScriptWrapper::MakeTimeout(const std::string &id, in
   eowu::time::DurationType duration = std::chrono::milliseconds(ms);
   
   eowu::ScriptWrapper::timeout_wrappers->Use([&](auto &timeout_map) -> void {
-    auto wrapper_to_store = std::make_unique<eowu::TimeoutWrapper>(lua_task_context, func, duration);
+    auto wrapper_to_store = std::make_unique<eowu::TimeoutWrapper>(lua_context, func, duration);
     wrapper = wrapper_to_store.get();
     
     timeout_map[id] = std::move(wrapper_to_store);
@@ -334,7 +343,7 @@ eowu::TargetSetWrapper* eowu::ScriptWrapper::MakeTargetSet(const std::string &id
     target_ptrs.push_back(it->second.get());
   }
   
-  auto target_set = std::make_unique<eowu::TargetSetWrapper>(lua_task_context, target_ptrs);
+  auto target_set = std::make_unique<eowu::TargetSetWrapper>(lua_contexts.task, target_ptrs);
   eowu::TargetSetWrapper *ptr = target_set.get();
   target_sets[id] = std::move(target_set);
   

@@ -6,7 +6,7 @@ Setup.Windows = {
   main = {
     width = 400,
     height = 600,
-    resizeable = true,
+    resizeable = true
   }
 }
 
