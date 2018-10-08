@@ -1,10 +1,11 @@
 local state = {}
 
 state.Name = 'state1'
---  Duration: ms
-state.Duration = 1000
---  Begin in this state
-state.First = true
+state.Duration = 1000   --  (ms)
+state.First = true      --  Begin in this state
+state.Variables = {     --  Variables are accessible across render and task contexts.
+  trial = 0
+}
 
 --  entry function: Called once upon entering the state.
 function state.Entry()
@@ -12,14 +13,20 @@ function state.Entry()
   --  eowu.script() is the global object through which other resources are accessed.
   local script = eowu.script()
   local state = script:State('state1')
+  local trial = state:Variable('trial')
+  local trial_number = trial:Get()
 
-  --  Set the active render function to the function given by id 'state1'. This function
-  --  will be called beginning on the next available render frame.
-  script:Render('state1')
+  --  Set the active render function. This function will be called beginning 
+  --  on the next available render frame.
+  if trial_number % 2 == 0 then
+    script:Render('even')
+  else
+    script:Render('odd')
+  end
 
   --  When the time limit for this state is met, proceed to the state given by 'state2'
   --  If no state is marked with Next() by the time the current state exits, the task will exit.
-  state:Next('state2')
+  state:Next('state1')
 
   print('Entered: ' .. state.name)
 end
@@ -27,27 +34,25 @@ end
 --  exit function: Called once upon exiting the state.
 function state.Exit()
   local state = eowu.script():State('state1')
+  local trial = state:Variable('trial')
 
-  print('Exited: ' .. state.name)
+  trial:Set(trial:Get() + 1)
 end
 
 --  render function: Called each render frame. Below,
---  state.Render{} maps this function to the id 'state1'.
-local function state1_render()
+--  state.Render{} maps this function to the id 'even'.
+local function render_even()
   local script = eowu.script()
   local s1 = script:Stimulus('s1')
   local kb = script:Keyboard()
   local color
-  local geom
 
   if kb:Down('space') then
     s1:ZRotate(-0.05)
     color = {1, 0, 0}
-    geom = 'rect_frame'
   else
     s1:ZRotate(0.01)
     color = {0, 0, 1}
-    geom = 'rect'
   end
 
   --  Units can be 'mixed', 'normalized', or 'pixels'.
@@ -58,13 +63,32 @@ local function state1_render()
   s1:Position({0.5, 0.5})
   s1:Size({200, 200})
   s1:Color(color)
-  s1:Geometry(geom)
+  s1:Geometry('rect')
+
+  s1:Draw()
+end
+
+--  Another render function. This one's called every odd-numbered trial.
+
+local function render_odd()
+  local script = eowu.script()
+  local kb = script:Keyboard()
+  local s1 = script:Stimulus('s1')
+
+  s1:Color({1, 1, 1})
+
+  if kb:Down('space') then
+    s1:ZRotate(-0.05)
+  else
+    s1:ZRotate(0.01)
+  end
 
   s1:Draw()
 end
 
 state.Render = {
-  state1 = state1_render
+  even = render_even,
+  odd = render_odd
 }
 
 return state

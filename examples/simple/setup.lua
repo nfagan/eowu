@@ -7,18 +7,17 @@ Setup.Windows = {
 }
 
 Setup.Geometry = {
-  --  'Circle', 'CircleFrame', 'Triangle', 'TriangleFrame'
   Builtin = {
-    rect = 'Rectangle',
-    rect_frame = 'RectangleFrame'
+    rect = 'Rectangle'
   }
 }
 
 Setup.Stimuli = {
-  s1 = {}
+  s1 = {
+    geometry = 'rect'
+  }
 }
 
 Setup.States = {
-  require('states.state1'),
-  require('states.state2')
+  require('states.state1')
 }
