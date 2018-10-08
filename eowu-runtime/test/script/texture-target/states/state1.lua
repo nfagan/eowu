@@ -8,6 +8,10 @@ function state1.Entry()
   local state = script:State('s1')
 
   script:Render('setup')
+
+  local to1 = script:MakeTimeout('t1', 10 * 1e3, function()
+    state:Exit()
+  end)
 end
 
 local function position_stimulus(kb, stim, mv_amt)
@@ -36,7 +40,6 @@ end
 
 local function default_render()
   local script = eowu.script()
-  local state = script:State('s1')
   local t1 = script:Target('t1')
   local kb = script:Keyboard()
   local s1 = script:Stimulus('s1')

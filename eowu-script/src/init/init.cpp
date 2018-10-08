@@ -36,6 +36,7 @@ void eowu::init::init_render_schema(lua_State *L) {
   eowu::VectorWrapper::CreateLuaSchema(L);
   eowu::ModelWrapper::CreateLuaSchema(L);
   eowu::KeyboardWrapper::CreateLuaSchema(L);
+  eowu::WindowWrapper::CreateLuaSchema(L);
 }
 
 void eowu::init::init_state_schema(lua_State *L) { 

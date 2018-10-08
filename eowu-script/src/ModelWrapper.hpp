@@ -16,6 +16,7 @@ namespace eowu {
   class Renderer;
   class TextureManager;
   class WindowContainerMap;
+  class ResourceManager;
   
   class ModelWrapper;
   class VectorWrapper;
@@ -25,6 +26,7 @@ class eowu::ModelWrapper {
   
 public:
   ModelWrapper(std::shared_ptr<eowu::Model> model,
+               std::shared_ptr<eowu::ResourceManager> resource_manager,
                std::shared_ptr<eowu::Renderer> renderer,
                std::shared_ptr<eowu::WindowContainerMap> window_container,
                std::shared_ptr<eowu::TextureManager> texture_manager);
@@ -34,6 +36,7 @@ public:
   int SetColor(lua_State *L);
   void SetTexture(const std::string &id);
   void SetOpacity(double value);
+  void SetGeometry(const std::string &id);
   void MakeLike(const eowu::ModelWrapper *other);
   
   int SetPositionVector(lua_State *L);
@@ -60,6 +63,7 @@ public:
   static void CreateLuaSchema(lua_State *L);
 private:
   std::shared_ptr<eowu::Model> model;
+  std::shared_ptr<eowu::ResourceManager> resource_manager;
   std::shared_ptr<eowu::Renderer> renderer;
   std::shared_ptr<eowu::TextureManager> texture_manager;
   std::shared_ptr<eowu::WindowContainerMap> window_container;

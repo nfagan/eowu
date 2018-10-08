@@ -19,3 +19,4 @@
 #include "VariableWrapper.hpp"
 #include "VariablesWrapper.hpp"
 #include "VectorWrapper.hpp"
+#include "WindowWrapper.hpp"

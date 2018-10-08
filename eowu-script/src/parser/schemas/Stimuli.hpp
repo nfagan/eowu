@@ -18,14 +18,18 @@ namespace eowu {
       std::string stimulus_id;
       std::string geometry_id;
       std::string texture_id;
+      
       bool provided_texture_id;
+      bool provided_geometry_id;
+      
       std::vector<double> color;
       std::string units;
       std::vector<double> size;
       std::vector<double> position;
       std::vector<double> rotation;
       
-      Stimulus() : provided_texture_id(false), size({0, 0, 0}), position({0, 0, 0}), rotation({0, 0, 0}) {
+      Stimulus() : provided_texture_id(false), provided_geometry_id(false),
+      size({0, 0, 0}), position({0, 0, 0}), rotation({0, 0, 0}) {
         //
       }
       

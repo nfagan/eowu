@@ -352,8 +352,10 @@ eowu::ValidationResult eowu::validate::stimulus(const eowu::schema::Stimulus &sc
   EOWU_RESULT_CONTEXT_EARLY_RETURN(tex_res);
   
   //  geometry ids
-  auto geom_res = eowu::validate::check_unrecognized_one_of(validation.geometry_ids, schema.geometry_id, "Geometry");
-  EOWU_RESULT_CONTEXT_EARLY_RETURN(geom_res);
+  if (schema.provided_geometry_id) {
+    auto geom_res = eowu::validate::check_unrecognized_one_of(validation.geometry_ids, schema.geometry_id, "Geometry");
+    EOWU_RESULT_CONTEXT_EARLY_RETURN(geom_res);
+  }
   
   //  units
   auto unit_res = eowu::validate::check_unrecognized_one_of(validation.units, schema.units, "Units");

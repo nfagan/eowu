@@ -31,6 +31,7 @@ namespace eowu {
   class ModelWrapper;
   class StateWrapper;
   class VariableWrapper;
+  class WindowWrapper;
   class XYTarget;
   class StateRunner;
   
@@ -70,19 +71,22 @@ public:
   void SetThreadIds(const std::thread::id &render, const std::thread::id &task);
   void SetStateRunner(eowu::StateRunner *runner);
   
+  int SetRenderFunctionPair(lua_State *L);
+  
   eowu::TargetSetWrapper* MakeTargetSet(const std::string &id, lua_State *L);
   eowu::TimeoutWrapper* MakeTimeout(const std::string &id, int ms, luabridge::LuaRef func);
   
   bool IsComplete() const;
   
-  int SetRenderFunctionPair(lua_State *L);
   eowu::StateWrapper* GetStateWrapper(const std::string &id) const;
   eowu::KeyboardWrapper* GetKeyboardWrapper() const;
   eowu::TargetWrapper* GetTargetWrapper(const std::string &id);
+  eowu::TargetSetWrapper* GetTargetSetWrapper(const std::string &id);
   eowu::TimeoutWrapper* GetTimeoutWrapper(const std::string &id);
   eowu::RendererWrapper GetRendererWrapper() const;
   eowu::ModelWrapper GetModelWrapper(const std::string &id) const;
   eowu::VariableWrapper GetVariable(const std::string &id);
+  eowu::WindowWrapper GetWindowWrapper(const std::string &id);
   
   double GetEllapsedTime() const;
   void Exit();

@@ -23,6 +23,7 @@ namespace eowu {
     
     eowu::SetupStatus create_resources(std::shared_ptr<eowu::GLPipeline> gl_pipeline, const eowu::schema::Setup &schema);
     eowu::SetupStatus create_models(std::shared_ptr<eowu::GLPipeline> gl_pipeline, const eowu::schema::Setup &schema);
+    eowu::SetupStatus create_meshes(std::shared_ptr<eowu::GLPipeline> gl_pipeline, const eowu::schema::Setup &schema);
     eowu::SetupStatus create_textures(std::shared_ptr<eowu::GLPipeline> gl_pipeline, const eowu::schema::Setup &schema);
     eowu::SetupStatus initialize_gl_pipeline(std::shared_ptr<eowu::GLPipeline> gl_pipeline, const eowu::schema::Setup &schema);
     eowu::SetupStatus initialize_glfw(std::shared_ptr<eowu::GLPipeline> gl_pipeline);

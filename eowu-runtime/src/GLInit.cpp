@@ -77,6 +77,39 @@ eowu::SetupStatus eowu::init::create_textures(std::shared_ptr<eowu::GLPipeline> 
   return result;
 }
 
+eowu::SetupStatus eowu::init::create_meshes(std::shared_ptr<eowu::GLPipeline> gl_pipeline, const eowu::schema::Setup &schema) {
+  eowu::SetupStatus result;
+  
+  auto resource_manager = gl_pipeline->GetResourceManager();
+  auto mesh_factory_functions = eowu::init::get_geometry_to_mesh_factory_map();
+  
+  const auto &geometries = schema.geometry.builtins.mapping;
+  
+  for (const auto &it : geometries) {
+    const auto &mesh_id = it.first;
+    const auto &mesh_type = it.second;
+    
+    const auto &mesh_func_it = mesh_factory_functions.find(mesh_type);
+    
+    //  if we missed something in validation, this will catch it.
+    if (mesh_func_it == mesh_factory_functions.end()) {
+      result.message = "Internal error: no mesh implementation for mesh type '" + mesh_type + "'.";
+      result.context = eowu::contexts::gl_init + std::string("::create_models");
+      
+      return result;
+    }
+    
+    auto mesh = resource_manager->Create<eowu::Mesh>(mesh_id);
+    
+    //  call the mesh_factory function mapped to this mesh_type.
+    mesh_func_it->second(mesh.get());
+  }
+  
+  result.success = true;
+  
+  return result;
+}
+
 eowu::SetupStatus eowu::init::create_models(std::shared_ptr<eowu::GLPipeline> gl_pipeline, const eowu::schema::Setup &schema) {
   eowu::SetupStatus result;
   
@@ -84,10 +117,8 @@ eowu::SetupStatus eowu::init::create_models(std::shared_ptr<eowu::GLPipeline> gl
   
   auto resource_manager = gl_pipeline->GetResourceManager();
   auto texture_manager = gl_pipeline->GetTextureManager();
-  auto mesh_factory_functions = eowu::init::get_geometry_to_mesh_factory_map();
   
   const auto &stimuli = schema.stimuli.stimuli;
-  const auto &geometries = schema.geometry.builtins.mapping;
   
   //  models
   for (const auto &it : stimuli) {
@@ -95,32 +126,21 @@ eowu::SetupStatus eowu::init::create_models(std::shared_ptr<eowu::GLPipeline> gl
     const auto &stim_schema = it.second;
     
     const std::string &stim_id = stim_schema.stimulus_id;
-    const std::string &mesh_id = stim_schema.geometry_id;
     
-    //  handle mesh creation
+    //  handle mesh assignment
     std::shared_ptr<eowu::Mesh> mesh = nullptr;
     
-    if (meshes.count(mesh_id) == 0) {
-      mesh = resource_manager->Create<eowu::Mesh>(stim_id);
+    if (stim_schema.provided_geometry_id) {
+      const std::string &mesh_id = stim_schema.geometry_id;
       
-      const std::string &mesh_type = geometries.at(mesh_id);
-      
-      const auto &mesh_func_it = mesh_factory_functions.find(mesh_type);
-      
-      //  if we missed something in validation, this will catch it.
-      if (mesh_func_it == mesh_factory_functions.end()) {
-        result.message = "Internal error: no mesh implementation for mesh type '" + mesh_type + "'.";
-        result.context = eowu::contexts::gl_init + std::string("::create_models");
+      try {
+        mesh = resource_manager->Get<eowu::Mesh>(mesh_id);
+      } catch (const std::exception &e) {
+        result.message = e.what();
+        result.context = "init::create_models";
         
         return result;
       }
-      
-      //  call the mesh_factory function mapped to this mesh_type.
-      mesh_func_it->second(mesh.get());
-      
-      meshes.emplace(mesh_id, mesh);
-    } else {
-      mesh = meshes.at(mesh_id);
     }
     
     //  handle material + model creation
@@ -168,6 +188,10 @@ eowu::SetupStatus eowu::init::create_resources(std::shared_ptr<eowu::GLPipeline>
   //  texture init
   auto tex_init = init::create_textures(gl_pipeline, schema);
   EOWU_SETUP_STATUS_EARLY_RETURN(tex_init, result);
+  
+  //  mesh init
+  auto mesh_init = init::create_meshes(gl_pipeline, schema);
+  EOWU_SETUP_STATUS_EARLY_RETURN(mesh_init, result);
   
   //  model init
   auto model_init = init::create_models(gl_pipeline, schema);

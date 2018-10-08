@@ -6,11 +6,7 @@
 //
 
 #include "ScriptWrapper.hpp"
-#include "StateWrapper.hpp"
-#include "ModelWrapper.hpp"
-#include "KeyboardWrapper.hpp"
-#include "RendererWrapper.hpp"
-#include "VariableWrapper.hpp"
+#include "Wrappers.hpp"
 #include "Constants.hpp"
 #include "LockedLuaRenderFunctions.hpp"
 #include "Lua.hpp"
@@ -186,13 +182,18 @@ double eowu::ScriptWrapper::GetEllapsedTime() const {
 
 eowu::ModelWrapper eowu::ScriptWrapper::GetModelWrapper(const std::string &id) const {
   assert(IsComplete());
-    
-  auto model = pipeline->GetResourceManager()->Get<eowu::Model>(id);
+  
+  auto resource_manager = pipeline->GetResourceManager();
+  auto model = resource_manager->Get<eowu::Model>(id);
   auto renderer = pipeline->GetRenderer();
   auto texture_manager = pipeline->GetTextureManager();
   auto window_container = pipeline->GetWindowContainer();
   
-  eowu::ModelWrapper model_wrapper(model, renderer, window_container, texture_manager);
+  eowu::ModelWrapper model_wrapper(model,
+                                   resource_manager,
+                                   renderer,
+                                   window_container,
+                                   texture_manager);
   
   return model_wrapper;
 }
@@ -204,6 +205,18 @@ eowu::TargetWrapper* eowu::ScriptWrapper::GetTargetWrapper(const std::string &id
   
   if (it == target_wrappers.end()) {
     throw eowu::NonexistentResourceError::MessageKindId("Target", id);
+  }
+  
+  return it->second.get();
+}
+
+eowu::TargetSetWrapper* eowu::ScriptWrapper::GetTargetSetWrapper(const std::string &id) {
+  assert(IsComplete());
+  
+  const auto &it = target_sets.find(id);
+  
+  if (it == target_sets.end()) {
+    throw eowu::NonexistentResourceError::MessageKindId("TargetSet", id);
   }
   
   return it->second.get();
@@ -252,6 +265,20 @@ eowu::RendererWrapper eowu::ScriptWrapper::GetRendererWrapper() const {
   eowu::RendererWrapper render_wrapper(renderer);
   
   return render_wrapper;
+}
+
+eowu::WindowWrapper eowu::ScriptWrapper::GetWindowWrapper(const std::string &id) {
+  assert(IsComplete());
+  
+  auto window_container = pipeline->GetWindowContainer();
+  
+  if (!window_container->Has(id)) {
+    throw eowu::NonexistentResourceError::MessageKindId("Window", id);
+  }
+  
+  eowu::WindowWrapper window(window_container->Get(id));
+  
+  return window;
 }
 
 eowu::VariableWrapper eowu::ScriptWrapper::GetVariable(const std::string &id) {  
@@ -458,11 +485,13 @@ void eowu::ScriptWrapper::CreateLuaSchema(lua_State *L) {
   .addFunction("Commit", &eowu::ScriptWrapper::CommitData)
   .addFunction("Stimulus", &eowu::ScriptWrapper::GetModelWrapper)
   .addFunction("Target", &eowu::ScriptWrapper::GetTargetWrapper)
+  .addFunction("TargetSet", &eowu::ScriptWrapper::GetTargetSetWrapper)
   .addFunction("Timeout", &eowu::ScriptWrapper::GetTimeoutWrapper)
   .addFunction("State", &eowu::ScriptWrapper::GetStateWrapper)
   .addFunction("Render", &eowu::ScriptWrapper::SetRenderFunctionPair)
   .addFunction("Renderer", &eowu::ScriptWrapper::GetRendererWrapper)
   .addFunction("Variable", &eowu::ScriptWrapper::GetVariable)
+  .addFunction("Window", &eowu::ScriptWrapper::GetWindowWrapper)
   .addFunction("Keyboard", &eowu::ScriptWrapper::GetKeyboardWrapper)
   .addFunction("Ellapsed", &eowu::ScriptWrapper::GetEllapsedTime)
   .addFunction("Exit", &eowu::ScriptWrapper::Exit)

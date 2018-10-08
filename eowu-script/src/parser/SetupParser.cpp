@@ -342,7 +342,7 @@ eowu::parser::ParseResult<eowu::schema::Stimulus> eowu::parser::stimulus(const l
   try {
     //  geometry is required
     value.stimulus_id = stimulus_id;
-    value.geometry_id = get_string_or_error(kv, "geometry");
+    value.geometry_id = get_string_or_type_error(kv, "geometry", "");
     value.texture_id = get_string_or_type_error(kv, "texture", "");
     value.units = get_string_or_type_error(kv, "units", "normalized");
     value.size = get_numeric_vector_or_type_error<double>(kv, "size", value.size);
@@ -350,6 +350,7 @@ eowu::parser::ParseResult<eowu::schema::Stimulus> eowu::parser::stimulus(const l
     value.rotation = get_numeric_vector_or_type_error<double>(kv, "rotation", value.rotation);
     value.color = get_numeric_vector_or_type_error<double>(kv, "color", value.color);
     value.provided_texture_id = value.texture_id != "";
+    value.provided_geometry_id = kv.count("geometry") > 0;
     
   } catch (const std::exception &e) {
     result.message = e.what();
