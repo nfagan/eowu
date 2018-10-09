@@ -1,6 +1,6 @@
 # eowu
 
-eowu is a performant, flexible state-machine. 
+`eowu` is a performant, flexible state-machine. 
 
 State logic is written in lua, with utilities provided to simplify matters of timing and stimulus presentation. See the `examples` subfolder for a couple of basic demos.
 
