@@ -1,4 +1,4 @@
-# EOWU
+# eowu
 
 eowu is a performant, flexible state-machine. 
 
