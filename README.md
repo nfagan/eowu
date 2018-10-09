@@ -8,7 +8,7 @@ State logic is written in lua, with utilities provided to simplify matters of ti
 
 eowu currently supports macOS and Windows. A compiler with c++17 support is required, along with `cmake`. Graphics hardware with support for OpenGL 3.3+ is also required.
 
-### build instructions - common to all platforms
+#### build instructions - common to all platforms
 ```bash
 git clone --recursive https://github.com/nfagan/eowu.git
 cd ./eowu
