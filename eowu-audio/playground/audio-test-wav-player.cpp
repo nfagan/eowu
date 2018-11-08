@@ -58,7 +58,7 @@ int audio::main_wav() {
   int bitDepth = audioFile.getBitDepth();
   
   unsigned int numSamples = audioFile.getNumSamplesPerChannel();
-  unsigned int nBufferFrames = 0;
+  unsigned int nBufferFrames = 256;
   
   // or, just use this quick shortcut to print a summary to the console
   audioFile.printSummary();
