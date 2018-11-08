@@ -6,7 +6,7 @@
 //
 
 #include "audio-test-wav-player.hpp"
-#include "AudioFile.cpp"
+#include "AudioFile.h"
 #include "RtAudio.h"
 #include <eowu-common/fs.hpp>
 #include <cstdlib>

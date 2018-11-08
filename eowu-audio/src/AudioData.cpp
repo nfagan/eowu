@@ -6,7 +6,7 @@
 //
 
 #include "AudioData.hpp"
-#include "AudioFile.cpp"
+#include "AudioFile.h"
 
 eowu::AudioData::AudioData() : sample_rate(0), bit_depth(0), n_samples(0), n_channels(0) {
   //
