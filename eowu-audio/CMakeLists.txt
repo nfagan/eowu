@@ -26,7 +26,11 @@ file(GLOB_RECURSE PLAYGROUND_SRC
 add_subdirectory(deps/rtaudio)
 include_directories(deps/rtaudio)
 
-find_package(RtAudio REQUIRED)
+if(WIN32)
+  link_directories(deps/rtaudio/build/Release)
+else()
+  find_package(RtAudio REQUIRED)
+endif()
 
 add_executable(eowu-audio-playground ${PLAYGROUND_SRC})
 add_executable(eowu-audio-test ${TEST_SRC})
