@@ -29,7 +29,7 @@ int saw( void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
   }
   return 0;
 }
-int audio::main()
+int audio::main_saw()
 {
   RtAudio dac;
   if ( dac.getDeviceCount() < 1 ) {

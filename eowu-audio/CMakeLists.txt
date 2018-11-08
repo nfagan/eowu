@@ -9,6 +9,8 @@ file(GLOB_RECURSE LIB_SRC
   include/*.hpp
 )
 
+list(APPEND LIB_SRC deps/AudioFile/AudioFile.cpp)
+
 file(GLOB TEST_SRC
   test/*.cpp 
   test/*.h
@@ -25,6 +27,7 @@ file(GLOB_RECURSE PLAYGROUND_SRC
 
 add_subdirectory(deps/rtaudio)
 include_directories(deps/rtaudio)
+include_directories(deps/AudioFile)
 
 if(WIN32)
   link_directories(deps/rtaudio/build/Release)
