@@ -40,6 +40,7 @@ namespace eowu {
     
     eowu::init::TargetResult initialize_targets(const eowu::schema::Targets &schema,
                                                 const eowu::init::XYSourceMapType &xy_sources,
+                                                const std::unordered_map<std::string, std::string> &xy_source_window_mapping,
                                                 std::shared_ptr<eowu::LuaContext> lua_context,
                                                 std::shared_ptr<eowu::GLPipeline> gl_pipeline);
     

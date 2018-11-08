@@ -56,14 +56,14 @@ int eowu::ModelWrapper::name(lua_State *L) { \
 }
 
 
-eowu::ModelWrapper::ModelWrapper(std::shared_ptr<eowu::Model> model,
-                                 std::shared_ptr<eowu::Renderer> renderer,
-                                 std::shared_ptr<eowu::WindowContainerMap> window_container,
-                                 std::shared_ptr<eowu::TextureManager> texture_manager) {
-  this->renderer = renderer;
-  this->model = model;
-  this->texture_manager = texture_manager;
-  this->window_container = window_container;
+eowu::ModelWrapper::ModelWrapper(std::shared_ptr<eowu::Model> model_,
+                                 std::shared_ptr<eowu::ResourceManager> resource_manager_,
+                                 std::shared_ptr<eowu::Renderer> renderer_,
+                                 std::shared_ptr<eowu::WindowContainerMap> window_container_,
+                                 std::shared_ptr<eowu::TextureManager> texture_manager_) :
+model(model_), resource_manager(resource_manager_), renderer(renderer_),
+texture_manager(texture_manager_), window_container(window_container_) {
+  //
 }
 
 void eowu::ModelWrapper::assert_mesh() {
@@ -145,6 +145,11 @@ void eowu::ModelWrapper::SetTexture(const std::string &id) {
   model->GetMaterial()->SetFaceColor(tex);
 }
 
+void eowu::ModelWrapper::SetGeometry(const std::string &id) {
+  auto mesh = resource_manager->Get<eowu::Mesh>(id);
+  model->SetMesh(mesh);
+}
+
 void eowu::ModelWrapper::SetZRotation(double value) {
   auto &trans = model->GetTransform();
   auto rotation = trans.GetRotation();
@@ -184,6 +189,7 @@ void eowu::ModelWrapper::CreateLuaSchema(lua_State *L) {
   .addFunction("ZRotation", &eowu::ModelWrapper::SetZRotation)
   .addCFunction("Size", &eowu::ModelWrapper::SetScaleVector)
   .addCFunction("Color", &eowu::ModelWrapper::SetColor)
+  .addFunction("Geometry", &eowu::ModelWrapper::SetGeometry)
   .addCFunction("Move", &eowu::ModelWrapper::Move)
   .addCFunction("Rotate", &eowu::ModelWrapper::Rotate)
   .addFunction("ZRotate", &eowu::ModelWrapper::ZRotate)

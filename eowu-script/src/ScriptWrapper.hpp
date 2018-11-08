@@ -31,6 +31,7 @@ namespace eowu {
   class ModelWrapper;
   class StateWrapper;
   class VariableWrapper;
+  class WindowWrapper;
   class XYTarget;
   class StateRunner;
   
@@ -62,6 +63,7 @@ public:
   void SetLuaRenderFunctionPair(std::shared_ptr<eowu::LockedLuaRenderFunctions> lua_render_functions);
   void SetKeyboardWrapper(std::unique_ptr<eowu::KeyboardWrapper> keyboard);
   void SetLuaTaskContext(std::shared_ptr<eowu::LuaContext> context);
+  void SetLuaRenderContext(std::shared_ptr<eowu::LuaContext> context);
   
   void SetVariables(const std::unordered_map<std::string, eowu::data::Commitable> &variables);
   void SetTaskDataStore(std::shared_ptr<eowu::data::Store> task_data_store);
@@ -69,19 +71,22 @@ public:
   void SetThreadIds(const std::thread::id &render, const std::thread::id &task);
   void SetStateRunner(eowu::StateRunner *runner);
   
+  int SetRenderFunctionPair(lua_State *L);
+  
   eowu::TargetSetWrapper* MakeTargetSet(const std::string &id, lua_State *L);
   eowu::TimeoutWrapper* MakeTimeout(const std::string &id, int ms, luabridge::LuaRef func);
   
   bool IsComplete() const;
   
-  int SetRenderFunctionPair(lua_State *L);
   eowu::StateWrapper* GetStateWrapper(const std::string &id) const;
   eowu::KeyboardWrapper* GetKeyboardWrapper() const;
   eowu::TargetWrapper* GetTargetWrapper(const std::string &id);
+  eowu::TargetSetWrapper* GetTargetSetWrapper(const std::string &id);
   eowu::TimeoutWrapper* GetTimeoutWrapper(const std::string &id);
   eowu::RendererWrapper GetRendererWrapper() const;
   eowu::ModelWrapper GetModelWrapper(const std::string &id) const;
   eowu::VariableWrapper GetVariable(const std::string &id);
+  eowu::WindowWrapper GetWindowWrapper(const std::string &id);
   
   double GetEllapsedTime() const;
   void Exit();
@@ -103,6 +108,11 @@ private:
     std::unordered_map<std::string, eowu::data::Commitable> defaults;
   };
   
+  struct LuaContexts {
+    std::shared_ptr<eowu::LuaContext> task;
+    std::shared_ptr<eowu::LuaContext> render;
+  };
+  
   static std::unordered_map<std::string, std::shared_ptr<eowu::TargetWrapper>> target_wrappers;
   static eowu::TimeoutWrapperContainerType timeout_wrappers;
   static eowu::LuaFunctionContainerType render_functions;
@@ -115,9 +125,9 @@ private:
   static std::unordered_map<std::string, std::unique_ptr<eowu::TargetSetWrapper>> target_sets;
   static std::unordered_map<std::string, std::shared_ptr<eowu::XYTarget>> xy_targets;
   static std::unique_ptr<eowu::KeyboardWrapper> keyboard;
-  static std::shared_ptr<eowu::LuaContext> lua_task_context;
   static ThreadIds thread_ids;
   static eowu::StateRunner *state_runner;
+  static LuaContexts lua_contexts;
   
   void commit_variables(std::vector<char> &into) const;
   void commit_states(std::vector<char> &into) const;

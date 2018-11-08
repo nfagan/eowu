@@ -18,7 +18,6 @@ namespace eowu {
       std::string type;
       std::string source_id;
       std::string model_id;
-      std::string window_id;
       std::vector<double> padding;
       
       bool provided_model_id;

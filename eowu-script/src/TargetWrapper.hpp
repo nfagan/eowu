@@ -33,6 +33,8 @@ public:
   void Show();
   void Hide();
   
+  bool IsInBounds() const;
+  
   int Draw(lua_State *L);
   
   void SetOnEntry(luabridge::LuaRef func);

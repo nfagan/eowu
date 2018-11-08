@@ -24,14 +24,20 @@ namespace eowu {
     using XYSourceMapType = std::unordered_map<std::string, const eowu::XYSource*>;
     using XYSetupResult = eowu::SetupResult<XYSourceMapType>;
     
-    struct SourceInit {
+    struct XYSourceInit {
       XYSourceMapType xy_sources;
+      std::unordered_map<std::string, std::string> xy_source_window_mapping;
     };
-    struct SourceResult : eowu::SetupResult<SourceInit> {};
+    using XYSourceResult = eowu::SetupResult<XYSourceInit>;
+    
+    struct SourceInit {
+      XYSourceInit xy_source_init;
+    };
+    using SourceResult = eowu::SetupResult<SourceInit>;
     
     eowu::init::SourceResult initialize_sources(const eowu::schema::Sources &schema,
-                                                  std::shared_ptr<eowu::GLPipeline> gl_pipeline);
-    XYSetupResult initialize_xy_sources(const eowu::schema::Sources &schema,
-                                        std::shared_ptr<eowu::GLPipeline> gl_pipeline);
+                                                std::shared_ptr<eowu::GLPipeline> gl_pipeline);
+    eowu::init::XYSourceResult initialize_xy_sources(const eowu::schema::Sources &schema,
+                                                     std::shared_ptr<eowu::GLPipeline> gl_pipeline);
   }
 }

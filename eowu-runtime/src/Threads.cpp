@@ -10,6 +10,7 @@
 #include <eowu-state/eowu-state.hpp>
 #include <eowu-common/logging.hpp>
 #include <eowu-common/config.hpp>
+#include <eowu-common/debug.hpp>
 #include <stdexcept>
 #include <cstddef>
 #include <chrono>
@@ -293,6 +294,8 @@ bool eowu::thread::try_await_thread_finish(const eowu::thread::SharedState &stat
 }
 
 void eowu::thread::print_error(const std::string &thread_type, const std::string &message) {
-  const std::string base = "\033[1;31mERROR [" + thread_type + "]: \033[0m";
-  std::cout << std::endl << base << message << std::endl << std::endl;
+  using namespace eowu::debug::colors;
+  
+  std::cout << std::endl << red << "ERROR [" << thread_type << "]: " << dflt;
+  std::cout << message << std::endl << std::endl;
 }

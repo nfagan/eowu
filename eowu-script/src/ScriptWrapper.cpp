@@ -6,11 +6,7 @@
 //
 
 #include "ScriptWrapper.hpp"
-#include "StateWrapper.hpp"
-#include "ModelWrapper.hpp"
-#include "KeyboardWrapper.hpp"
-#include "RendererWrapper.hpp"
-#include "VariableWrapper.hpp"
+#include "Wrappers.hpp"
 #include "Constants.hpp"
 #include "LockedLuaRenderFunctions.hpp"
 #include "Lua.hpp"
@@ -60,7 +56,7 @@ eowu::TimeoutWrapperContainerType eowu::ScriptWrapper::timeout_wrappers = nullpt
 std::unique_ptr<eowu::KeyboardWrapper> eowu::ScriptWrapper::keyboard = nullptr;
 //
 //  lua task context
-std::shared_ptr<eowu::LuaContext> eowu::ScriptWrapper::lua_task_context = nullptr;
+eowu::ScriptWrapper::LuaContexts eowu::ScriptWrapper::lua_contexts{};
 //
 //  thread ids
 eowu::ScriptWrapper::ThreadIds eowu::ScriptWrapper::thread_ids{};
@@ -84,7 +80,11 @@ bool eowu::ScriptWrapper::IsComplete() const {
 }
 
 void eowu::ScriptWrapper::SetLuaTaskContext(std::shared_ptr<eowu::LuaContext> context) {
-  eowu::ScriptWrapper::lua_task_context = context;
+  eowu::ScriptWrapper::lua_contexts.task = context;
+}
+
+void eowu::ScriptWrapper::SetLuaRenderContext(std::shared_ptr<eowu::LuaContext> context) {
+  eowu::ScriptWrapper::lua_contexts.render = context;
 }
 
 void eowu::ScriptWrapper::SetThreadIds(const std::thread::id &render, const std::thread::id &task) {
@@ -182,13 +182,18 @@ double eowu::ScriptWrapper::GetEllapsedTime() const {
 
 eowu::ModelWrapper eowu::ScriptWrapper::GetModelWrapper(const std::string &id) const {
   assert(IsComplete());
-    
-  auto model = pipeline->GetResourceManager()->Get<eowu::Model>(id);
+  
+  auto resource_manager = pipeline->GetResourceManager();
+  auto model = resource_manager->Get<eowu::Model>(id);
   auto renderer = pipeline->GetRenderer();
   auto texture_manager = pipeline->GetTextureManager();
   auto window_container = pipeline->GetWindowContainer();
   
-  eowu::ModelWrapper model_wrapper(model, renderer, window_container, texture_manager);
+  eowu::ModelWrapper model_wrapper(model,
+                                   resource_manager,
+                                   renderer,
+                                   window_container,
+                                   texture_manager);
   
   return model_wrapper;
 }
@@ -200,6 +205,18 @@ eowu::TargetWrapper* eowu::ScriptWrapper::GetTargetWrapper(const std::string &id
   
   if (it == target_wrappers.end()) {
     throw eowu::NonexistentResourceError::MessageKindId("Target", id);
+  }
+  
+  return it->second.get();
+}
+
+eowu::TargetSetWrapper* eowu::ScriptWrapper::GetTargetSetWrapper(const std::string &id) {
+  assert(IsComplete());
+  
+  const auto &it = target_sets.find(id);
+  
+  if (it == target_sets.end()) {
+    throw eowu::NonexistentResourceError::MessageKindId("TargetSet", id);
   }
   
   return it->second.get();
@@ -250,6 +267,20 @@ eowu::RendererWrapper eowu::ScriptWrapper::GetRendererWrapper() const {
   return render_wrapper;
 }
 
+eowu::WindowWrapper eowu::ScriptWrapper::GetWindowWrapper(const std::string &id) {
+  assert(IsComplete());
+  
+  auto window_container = pipeline->GetWindowContainer();
+  
+  if (!window_container->Has(id)) {
+    throw eowu::NonexistentResourceError::MessageKindId("Window", id);
+  }
+  
+  eowu::WindowWrapper window(window_container->Get(id));
+  
+  return window;
+}
+
 eowu::VariableWrapper eowu::ScriptWrapper::GetVariable(const std::string &id) {  
   auto it = variables.active.find(id);
   
@@ -268,9 +299,14 @@ eowu::VariableWrapper eowu::ScriptWrapper::GetVariable(const std::string &id) {
 eowu::TimeoutWrapper* eowu::ScriptWrapper::MakeTimeout(const std::string &id, int ms, luabridge::LuaRef func) {
   const char* const func_id = "MakeTimeout";
   
-  //  Ensure we're calling from the task thread.
-  if (!is_task_thread()) {
-    throw eowu::LuaError(eowu::util::get_message_wrong_thread(func_id, "Render"));
+  std::shared_ptr<eowu::LuaContext> lua_context = nullptr;
+  
+  if (is_task_thread()) {
+    lua_context = lua_contexts.task;
+  } else if (is_render_thread()) {
+    lua_context = lua_contexts.render;
+  } else {
+    throw eowu::LuaError("Unrecognized thread type.");
   }
   
   if (!func.isFunction()) {
@@ -286,7 +322,7 @@ eowu::TimeoutWrapper* eowu::ScriptWrapper::MakeTimeout(const std::string &id, in
   eowu::time::DurationType duration = std::chrono::milliseconds(ms);
   
   eowu::ScriptWrapper::timeout_wrappers->Use([&](auto &timeout_map) -> void {
-    auto wrapper_to_store = std::make_unique<eowu::TimeoutWrapper>(lua_task_context, func, duration);
+    auto wrapper_to_store = std::make_unique<eowu::TimeoutWrapper>(lua_context, func, duration);
     wrapper = wrapper_to_store.get();
     
     timeout_map[id] = std::move(wrapper_to_store);
@@ -334,7 +370,7 @@ eowu::TargetSetWrapper* eowu::ScriptWrapper::MakeTargetSet(const std::string &id
     target_ptrs.push_back(it->second.get());
   }
   
-  auto target_set = std::make_unique<eowu::TargetSetWrapper>(lua_task_context, target_ptrs);
+  auto target_set = std::make_unique<eowu::TargetSetWrapper>(lua_contexts.task, target_ptrs);
   eowu::TargetSetWrapper *ptr = target_set.get();
   target_sets[id] = std::move(target_set);
   
@@ -449,11 +485,13 @@ void eowu::ScriptWrapper::CreateLuaSchema(lua_State *L) {
   .addFunction("Commit", &eowu::ScriptWrapper::CommitData)
   .addFunction("Stimulus", &eowu::ScriptWrapper::GetModelWrapper)
   .addFunction("Target", &eowu::ScriptWrapper::GetTargetWrapper)
+  .addFunction("TargetSet", &eowu::ScriptWrapper::GetTargetSetWrapper)
   .addFunction("Timeout", &eowu::ScriptWrapper::GetTimeoutWrapper)
   .addFunction("State", &eowu::ScriptWrapper::GetStateWrapper)
   .addFunction("Render", &eowu::ScriptWrapper::SetRenderFunctionPair)
   .addFunction("Renderer", &eowu::ScriptWrapper::GetRendererWrapper)
   .addFunction("Variable", &eowu::ScriptWrapper::GetVariable)
+  .addFunction("Window", &eowu::ScriptWrapper::GetWindowWrapper)
   .addFunction("Keyboard", &eowu::ScriptWrapper::GetKeyboardWrapper)
   .addFunction("Ellapsed", &eowu::ScriptWrapper::GetEllapsedTime)
   .addFunction("Exit", &eowu::ScriptWrapper::Exit)

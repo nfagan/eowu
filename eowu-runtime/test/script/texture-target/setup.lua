@@ -38,7 +38,6 @@ Setup.Targets = {
   t1 = {
     stimulus = 's1',
     source = 'mouse',
-    window = 'main',
     type = 'Circle'
   }
 }

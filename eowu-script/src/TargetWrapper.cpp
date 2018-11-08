@@ -63,6 +63,10 @@ void eowu::TargetWrapper::Show() {
   is_hidden = false;
 }
 
+bool eowu::TargetWrapper::IsInBounds() const {
+  return target->IsInBounds();
+}
+
 int eowu::TargetWrapper::Draw(lua_State *L) {
   //  @TODO: Refactor to share code between this and ModelWrapper.
   
@@ -147,6 +151,7 @@ void eowu::TargetWrapper::CreateLuaSchema(lua_State *L) {
   .addFunction("Entry", &eowu::TargetWrapper::SetOnEntry)
   .addFunction("Exit", &eowu::TargetWrapper::SetOnExit)
   .addFunction("Reset", &eowu::TargetWrapper::Reset)
+  .addFunction("In", &eowu::TargetWrapper::IsInBounds)
   .endClass()
   .endNamespace();
 }

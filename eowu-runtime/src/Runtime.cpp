@@ -66,10 +66,11 @@ int eowu::Runtime::Main(const std::string &file) {
   }
   
   //  targets
-  const auto &xy_sources = source_status.result.xy_sources;
-  const auto &target_schema = lua_runtime.setup_schema.targets;
-  auto lua_task_context = lua_runtime.lua_contexts.task;
-  auto target_status = eowu::init::initialize_targets(target_schema, xy_sources, lua_task_context, gl_pipeline);
+  auto target_status = eowu::init::initialize_targets(lua_runtime.setup_schema.targets,
+                                                      source_status.result.xy_source_init.xy_sources,
+                                                      source_status.result.xy_source_init.xy_source_window_mapping,
+                                                      lua_runtime.lua_contexts.task,
+                                                      gl_pipeline);
   
   if (!target_status.status.success) {
     target_status.status.file = file;
