@@ -17,6 +17,3 @@
 [submodule "eowu-audio/deps/rtaudio"]
 	path = eowu-audio/deps/rtaudio
 	url = https://github.com/thestk/rtaudio
-[submodule "eowu-audio/deps/AudioFile"]
-	path = eowu-audio/deps/AudioFile
-	url = https://github.com/adamstark/AudioFile
