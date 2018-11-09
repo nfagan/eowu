@@ -9,6 +9,7 @@
 
 #include <eowu-common/types.hpp>
 #include <vector>
+#include <memory>
 
 namespace eowu {
   struct AudioData;
@@ -25,5 +26,5 @@ struct eowu::AudioData {
   
   std::vector<std::vector<double>> samples;
   
-  static eowu::AudioData FromWAV(const std::string &path);
+  static std::shared_ptr<eowu::AudioData> FromWavOrAiffFile(const std::string &path);
 };

@@ -6,6 +6,8 @@
 //
 
 #include "audio-test-wav-player.hpp"
+#include "eowu-audio.hpp"
+
 #include "AudioFile.h"
 #include "RtAudio.h"
 #include <eowu-common/fs.hpp>
@@ -58,6 +60,8 @@ int audio::main_wav() {
   auto repo_root = eowu::fs::get_eowu_root_directory();
   
   auto path = eowu::fs::full_file({repo_root, "res", "sounds", "piano.wav"});
+  
+  eowu::AudioSourceAggregate src;
   
   AudioFile<double> audioFile;
   

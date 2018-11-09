@@ -6,6 +6,7 @@
 //
 
 #include "audio-test-playback.hpp"
+#include "eowu-audio.hpp"
 
 #include "RtAudio.h"
 #include <iostream>
