@@ -15,7 +15,11 @@ eowu::AudioData::AudioData() : sample_rate(0), bit_depth(0), n_samples(0), n_cha
 eowu::AudioData eowu::AudioData::FromWAV(const std::string &path) {
   AudioFile<double> audio_file;
   
-  audio_file.load(path);
+  bool success = audio_file.load(path);
+  
+  if (!success) {
+    //
+  }
   
   eowu::AudioData audio_data;
   

@@ -15,7 +15,6 @@ namespace eowu {
 }
 
 struct eowu::AudioData {
-  
   AudioData();
   ~AudioData() = default;
   

@@ -32,6 +32,7 @@ int saw( void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
 int audio::main_saw()
 {
   RtAudio dac;
+  
   if ( dac.getDeviceCount() < 1 ) {
     std::cout << "\nNo audio devices found!\n";
     exit( 0 );

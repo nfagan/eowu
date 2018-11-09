@@ -28,12 +28,23 @@ namespace wav {
     
     UserData *user_data = static_cast<UserData*>(userData);
     
+    std::size_t max_n = user_data->audio_file->samples[0].size();
+    
     if ( status )
       std::cout << "Stream underflow detected!" << std::endl;
     // Write interleaved audio data.
     for ( i=0; i<nBufferFrames; i++ ) {
       for ( j=0; j<2; j++ ) {
-        *buffer++ = user_data->audio_file->samples[j][i+user_data->offset];
+        std::size_t index = i + user_data->offset;
+        double val;
+        
+        if (index >= max_n) {
+          val = 0.0;
+        } else {
+          val = user_data->audio_file->samples[j][index];
+        }
+        
+        *buffer++ = val;
       }
     }
     
@@ -46,7 +57,7 @@ namespace wav {
 int audio::main_wav() {
   auto repo_root = eowu::fs::get_eowu_root_directory();
   
-  auto path = eowu::fs::full_file({repo_root, "eowu-audio", "data", "06_23_2016 extremely rough.wav"});
+  auto path = eowu::fs::full_file({repo_root, "res", "sounds", "piano.wav"});
   
   AudioFile<double> audioFile;
   
@@ -64,6 +75,7 @@ int audio::main_wav() {
   audioFile.printSummary();
   
   RtAudio dac;
+  
   if ( dac.getDeviceCount() < 1 ) {
     std::cout << "\nNo audio devices found!\n";
     exit( 0 );
