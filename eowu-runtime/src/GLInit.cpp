@@ -221,7 +221,11 @@ eowu::SetupStatus eowu::init::initialize_glfw(std::shared_ptr<eowu::GLPipeline> 
   return result;
 }
 
-eowu::SetupStatus eowu::init::open_windows(std::shared_ptr<eowu::GLPipeline> gl_pipeline, const eowu::schema::Setup &schema) {
+eowu::SetupStatus eowu::init::open_windows(std::shared_ptr<eowu::GLPipeline> gl_pipeline,
+                                           const eowu::schema::Setup &schema) {
+  
+  EOWU_LOG_INFO("init::open_windows: Opening windows.");
+  
   eowu::SetupStatus result;
   
   auto context_manager = gl_pipeline->GetContextManager();
@@ -256,6 +260,8 @@ eowu::SetupStatus eowu::init::open_windows(std::shared_ptr<eowu::GLPipeline> gl_
   }
   
   result.success = true;
+  
+  EOWU_LOG_INFO("init::open_windows: Done opening windows.");
   
   return result;
 }

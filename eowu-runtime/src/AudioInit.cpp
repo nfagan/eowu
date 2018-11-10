@@ -7,6 +7,7 @@
 
 #include "AudioInit.hpp"
 #include <eowu-script/eowu-script.hpp>
+#include <eowu-common/logging.hpp>
 
 eowu::init::AudioResult eowu::init::initialize_audio_pipeline(const eowu::schema::Sounds &sounds_schema) {
   eowu::init::AudioResult result;
@@ -48,18 +49,29 @@ eowu::init::AudioSourceMapType eowu::init::initialize_buffer_sources(const eowu:
   
   const auto &mapping = sounds_schema.mapping;
   
+  std::unordered_map<std::string, std::shared_ptr<eowu::AudioData>> processed_audio_data;
+  
   for (const auto &it : mapping) {
     const std::string &key = it.first;
     const std::string &filename = it.second;
     
     std::shared_ptr<eowu::AudioData> audio_data = nullptr;
     
-    audio_data = eowu::AudioData::FromWavOrAiffFile(filename);
+    if (processed_audio_data.count(filename) > 0) {
+      audio_data = processed_audio_data.at(filename);
+    } else {
+      EOWU_LOG_INFO("init::load_buffer_sources: Loading '" + filename + "'");
+      
+      audio_data = eowu::AudioData::FromWavOrAiffFile(filename);
+      processed_audio_data.emplace(filename, audio_data);
+    }
     
     auto buffer_source = std::make_shared<eowu::AudioBufferSource>(audio_data);
     
     result.emplace(key, buffer_source);
   }
+  
+  EOWU_LOG_INFO("init::load_buffer_sources: Done loading.");
   
   return result;
 }

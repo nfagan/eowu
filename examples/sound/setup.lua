@@ -9,7 +9,6 @@ local texture_root = fullfile({res_root, 'textures'})
 Setup.Windows = {
   w1 = {
     resizeable = true,
-    fullscreen = false
   }
 }
 
