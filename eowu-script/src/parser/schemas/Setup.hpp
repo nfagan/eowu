@@ -15,6 +15,7 @@
 #include "Targets.hpp"
 #include "Save.hpp"
 #include "Source.hpp"
+#include "Sounds.hpp"
 #include "Paths.hpp"
 #include "Variables.hpp"
 
@@ -34,6 +35,7 @@ namespace eowu {
       eowu::schema::Targets targets;
       eowu::schema::Stimuli stimuli;
       eowu::schema::Sources sources;
+      eowu::schema::Sounds sounds;
       eowu::schema::Paths paths;
       eowu::schema::Variables variables;
       eowu::schema::Save save;

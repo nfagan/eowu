@@ -15,6 +15,7 @@
 #include "parser/ParseUtil.hpp"
 #include <eowu-common/config.hpp>
 #include <eowu-gl/eowu-gl.hpp>
+#include <eowu-audio.hpp>
 #include <eowu-state/eowu-state.hpp>
 #include <eowu-data.hpp>
 #include <assert.h>
@@ -24,6 +25,9 @@ eowu::StateWrapperContainerType eowu::ScriptWrapper::states = nullptr;
 //
 //  gl pipeline
 std::shared_ptr<eowu::GLPipeline> eowu::ScriptWrapper::pipeline = nullptr;
+//
+//  audio context
+std::shared_ptr<eowu::AudioContext> eowu::ScriptWrapper::audio_context = nullptr;
 //
 //  render functions
 eowu::LuaFunctionContainerType eowu::ScriptWrapper::render_functions = nullptr;
@@ -45,6 +49,9 @@ std::unordered_map<std::string, std::shared_ptr<eowu::TargetWrapper>> eowu::Scri
 //
 //  xy-targets
 std::unordered_map<std::string, std::shared_ptr<eowu::XYTarget>> eowu::ScriptWrapper::xy_targets{};
+//
+//  sounds
+std::unordered_map<std::string, std::shared_ptr<eowu::AudioBufferSource>> eowu::ScriptWrapper::sounds{};
 //
 //  target sets
 std::unordered_map<std::string, std::unique_ptr<eowu::TargetSetWrapper>> eowu::ScriptWrapper::target_sets{};
@@ -119,6 +126,15 @@ void eowu::ScriptWrapper::SetStateWrapperContainer(eowu::StateWrapperContainerTy
 
 void eowu::ScriptWrapper::SetGLPipeline(std::shared_ptr<eowu::GLPipeline> pipeline) {
   eowu::ScriptWrapper::pipeline = pipeline;
+}
+
+void eowu::ScriptWrapper::SetAudioContext(std::shared_ptr<eowu::AudioContext> context) {
+  eowu::ScriptWrapper::audio_context = context;
+}
+
+void eowu::ScriptWrapper::SetSounds(const std::unordered_map<std::string,
+                                    std::shared_ptr<eowu::AudioBufferSource>> &sources) {
+  eowu::ScriptWrapper::sounds = sources;
 }
 
 void eowu::ScriptWrapper::SetLuaRenderFunctionPair(std::shared_ptr<eowu::LockedLuaRenderFunctions> lua_render_functions) {
@@ -294,6 +310,21 @@ eowu::VariableWrapper eowu::ScriptWrapper::GetVariable(const std::string &id) {
   eowu::VariableWrapper wrapper(active, defaults);
   
   return wrapper;
+}
+
+eowu::AudioSourceWrapper eowu::ScriptWrapper::GetAudioSourceWrapper(const std::string &id) const {
+  auto it = sounds.find(id);
+  
+  if (it == sounds.end()) {
+    throw eowu::NonexistentResourceError::MessageKindId("Sound", id);
+  }
+  
+  auto source_aggregate = audio_context->GetSourceAggregate();
+  auto buffer_source = it->second;
+  
+  eowu::AudioSourceWrapper source_wrapper(source_aggregate, buffer_source);
+  
+  return source_wrapper;
 }
 
 eowu::TimeoutWrapper* eowu::ScriptWrapper::MakeTimeout(const std::string &id, int ms, luabridge::LuaRef func) {
@@ -493,6 +524,7 @@ void eowu::ScriptWrapper::CreateLuaSchema(lua_State *L) {
   .addFunction("Variable", &eowu::ScriptWrapper::GetVariable)
   .addFunction("Window", &eowu::ScriptWrapper::GetWindowWrapper)
   .addFunction("Keyboard", &eowu::ScriptWrapper::GetKeyboardWrapper)
+  .addFunction("Sound", &eowu::ScriptWrapper::GetAudioSourceWrapper)
   .addFunction("Ellapsed", &eowu::ScriptWrapper::GetEllapsedTime)
   .addFunction("Exit", &eowu::ScriptWrapper::Exit)
   .addFunction("MakeTargetSet", &eowu::ScriptWrapper::MakeTargetSet)

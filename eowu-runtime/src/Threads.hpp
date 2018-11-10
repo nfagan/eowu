@@ -20,9 +20,8 @@ namespace eowu {
   class LuaContext;
   class LuaFunction;
   class LockedLuaRenderFunctions;
-  class ContextManager;
-  class GLPipeline;
   class Window;
+  class AudioContext;
   
   namespace thread {
     struct SharedState {
@@ -60,7 +59,9 @@ namespace eowu {
     bool try_update_targets(const std::vector<std::shared_ptr<eowu::XYTarget>> &targets);
     bool try_update_timeouts(const eowu::TimeoutWrapperContainerType &timeouts);
     
-    void events(eowu::thread::SharedState &state, std::shared_ptr<eowu::ContextManager> context_manager);
+    void events(eowu::thread::SharedState &state,
+                std::shared_ptr<eowu::ContextManager> context_manager,
+                std::shared_ptr<eowu::AudioContext> audio_context);
     
     bool try_await_thread_finish(const eowu::thread::SharedState &state,
                               eowu::time::DurationType timeout);

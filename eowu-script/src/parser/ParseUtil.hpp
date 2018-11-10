@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include "ParseResult.hpp"
 #include <eowu-data.hpp>
 #include <unordered_map>
 #include <string>
@@ -32,6 +33,10 @@ namespace eowu {
     std::vector<std::string> get_string_vector_from_state(lua_State *L, int index);
     
     eowu::parser::VariableMapType get_variables(const luabridge::LuaRef &ref);
+    
+    template<typename T>
+    eowu::parser::ParseResult<T> parse_string_map_from_table(const luabridge::LuaRef &table,
+                                                             const std::string &context);
     
     bool is_homogeneous_array(const luabridge::LuaRef &table);
     bool is_typed_array(const luabridge::LuaRef &table, int type, bool check_if_array = true);
@@ -77,3 +82,5 @@ namespace eowu {
                                            const std::unordered_set<std::string> &test);
   }
 }
+
+#include "ParseUtil.hh"

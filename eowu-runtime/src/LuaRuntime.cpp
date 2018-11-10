@@ -152,6 +152,7 @@ lua_State* eowu::LuaRuntime::get_new_lua_state() {
 void eowu::LuaRuntime::initialize_schemas(lua_State *L) {
   eowu::init::init_state_schema(L);
   eowu::init::init_render_schema(L);
+  eowu::init::init_audio_schemas(L);
   eowu::ScriptWrapper::CreateLuaSchema(L);
 }
 

@@ -32,7 +32,9 @@ public:
   double GetLatestSample(unsigned int channel) const;
   
   bool Ended() const;
+  
   void Tick();
+  void Stop();
   
 private:
   std::shared_ptr<eowu::AudioData> audio_data;

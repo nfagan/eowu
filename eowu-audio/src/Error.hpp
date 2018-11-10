@@ -11,4 +11,5 @@
 
 namespace eowu {
   EOWU_GENERIC_ERROR(AudioLoadError);
+  EOWU_GENERIC_ERROR(AudioError);
 }

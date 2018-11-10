@@ -9,3 +9,5 @@
 
 #include "../src/AudioBufferSource.hpp"
 #include "../src/AudioSourceAggregate.hpp"
+#include "../src/AudioContext.hpp"
+#include "../src/Error.hpp"

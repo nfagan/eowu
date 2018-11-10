@@ -11,6 +11,7 @@
 #include <eowu-common/logging.hpp>
 #include <eowu-common/config.hpp>
 #include <eowu-common/debug.hpp>
+#include <eowu-audio.hpp>
 #include <stdexcept>
 #include <cstddef>
 #include <chrono>
@@ -248,13 +249,17 @@ bool eowu::thread::try_call_render(const std::shared_ptr<eowu::LuaContext> &lua_
   return success;
 }
 
-void eowu::thread::events(eowu::thread::SharedState &state, std::shared_ptr<eowu::ContextManager> context_manager) {
+void eowu::thread::events(eowu::thread::SharedState &state,
+                          std::shared_ptr<eowu::ContextManager> context_manager,
+                          std::shared_ptr<eowu::AudioContext> audio_context) {
+  
   int key_code = eowu::Keyboard::GetKeyCode("escape");
   auto &kb = context_manager->GetKeyboard();
   
   //  main events loop
   while (state.threads_should_continue && !context_manager->AllShouldClose()) {
     context_manager->PollEvents();
+    audio_context->Update();
     
     if (kb.IsPressed(key_code)) {
       state.threads_should_continue = false;

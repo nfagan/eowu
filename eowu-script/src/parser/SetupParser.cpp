@@ -90,6 +90,12 @@ eowu::parser::ParseResult<eowu::schema::Setup> eowu::parser::setup(const luabrid
     EOWU_PARSER_EARLY_RETURN_ALLOW_MISSING(tex_result, result, textures);
   }
   
+  //  Sounds
+  if (kv.count("Sounds") > 0) {
+    auto sound_result = eowu::parser::sounds(kv.at("Sounds"));
+    EOWU_PARSER_EARLY_RETURN_ALLOW_MISSING(sound_result, result, sounds);
+  }
+  
   //  Save
   if (kv.count("Save") > 0) {
     auto save_result = eowu::parser::save(kv.at("Save"));
@@ -230,29 +236,15 @@ eowu::parser::ParseResult<eowu::schema::Windows> eowu::parser::windows(const lua
 //
 
 eowu::parser::ParseResult<eowu::schema::Textures> eowu::parser::textures(const luabridge::LuaRef &table) {
-  using namespace eowu::parser;
-  using namespace eowu::schema;
-  
-  ParseResult<Textures> result;
+  return eowu::parser::parse_string_map_from_table<eowu::schema::Textures>(table, "Textures");
+}
 
-  auto kv = get_string_map_from_table(table);
-  
-  for (const auto &it : kv) {
-    const auto &file = it.first;
-    const auto &ref = it.second;
-    
-    if (!ref.isString()) {
-      result.message = "Texture file path " + file + " must refer to a string value.";
-      result.context = "Textures";
-      return result;
-    }
-    
-    result.result.mapping.emplace(file, ref.tostring());
-  }
-  
-  result.success = true;
-  
-  return result;
+//
+//  sounds
+//
+
+eowu::parser::ParseResult<eowu::schema::Sounds> eowu::parser::sounds(const luabridge::LuaRef &table) {
+  return eowu::parser::parse_string_map_from_table<eowu::schema::Sounds>(table, "Sounds");
 }
 
 //

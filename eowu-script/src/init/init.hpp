@@ -50,5 +50,6 @@ namespace eowu {
     void init_state_schema(lua_State *L);
     void init_render_schema(lua_State *L);
     void init_static_schemas(lua_State *L);
+    void init_audio_schemas(lua_State *L);
   }
 }

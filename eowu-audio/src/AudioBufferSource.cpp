@@ -68,6 +68,14 @@ void eowu::AudioBufferSource::Tick() {
   seek_position++;
 }
 
+void eowu::AudioBufferSource::Stop() {
+  if (audio_data == nullptr) {
+    return;
+  }
+  
+  seek_position = audio_data->n_samples;
+}
+
 bool eowu::AudioBufferSource::Ended() const {
   if (audio_data == nullptr) {
     return true;

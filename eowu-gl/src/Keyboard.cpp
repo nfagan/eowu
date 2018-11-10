@@ -59,7 +59,8 @@ bool eowu::Keyboard::WasPressed(int key) {
     return false;
   }
   
-  pressed_counts[key] = n_pressed - 1;
+//  pressed_counts[key] = n_pressed - 1;
+  pressed_counts[key] = 0;
   
   return true;
 }

@@ -12,6 +12,7 @@
 template<std::size_t N>
 eowu::AudioSourceAggregateImpl<N>::AudioSourceAggregateImpl() {
   std::fill(is_active.begin(), is_active.end(), false);
+  std::fill(handles.begin(), handles.end(), nullptr);
   
   size = N;
 }
@@ -41,33 +42,32 @@ bool eowu::AudioSourceAggregateImpl<N>::LimitSize(std::size_t to_size) {
 }
 
 template<std::size_t N>
-void eowu::AudioSourceAggregateImpl<N>::Push(const eowu::AudioBufferSource &source) {
+std::shared_ptr<eowu::AudioSourceHandle> eowu::AudioSourceAggregateImpl<N>::Push(const eowu::AudioBufferSource &source) {
   std::unique_lock<std::mutex> lock(mut);
+  queued_sources.push_back(source);
   
-  std::size_t use_n = size;
+  auto handle = std::make_shared<eowu::AudioSourceHandle>();
+  handle->set_source(&queued_sources.back());
   
-  for (std::size_t i = 0; i < use_n; i++) {
-    if (is_active[i]) {
-      continue;
+  queued_handles.push_back(handle);
+  
+  return handle;
+}
+
+template<std::size_t N>
+std::shared_ptr<eowu::AudioSourceHandle> eowu::AudioSourceAggregateImpl<N>::PushSync(const eowu::AudioBufferSource &source) {
+  
+  while (true) {
+    std::size_t n_pending = CountPending();
+    std::size_t n_inactive = CountInactive();
+    
+    //  At least one free slot in which source can be inserted.
+    if (n_inactive > n_pending) {
+      break;
     }
-    
-    //  If there's a queued source, add it
-    //  first to the active sources.
-    if (queued_sources.size() > 0) {
-      sources[i] = queued_sources.front();
-      queued_sources.pop_front();
-      queued_sources.push_back(source);
-    } else {
-      sources[i] = source;
-    }
-    
-    is_active[i] = true;
-    
-    return;
   }
   
-  //  all slots are taken, so add it to the queue.
-  queued_sources.push_back(source);
+  return Push(source);
 }
 
 template<std::size_t N>
@@ -77,16 +77,31 @@ void eowu::AudioSourceAggregateImpl<N>::Update() {
   std::size_t use_n = size;
   
   for (std::size_t i = 0; i < use_n; i++) {
+    if (queued_sources.size() == 0) {
+      return;
+    }
+    
     if (is_active[i]) {
       continue;
     }
     
-    if (queued_sources.size() > 0) {
-      sources[i] = queued_sources.front();
-      queued_sources.pop_front();
-    } else {
-      return;
+    const auto &queued_source = queued_sources.front();
+    const auto &queued_handle = queued_handles.front();
+    auto current_handle = handles[i];
+    
+    if (current_handle != nullptr) {
+      current_handle->set_source(nullptr);
     }
+    
+    queued_handle->use([&] (auto *handle) -> void {
+      sources[i] = queued_source;
+      handles[i] = queued_handle;
+      
+      handle->source = &sources[i];
+    });
+    
+    queued_sources.pop_front();
+    queued_handles.pop_front();
     
     is_active[i] = true;
   }
@@ -95,6 +110,40 @@ void eowu::AudioSourceAggregateImpl<N>::Update() {
 template<std::size_t N>
 bool eowu::AudioSourceAggregateImpl<N>::IsActive(std::size_t at) const {
   return is_active[at];
+}
+
+template<std::size_t N>
+std::size_t eowu::AudioSourceAggregateImpl<N>::CountActive() const {
+  std::size_t use_n = size;
+  std::size_t n = 0;
+  
+  for (std::size_t i = 0; i < use_n; i++) {
+    if (is_active[i]) {
+      n++;
+    }
+  }
+  
+  return n;
+}
+
+template<std::size_t N>
+std::size_t eowu::AudioSourceAggregateImpl<N>::CountInactive() const {
+  std::size_t use_n = size;
+  std::size_t n = 0;
+  
+  for (std::size_t i = 0; i < use_n; i++) {
+    if (!is_active[i]) {
+      n++;
+    }
+  }
+  
+  return n;
+}
+
+template<std::size_t N>
+std::size_t eowu::AudioSourceAggregateImpl<N>::CountPending() const {
+  std::unique_lock<std::mutex> lock(mut);
+  return queued_sources.size();
 }
 
 template<std::size_t N>
@@ -112,7 +161,7 @@ bool eowu::AudioSourceAggregateImpl<N>::AnyActive() const {
 
 template<std::size_t N>
 bool eowu::AudioSourceAggregateImpl<N>::AnyPending() const {
-  return queued_sources.size() > 0;
+  return CountPending() > 0;
 }
 
 template<std::size_t N>

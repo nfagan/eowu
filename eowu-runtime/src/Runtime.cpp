@@ -7,12 +7,14 @@
 
 #include "Runtime.hpp"
 #include "GLInit.hpp"
+#include "AudioInit.hpp"
 #include "DataInit.hpp"
 #include "SourceInit.hpp"
 #include "TargetInit.hpp"
 #include "Threads.hpp"
 #include <eowu-script/eowu-script.hpp>
 #include <eowu-gl/eowu-gl.hpp>
+#include <eowu-audio.hpp>
 #include <eowu-state/eowu-state.hpp>
 #include <eowu-common/Timer.hpp>
 #include <Lua.hpp>
@@ -45,6 +47,21 @@ int eowu::Runtime::Main(const std::string &file) {
   
   //  otherwise, the task data store is ok.
   script_wrapper.SetTaskDataStore(data_init_result.result.task_data_store);
+  
+  //  sounds
+  auto sound_status = eowu::init::initialize_audio_pipeline(lua_runtime.setup_schema.sounds);
+  
+  if (!sound_status.status.success) {
+    sound_status.status.file = file;
+    sound_status.status.print();
+    return 1;
+  }
+  
+  //  otherwise, audio context + sounds are ok.
+  auto audio_context = sound_status.result.audio_context;
+  
+  script_wrapper.SetAudioContext(audio_context);
+  script_wrapper.SetSounds(sound_status.result.sounds);
   
   //  gl pipeline
   auto gl_pipeline = eowu::GLPipeline::GetInstance();
@@ -130,7 +147,7 @@ int eowu::Runtime::Main(const std::string &file) {
   
   //
   //  Main thread event loop
-  eowu::thread::events(thread_state, context_manager);
+  eowu::thread::events(thread_state, context_manager, audio_context);
   
   //  When the events thread is finished (e.g., when the escape key is pressed),
   //  attempt to wait for the render and task threads to finish. If they don't complete

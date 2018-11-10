@@ -88,9 +88,9 @@ int eowu::audio::main() {
   
   guitar_src.SetGain(5.0);
   
-  src.Push(piano_src);
-  src.Push(guitar_src);
-  src.Push(piano_src);
+  auto h1 = src.Push(piano_src);
+  auto h2 = src.Push(guitar_src);
+  auto h3 = src.Push(piano_src);
   
   RtAudio dac;
   

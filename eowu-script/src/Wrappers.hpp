@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include "AudioSourceWrapper.hpp"
+#include "AudioSourceHandleWrapper.hpp"
 #include "FilesystemWrapper.hpp"
 #include "StateWrapper.hpp"
 #include "KeyboardWrapper.hpp"

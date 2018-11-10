@@ -35,6 +35,10 @@ namespace eowu {
   class XYTarget;
   class StateRunner;
   
+  class AudioContext;
+  class AudioBufferSource;
+  class AudioSourceWrapper;
+  
   namespace data {
     class Store;
     class Commitable;
@@ -58,6 +62,7 @@ public:
   void SetXYTargets(const std::unordered_map<std::string, std::shared_ptr<eowu::XYTarget>> &targets);
   
   void SetGLPipeline(std::shared_ptr<eowu::GLPipeline> pipeline);
+  void SetAudioContext(std::shared_ptr<eowu::AudioContext> context);
   void SetRenderFunctions(eowu::LuaFunctionContainerType render_functions);
   void SetFlipFunctions(eowu::LuaFunctionContainerType render_functions);
   void SetLuaRenderFunctionPair(std::shared_ptr<eowu::LockedLuaRenderFunctions> lua_render_functions);
@@ -70,6 +75,7 @@ public:
   void SetLockedRenderFunctions(std::shared_ptr<eowu::LockedLuaRenderFunctions> locked_functions);
   void SetThreadIds(const std::thread::id &render, const std::thread::id &task);
   void SetStateRunner(eowu::StateRunner *runner);
+  void SetSounds(const std::unordered_map<std::string, std::shared_ptr<eowu::AudioBufferSource>> &sounds);
   
   int SetRenderFunctionPair(lua_State *L);
   
@@ -87,6 +93,7 @@ public:
   eowu::ModelWrapper GetModelWrapper(const std::string &id) const;
   eowu::VariableWrapper GetVariable(const std::string &id);
   eowu::WindowWrapper GetWindowWrapper(const std::string &id);
+  eowu::AudioSourceWrapper GetAudioSourceWrapper(const std::string &id) const;
   
   double GetEllapsedTime() const;
   void Exit();
@@ -119,11 +126,13 @@ private:
   static eowu::LuaFunctionContainerType flip_functions;
   static eowu::StateWrapperContainerType states;
   static std::shared_ptr<eowu::GLPipeline> pipeline;
+  static std::shared_ptr<eowu::AudioContext> audio_context;
   static Variables variables;
   static std::shared_ptr<eowu::data::Store> task_data_store;
   static std::shared_ptr<eowu::LockedLuaRenderFunctions> lua_render_thread_functions;
   static std::unordered_map<std::string, std::unique_ptr<eowu::TargetSetWrapper>> target_sets;
   static std::unordered_map<std::string, std::shared_ptr<eowu::XYTarget>> xy_targets;
+  static std::unordered_map<std::string, std::shared_ptr<eowu::AudioBufferSource>> sounds;
   static std::unique_ptr<eowu::KeyboardWrapper> keyboard;
   static ThreadIds thread_ids;
   static eowu::StateRunner *state_runner;

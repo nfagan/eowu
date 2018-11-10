@@ -49,7 +49,7 @@ set_property(TARGET eowu-script PROPERTY CXX_STANDARD 17)
 set_property(TARGET eowu-script-test PROPERTY CXX_STANDARD 17)
 #set_property(TARGET eowu-script-playground PROPERTY CXX_STANDARD 17)
 
-target_link_libraries(eowu-script eowu-gl eowu-state eowu-data lua)
+target_link_libraries(eowu-script eowu-gl eowu-audio eowu-state eowu-data lua)
 target_link_libraries(eowu-script-test eowu-script)
 #target_link_libraries(eowu-script-playground eowu-script)
 

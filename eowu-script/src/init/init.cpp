@@ -49,6 +49,11 @@ void eowu::init::init_state_schema(lua_State *L) {
   eowu::TimeoutWrapper::CreateLuaSchema(L);
 }
 
+void eowu::init::init_audio_schemas(lua_State *L) {
+  eowu::AudioSourceHandleWrapper::CreateLuaSchema(L);
+  eowu::AudioSourceWrapper::CreateLuaSchema(L);
+}
+
 EOWU_GET_LUA_FUNCTION_CONTAINER(get_render_functions, render_functions)
 EOWU_GET_LUA_FUNCTION_CONTAINER(get_flip_functions, flip_functions)
 

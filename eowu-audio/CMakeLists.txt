@@ -33,7 +33,7 @@ add_executable(eowu-audio-playground ${PLAYGROUND_SRC})
 add_executable(eowu-audio-test ${TEST_SRC})
 add_library(eowu-audio STATIC ${LIB_SRC})
 
-target_include_directories(eowu-audio PUBLIC include/)
+target_include_directories(eowu-audio PUBLIC include/ deps/rtaudio)
 
 set_property(TARGET eowu-audio PROPERTY CXX_STANDARD 17)
 set_property(TARGET eowu-audio-playground PROPERTY CXX_STANDARD 17)

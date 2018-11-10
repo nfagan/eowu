@@ -40,6 +40,8 @@ namespace eowu {
                                              const std::string &source_id);
     ParseResult<eowu::schema::Sources> sources(const luabridge::LuaRef &table);
     
+    ParseResult<eowu::schema::Sounds> sounds(const luabridge::LuaRef &table);
+    
     ParseResult<eowu::schema::State> state(const luabridge::LuaRef &table);
     ParseResult<eowu::schema::States> states(const luabridge::LuaRef &table);
     
