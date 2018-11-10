@@ -29,12 +29,6 @@ add_subdirectory(deps/rtaudio)
 include_directories(deps/rtaudio)
 include_directories(deps/AudioFile)
 
-if(WIN32)
-  link_directories(deps/rtaudio/build/Release)
-else()
-  find_package(RtAudio REQUIRED)
-endif()
-
 add_executable(eowu-audio-playground ${PLAYGROUND_SRC})
 add_executable(eowu-audio-test ${TEST_SRC})
 add_library(eowu-audio STATIC ${LIB_SRC})
