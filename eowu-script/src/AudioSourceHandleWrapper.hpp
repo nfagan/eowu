@@ -21,6 +21,7 @@ public:
   ~AudioSourceHandleWrapper() = default;
   
   void Stop();
+  bool IsValid() const;
   
   static void CreateLuaSchema(lua_State *L);
 private:

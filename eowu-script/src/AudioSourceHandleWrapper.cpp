@@ -18,11 +18,16 @@ void eowu::AudioSourceHandleWrapper::Stop() {
   source_handle->Stop();
 }
 
+bool eowu::AudioSourceHandleWrapper::IsValid() const {
+  return source_handle->IsValid();
+}
+
 void eowu::AudioSourceHandleWrapper::CreateLuaSchema(lua_State *L) {
   luabridge::getGlobalNamespace(L)
   .beginNamespace(eowu::constants::eowu_namespace)
   .beginClass<eowu::AudioSourceHandleWrapper>("_AudioSourceHandle")
   .addFunction("Stop", &eowu::AudioSourceHandleWrapper::Stop)
+  .addFunction("IsValid", &eowu::AudioSourceHandleWrapper::IsValid)
   .endClass()
   .endNamespace();
 }

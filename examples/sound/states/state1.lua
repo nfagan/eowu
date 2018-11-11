@@ -1,6 +1,6 @@
 local state = {}
 
-state.Name = ''
+state.Name = 'state1'
 state.First = true
 state.Duration = -1
 

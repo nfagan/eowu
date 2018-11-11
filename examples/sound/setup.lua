@@ -28,8 +28,7 @@ Setup.Stimuli = {
 }
 
 Setup.Textures = {
-  t1 = fullfile({texture_root, 'eg.png'}),
-  t2 = fullfile({texture_root, 'eg2.png'})
+  t1 = fullfile({texture_root, 'eg.png'})
 }
 
 Setup.States = {
