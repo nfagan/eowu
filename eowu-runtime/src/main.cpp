@@ -6,6 +6,7 @@
 //
 
 #include "Runtime.hpp"
+#include <eowu-common/fs.hpp>
 #include <string>
 #include <iostream>
 
@@ -19,6 +20,11 @@ int main(int argc, char** argv) {
     return 0;
   } else {
     file = argv[1];
+    
+    if (file == "--demo") {
+      auto repo_root = eowu::fs::get_eowu_root_directory();
+      file = eowu::fs::full_file({repo_root, "examples", "sound", "setup.lua"});
+    }
   }
   
   return runtime.Main(file);

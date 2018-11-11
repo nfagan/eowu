@@ -6,7 +6,9 @@ state.Duration = -1
 
 function state.Entry()
   local script = eowu.script()
-  script:Render('default')  
+  script:Render('default')
+
+  print('Press + hold space to play sound!')
 end
 
 local sound_handle = nil
