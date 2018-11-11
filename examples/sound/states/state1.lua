@@ -8,7 +8,7 @@ function state.Entry()
   local script = eowu.script()
   script:Render('default')
 
-  print('Press + hold space to play sound!')
+  print('Press + hold space to play sound; press escape to exit.')
 end
 
 local sound_handle = nil
