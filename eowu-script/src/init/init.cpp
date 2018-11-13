@@ -29,6 +29,7 @@
 
 void eowu::init::init_static_schemas(lua_State *L) {
   eowu::FilesystemWrapper::CreateLuaSchema(L);
+  eowu::time::wrapper::CreateLuaSchema(L);
 }
 
 void eowu::init::init_render_schema(lua_State *L) {

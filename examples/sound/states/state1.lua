@@ -8,10 +8,10 @@ function state.Entry()
   local script = eowu.script()
   script:Render('default')
 
-  print('Press + hold space to play sound; press escape to exit.')
+  print('Press + hold space / shift to play sound; press escape to exit.')
 end
 
-local sound_handle = nil
+local sound_handles = {}
 
 local function default_render()
   local script = eowu.script()
@@ -22,24 +22,28 @@ local function default_render()
   s1:Units('mixed')
   s1:Size({200, 200})
   s1:Position({0.5, 0.5})
+  s1:Opacity(1.0)
 
-  local tex = 't1'
+  if kb:Pressed('space') then
+    sound_handles[1] = script:Sound('piano'):Play()
+  end
+
+  if kb:Pressed('left-shift') then
+    sound_handles[2] = script:Sound('guitar'):Play()
+  end
 
   if kb:Down('space') then
     s1:ZRotate(0.03)
+    s1:Texture('t1')
+  else
+    if sound_handles[1] then sound_handles[1]:Stop() end
+    s1:Color({1, 1, 0})
+  end
 
-    if kb:Pressed('space') then
-      local sound = script:Sound('piano')
-      sound_handle = sound:Play()
-    end
-
-    s1:Texture(tex)
-  else    
-    if sound_handle ~= nil then
-      sound_handle:Stop()
-    end
-
-    s1:Color({1, 0, 0})
+  if kb:Down('left-shift') then
+    s1:Opacity(0.5)
+  else
+    if sound_handles[2] then sound_handles[2]:Stop() end
   end
 
   s1:Draw()

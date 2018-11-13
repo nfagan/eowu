@@ -6,10 +6,12 @@
 //
 
 #include "test-path.hpp"
+#include "test-directory-contents.hpp"
 
 int main(int argc, char **argv) {
   eowu::test::test_path();
   eowu::test::test_fullfile();
+  eowu::test::test_directory_contents();
   
   return 0;
 }

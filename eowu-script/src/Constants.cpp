@@ -9,6 +9,7 @@
 
 const char* const eowu::constants::eowu_namespace = "eowu";
 const char* const eowu::constants::eowu_math_namespace = "math";
+const char* const eowu::constants::eowu_time_namespace = "time";
 const char* const eowu::constants::eowu_fs_namespace = "fs";
 const char* const eowu::constants::eowu_script_name = "script";
 const char* const eowu::constants::eowu_noop_name = "EOWU_NOOP";

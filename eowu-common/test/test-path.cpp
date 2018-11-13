@@ -12,7 +12,9 @@
 #include <iostream>
 
 void eowu::test::test_fullfile() {
-  EOWU_PRINT_TEST_BEGIN("full_file");
+  std::string platform = eowu::platform::name;
+  
+  EOWU_PRINT_TEST_BEGIN("fullfile: " + platform);
   
 #ifdef EOWU_IS_WIN
   std::vector<std::string> components{"C:\\", "Users\\Nick\\", "Another"};
@@ -23,8 +25,6 @@ void eowu::test::test_fullfile() {
   std::vector<std::string> components2{"/Users/", "//Nick/", "/Another"};
   std::string expected = "/Users/Nick/Another";
 #endif
-  
-  std::string platform = eowu::platform::name;
   
   auto res = eowu::fs::full_file(components);
   EOWU_ASSERT_TRUE(res == expected, "full_file succeeded on: " + platform + "; value was: " + res,
@@ -37,9 +37,9 @@ void eowu::test::test_fullfile() {
 }
 
 void eowu::test::test_path() {
-  EOWU_PRINT_TEST_BEGIN("path");
-  
   std::string platform = eowu::platform::name;
+  
+  EOWU_PRINT_TEST_BEGIN("path: " + platform);
   
 #ifndef EOWU_IS_WIN
   std::string file_path_1 = "/Users/Nick/test";

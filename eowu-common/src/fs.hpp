@@ -1,5 +1,5 @@
 //
-//  path.hpp
+//  fs.hpp
 //  eowu-common
 //
 //  Created by Nick Fagan on 9/14/18.
@@ -27,9 +27,23 @@ namespace eowu {
     
     std::string full_file(const std::vector<std::string> &components);
     
+    struct finfo {
+      std::string name;
+      std::string directory;
+      bool is_directory;
+      
+      finfo();
+      ~finfo() = default;
+    };
+    
+    std::vector<eowu::fs::finfo> get_directory_contents(const std::string &path, bool is_recursive, bool *success);
+    std::vector<eowu::fs::finfo> get_directory_contents(const std::string &path, bool is_recursive = false);
+    
     namespace priv {
-      bool require_directory_windows(const std::string &path);
-      bool require_directory_unix(const std::string &path);
+      void get_directory_contents_impl(const std::string &path,
+                                       std::vector<eowu::fs::finfo> &contents,
+                                       bool is_recursive,
+                                       bool *success);
     }
   }
 }

@@ -13,6 +13,9 @@
 
 #ifdef EOWU_IS_WIN
 #include <windows.h>
+#else
+#include <dirent.h>
+#include <stdio.h> 
 #endif
 
 std::string eowu::fs::get_eowu_root_directory(bool *success) {
@@ -167,16 +170,8 @@ std::string eowu::fs::full_file(const std::vector<std::string> &components) {
   return result;
 }
 
+#ifdef EOWU_IS_WIN
 bool eowu::fs::require_directory(const std::string &path) {
-#ifdef EOWU_IS_WIN
-  return eowu::fs::priv::require_directory_windows(path);
-#else
-  return eowu::fs::priv::require_directory_unix(path);
-#endif
-}
-
-#ifdef EOWU_IS_WIN
-bool eowu::fs::priv::require_directory_windows(const std::string &path) {
   const char *path_str = path.c_str();
   
   if (CreateDirectory(path_str, NULL)) {
@@ -186,7 +181,7 @@ bool eowu::fs::priv::require_directory_windows(const std::string &path) {
   }
 }
 #else
-bool eowu::fs::priv::require_directory_unix(const std::string &path) {
+bool eowu::fs::require_directory(const std::string &path) {
   // https://codeyarns.com/2014/08/07/how-to-create-directory-using-c-on-linux/
   const int dir_err = mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
   
@@ -196,4 +191,128 @@ bool eowu::fs::priv::require_directory_unix(const std::string &path) {
   
   return true;
 }
+#endif
+
+//  finfo
+
+eowu::fs::finfo::finfo() : is_directory(false) {
+  //
+}
+
+std::vector<eowu::fs::finfo> eowu::fs::get_directory_contents(const std::string &path,
+                                                              bool is_recursive,
+                                                              bool *success) {
+  std::vector<eowu::fs::finfo> res;
+  eowu::fs::priv::get_directory_contents_impl(path, res, is_recursive, success);
+  
+  return res;
+}
+
+std::vector<eowu::fs::finfo> eowu::fs::get_directory_contents(const std::string &path, bool is_recursive) {
+  bool dummy = false;
+  return eowu::fs::get_directory_contents(path, is_recursive, &dummy);
+}
+
+#ifndef EOWU_IS_WIN
+void eowu::fs::priv::get_directory_contents_impl(const std::string &path,
+                                                 std::vector<eowu::fs::finfo> &res,
+                                                 bool is_recursive,
+                                                 bool *success) {
+  DIR *dirp;
+  struct dirent *directory;
+  
+  dirp = opendir(path.c_str());
+  
+  if (!dirp) {
+    *success = false;
+    return;
+  } else {
+    *success = true;
+  }
+  
+  while ((directory = readdir(dirp)) != NULL) {
+    eowu::fs::finfo info;
+    
+    std::string name = directory->d_name;
+    
+    if (name == "." || name == "..") {
+      continue;
+    }
+    
+    std::string absolute_path = eowu::fs::full_file({path, name});
+    const bool is_directory = eowu::fs::directory_exists(absolute_path);
+    
+    info.directory = path;
+    info.name = name;
+    info.is_directory = is_directory;
+    
+    res.push_back(std::move(info));
+    
+    if (is_directory && is_recursive) {
+      get_directory_contents_impl(absolute_path, res, is_recursive, success);
+      
+      if (!(*success)) {
+        break;
+      }
+    }
+  }
+  
+  closedir(dirp);
+  
+  return;
+}
+#else
+void eowu::fs::priv::get_directory_contents_impl(const std::string &path,
+                                                 std::vector<eowu::fs::finfo> &res,
+                                                 bool is_recursive,
+                                                 bool *success) {
+  //  https://docs.microsoft.com/en-us/windows/desktop/fileio/listing-the-files-in-a-directory
+  //  https://stackoverflow.com/questions/6320573/how-to-get-list-of-files-in-a-directory-programmatically
+  WIN32_FIND_DATA search_data;
+  
+  memset(&search_data, 0, sizeof(WIN32_FIND_DATA));
+  
+  auto search_path = eowu::fs::full_file({path, "*"});
+  
+  if (search_path.length() > MAX_PATH) {
+    *success = false;
+    return;
+  }
+  
+  HANDLE handle = FindFirstFile(search_path.c_str(), &search_data);
+  
+  while (handle != INVALID_HANDLE_VALUE) {
+    eowu::fs::finfo info;
+    
+    std::string name = search_data.cFileName;
+    
+    if (name == "." || name == "..") {
+      continue;
+    }
+    
+    std::string absolute_path = eowu::fs::full_file({path, name});
+    const bool is_directory = eowu::fs::directory_exists(absolute_path);
+    
+    info.directory = path;
+    info.name = name;
+    info.is_directory = is_directory;
+    
+    res.push_back(info);
+    
+    if (is_directory && is_recursive) {
+      get_directory_contents_impl(absolute_path, res, is_recursive, success);
+      
+      if (!(*success)) {
+        break;
+      }
+    }
+    
+    if (FindNextFile(handle, &search_data) == FALSE) {
+      break;
+    }
+  }
+  
+  FindClose(handle);
+}
+
 #endif

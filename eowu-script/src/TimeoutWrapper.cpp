@@ -16,6 +16,10 @@ timeout(duration), lua_context(context), on_ellapsed(func) {
   configure_timeout();
 }
 
+eowu::TimeoutWrapper::~TimeoutWrapper() {
+  Cancel();
+}
+
 void eowu::TimeoutWrapper::Update() {
   timeout.Update();
 }

@@ -32,7 +32,7 @@ public:
                  const luabridge::LuaRef &func,
                  const eowu::time::DurationType &duration);
   
-  ~TimeoutWrapper() = default;
+  ~TimeoutWrapper();
   
   void Update();
   void Cancel();

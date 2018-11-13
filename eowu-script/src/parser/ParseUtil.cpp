@@ -16,6 +16,9 @@
 #define EOWU_get_numeric_value_or(type) \
   template type eowu::parser::get_numeric_value_or(const eowu::parser::MapTableType &table, const std::string &key, type deflt)
 
+#define EOWU_get_numeric_value_or_error_from_state(type) \
+  template type eowu::parser::get_numeric_value_or_error_from_state(lua_State *L, int index)
+
 #define EOWU_get_numeric_value_or_error(type) \
   template type eowu::parser::get_numeric_value_or_error(const eowu::parser::MapTableType &table, const std::string &key)
 
@@ -293,6 +296,29 @@ std::vector<std::string> eowu::parser::get_string_vector_from_table(const luabri
   return result;
 }
 
+std::string eowu::parser::get_string_or_error_from_state(lua_State *L, int index) {
+  if (!lua_isstring(L, index)) {
+    std::string type_name = lua_typename(L, lua_type(L, index));
+    throw eowu::LuaError("Expected input to be string; was: '" + type_name + "'.");
+  }
+  
+  std::string res = lua_tostring(L, index);
+  
+  return res;
+}
+
+std::vector<std::string> eowu::parser::require_string_vector_from_state(lua_State *L, int index) {
+  std::vector<std::string> res;
+  
+  if (lua_isstring(L, index)) {
+    res.push_back(eowu::parser::get_string_or_error_from_state(L, index));
+  } else {
+    res = eowu::parser::get_string_vector_from_state(L, index);
+  }
+  
+  return res;
+}
+
 #if false
 std::vector<std::string> eowu::parser::get_string_vector_from_table(const luabridge::LuaRef &table) {
   using namespace luabridge;
@@ -374,6 +400,35 @@ EOWU_get_numeric_value_or(int);
 EOWU_get_numeric_value_or(unsigned int);
 EOWU_get_numeric_value_or(bool);
 EOWU_get_numeric_value_or(double);
+
+//
+//  get_numeric_value_or_error_from_state
+//
+
+template<typename T>
+T eowu::parser::get_numeric_value_or_error_from_state(lua_State *L, int index) {
+  
+  if (!lua_isnumber(L, index)) {
+    std::string type_name = lua_typename(L, lua_type(L, index));
+    throw eowu::LuaError("Expected input to be numeric; was: '" + type_name + "'.");
+  }
+  
+  double num = lua_tonumber(L, index);
+  
+  return static_cast<T>(num);
+}
+
+EOWU_get_numeric_value_or_error_from_state(double);
+EOWU_get_numeric_value_or_error_from_state(int);
+
+bool eowu::parser::get_bool_or_error_from_state(lua_State *L, int index) {
+  if (!lua_isboolean(L, index)) {
+    std::string type_name = lua_typename(L, lua_type(L, index));
+    throw eowu::LuaError("Expected input to be boolean; was: '" + type_name + "'.");
+  }
+  
+  return lua_toboolean(L, index);
+}
 
 //
 //  get_numeric_value_or_error

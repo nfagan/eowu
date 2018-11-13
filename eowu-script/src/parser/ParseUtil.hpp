@@ -31,6 +31,12 @@ namespace eowu {
     std::vector<double> get_numeric_vector_from_state(lua_State *L, int index);
     std::vector<std::string> get_string_vector_from_table(const luabridge::LuaRef &ref);
     std::vector<std::string> get_string_vector_from_state(lua_State *L, int index);
+    std::string get_string_or_error_from_state(lua_State *L, int index);
+    std::vector<std::string> require_string_vector_from_state(lua_State *L, int index);
+    
+    template<typename T>
+    T get_numeric_value_or_error_from_state(lua_State *L, int index);
+    bool get_bool_or_error_from_state(lua_State *L, int index);
     
     eowu::parser::VariableMapType get_variables(const luabridge::LuaRef &ref);
     

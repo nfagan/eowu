@@ -8,6 +8,7 @@
 #pragma once
 
 #include <string>
+#include <eowu-common/fs.hpp>
 
 struct lua_State;
 
@@ -25,4 +26,8 @@ public:
 private:
   static std::string get_eowu_root_directory();
   static std::string full_file(lua_State *L);
+  static int dir(lua_State *L);
+  static int find(lua_State *L);
+  
+  static void create_finfo_table(lua_State *L, const eowu::fs::finfo &info);
 };
