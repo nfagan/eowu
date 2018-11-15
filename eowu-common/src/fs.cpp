@@ -11,6 +11,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#include <iostream>
+
 #ifdef EOWU_IS_WIN
 #include <windows.h>
 #else
@@ -248,7 +250,7 @@ void eowu::fs::priv::get_directory_contents_impl(const std::string &path,
     
     res.push_back(std::move(info));
     
-    if (is_directory && is_recursive) {
+    if (is_recursive && is_directory) {
       get_directory_contents_impl(absolute_path, res, is_recursive, success);
       
       if (!(*success)) {
@@ -258,8 +260,6 @@ void eowu::fs::priv::get_directory_contents_impl(const std::string &path,
   }
   
   closedir(dirp);
-  
-  return;
 }
 #else
 void eowu::fs::priv::get_directory_contents_impl(const std::string &path,
@@ -280,34 +280,40 @@ void eowu::fs::priv::get_directory_contents_impl(const std::string &path,
   }
   
   HANDLE handle = FindFirstFile(search_path.c_str(), &search_data);
+
+	if (handle == INVALID_HANDLE_VALUE) {
+		*success = false;
+		return;
+	}
+
+	*success = true;
   
   while (handle != INVALID_HANDLE_VALUE) {
     eowu::fs::finfo info;
     
     std::string name = search_data.cFileName;
     
-    if (name == "." || name == "..") {
-      continue;
-    }
+		if (name != "." && name != "..") {
+			const bool is_directory = search_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
+
+			info.directory = path;
+			info.name = name;
+			info.is_directory = is_directory;
+
+			res.push_back(info);
+
+			if (is_recursive && is_directory) {
+				std::string absolute_path = eowu::fs::full_file({path, name});
+
+				get_directory_contents_impl(absolute_path, res, is_recursive, success);
+
+				if (!(*success)) {
+					break;
+				}
+			}
+		}
     
-    std::string absolute_path = eowu::fs::full_file({path, name});
-    const bool is_directory = eowu::fs::directory_exists(absolute_path);
-    
-    info.directory = path;
-    info.name = name;
-    info.is_directory = is_directory;
-    
-    res.push_back(info);
-    
-    if (is_directory && is_recursive) {
-      get_directory_contents_impl(absolute_path, res, is_recursive, success);
-      
-      if (!(*success)) {
-        break;
-      }
-    }
-    
-    if (FindNextFile(handle, &search_data) == FALSE) {
+    if (FindNextFile(handle, &search_data) == 0) {
       break;
     }
   }
