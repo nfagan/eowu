@@ -172,8 +172,16 @@ std::string eowu::fs::full_file(const std::vector<std::string> &components) {
   return result;
 }
 
-#ifdef EOWU_IS_WIN
 bool eowu::fs::require_directory(const std::string &path) {
+  if (eowu::fs::directory_exists(path)) {
+    return true;
+  }
+  
+  return eowu::fs::make_directory(path);
+}
+
+#ifdef EOWU_IS_WIN
+bool eowu::fs::make_directory(const std::string &path) {
   const char *path_str = path.c_str();
   
   if (CreateDirectory(path_str, NULL)) {
@@ -183,7 +191,7 @@ bool eowu::fs::require_directory(const std::string &path) {
   }
 }
 #else
-bool eowu::fs::require_directory(const std::string &path) {
+bool eowu::fs::make_directory(const std::string &path) {
   // https://codeyarns.com/2014/08/07/how-to-create-directory-using-c-on-linux/
   const int dir_err = mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
   

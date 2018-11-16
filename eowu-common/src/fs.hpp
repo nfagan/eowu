@@ -20,6 +20,7 @@ namespace eowu {
     std::string get_outer_directory(const std::string &inner_dir, std::size_t n_levels, bool *success);
     std::string get_outer_directory(const std::string &inner_dir);
     
+    bool make_directory(const std::string &path);
     bool require_directory(const std::string &path);
     
     bool directory_exists(const std::string &path);
