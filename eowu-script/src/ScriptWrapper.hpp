@@ -11,6 +11,7 @@
 #include "TargetWrapper.hpp"
 #include "TargetSetWrapper.hpp"
 #include "TimeoutWrapper.hpp"
+#include "TimeoutAggregate.hpp"
 #include <eowu-common/LockedResource.hpp>
 #include <memory>
 #include <unordered_map>
@@ -34,6 +35,7 @@ namespace eowu {
   class WindowWrapper;
   class XYTarget;
   class StateRunner;
+  class TimeoutHandleWrapper;
   
   class AudioContext;
   class AudioBufferSource;
@@ -58,7 +60,6 @@ public:
   
   void SetStateWrapperContainer(eowu::StateWrapperContainerType states);
   void SetTargetWrapperContainer(const std::unordered_map<std::string, std::shared_ptr<eowu::TargetWrapper>> &targets);
-  void SetTimeoutWrapperContainer(eowu::TimeoutWrapperContainerType timeout_wrappers);
   void SetXYTargets(const std::unordered_map<std::string, std::shared_ptr<eowu::XYTarget>> &targets);
   
   void SetGLPipeline(std::shared_ptr<eowu::GLPipeline> pipeline);
@@ -80,15 +81,20 @@ public:
   int SetRenderFunctionPair(lua_State *L);
   
   eowu::TargetSetWrapper* MakeTargetSet(const std::string &id, lua_State *L);
-  eowu::TimeoutWrapper* MakeTimeout(const std::string &id, int ms, luabridge::LuaRef func);
+  eowu::TimeoutHandleWrapper MakeTimeout(const std::string &id, int ms, luabridge::LuaRef func);
+  eowu::TimeoutHandleWrapper MakeInterval(const std::string &id, int ms, luabridge::LuaRef func);
   
   bool IsComplete() const;
+  
+  const eowu::TimeoutAggregateMapType* GetIntervalWrappers() const;
+  const eowu::TimeoutAggregateMapType* GetTimeoutWrappers() const;
   
   eowu::StateWrapper* GetStateWrapper(const std::string &id) const;
   eowu::KeyboardWrapper* GetKeyboardWrapper() const;
   eowu::TargetWrapper* GetTargetWrapper(const std::string &id);
   eowu::TargetSetWrapper* GetTargetSetWrapper(const std::string &id);
-  eowu::TimeoutWrapper* GetTimeoutWrapper(const std::string &id);
+  eowu::TimeoutHandleWrapper GetTimeoutHandleWrapper(const std::string &id);
+  eowu::TimeoutHandleWrapper GetIntervalHandleWrapper(const std::string &id);
   eowu::RendererWrapper GetRendererWrapper() const;
   eowu::ModelWrapper GetModelWrapper(const std::string &id) const;
   eowu::VariableWrapper GetVariable(const std::string &id);
@@ -121,7 +127,8 @@ private:
   };
   
   static std::unordered_map<std::string, std::shared_ptr<eowu::TargetWrapper>> target_wrappers;
-  static eowu::TimeoutWrapperContainerType timeout_wrappers;
+  static eowu::TimeoutAggregateMapType timeout_wrappers;
+  static eowu::TimeoutAggregateMapType interval_wrappers;
   static eowu::LuaFunctionContainerType render_functions;
   static eowu::LuaFunctionContainerType flip_functions;
   static eowu::StateWrapperContainerType states;
@@ -138,6 +145,17 @@ private:
   static eowu::StateRunner *state_runner;
   static LuaContexts lua_contexts;
   
+  eowu::TimeoutHandleWrapper make_timeout(eowu::TimeoutAggregateMapType *aggregate,
+                                          const std::string &id,
+                                          int ms,
+                                          const luabridge::LuaRef &func,
+                                          const char* const make_func_id,
+                                          eowu::Timeout::Type timeout_type);
+  
+  eowu::TimeoutHandleWrapper get_timeout_handle_wrapper(const std::string &id,
+                                                        const eowu::TimeoutAggregateMapType *aggregate,
+                                                        const char* const kind);
+  
   void commit_variables(std::vector<char> &into) const;
   void commit_states(std::vector<char> &into) const;
   
@@ -145,6 +163,8 @@ private:
                                              int stack_index,
                                              eowu::LuaFunctionMapType *funcs,
                                              const std::string &kind);
+  
+  std::shared_ptr<eowu::LuaContext> get_lua_context_for_thread();
   
   bool is_render_thread();
   bool is_task_thread();

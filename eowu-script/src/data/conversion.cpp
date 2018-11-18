@@ -112,7 +112,7 @@ void eowu::data::priv::from_lua(const std::string &name, const luabridge::LuaRef
         to->value = parser::get_string_vector_from_table(from);
         
       } else {
-        assert(false);
+        throw eowu::DataConversionError(priv::get_invalid_type_error_message(from));
       }
       
     //  value is key-value map or multi-dimensional array

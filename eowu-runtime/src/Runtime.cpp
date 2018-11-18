@@ -104,8 +104,8 @@ int eowu::Runtime::Main(const std::string &file) {
   
   //
   //  make timeout wrappers
-  auto timeout_wrappers = std::make_shared<TimeoutWrapperLockedResourceType>();
-  script_wrapper.SetTimeoutWrapperContainer(timeout_wrappers);
+  const auto *interval_wrappers = script_wrapper.GetIntervalWrappers();
+  const auto *timeout_wrappers = script_wrapper.GetTimeoutWrappers();
   
   //
   //  otherwise, the gl pipeline and sources are ok.
@@ -122,7 +122,8 @@ int eowu::Runtime::Main(const std::string &file) {
                                  std::ref(thread_state),
                                  std::ref(state_runner),
                                  std::ref(vec_targets),
-                                 timeout_wrappers);
+                                 timeout_wrappers,
+                                 interval_wrappers);
 
   //
 	//	Detach gl-context from main thread.
@@ -147,7 +148,8 @@ int eowu::Runtime::Main(const std::string &file) {
   
   //
   //  Main thread event loop
-  eowu::thread::events(thread_state, context_manager, audio_context);
+  int stop_key_code = eowu::Keyboard::GetKeyCode("escape");
+  eowu::thread::events(thread_state, context_manager, audio_context, stop_key_code);
   
   //  When the events thread is finished (e.g., when the escape key is pressed),
   //  attempt to wait for the render and task threads to finish. If they don't complete

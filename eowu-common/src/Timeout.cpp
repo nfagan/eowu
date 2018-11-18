@@ -6,45 +6,87 @@
 //
 
 #include "Timeout.hpp"
+#include <iostream>
 
 eowu::Timeout::Timeout() :
-duration(eowu::time::zero()), on_ellapsed(&eowu::Timeout::on_ellapsed_noop) {
+type(eowu::Timeout::TIMEOUT),
+duration(eowu::time::zero()),
+is_first_update(true),
+callback(&eowu::Timeout::noop) {
   //
 }
 
+eowu::Timeout::Timeout(eowu::Timeout::Type timeout_type,
+                       const eowu::time::DurationType &dur) :
+type(timeout_type),
+duration(dur),
+is_first_update(true),
+callback(&eowu::Timeout::noop) {
+  //
+}
+
+
 eowu::Timeout::Timeout(const eowu::time::DurationType &dur) :
-duration(dur), on_ellapsed(&eowu::Timeout::on_ellapsed_noop) {
+type(eowu::Timeout::TIMEOUT),
+duration(dur),
+is_first_update(true),
+callback(&eowu::Timeout::noop) {
   //
 }
 
 eowu::Timeout::Timeout(const eowu::Timeout &other) :
-timer(other.timer), duration(other.duration.load()) {
+timer(other.timer),
+duration(other.duration.load()),
+is_first_update(other.is_first_update.load()) {
   std::unique_lock<std::recursive_mutex> other_lock(other.mut);
   
-  on_ellapsed = other.on_ellapsed;
+  callback = other.callback;
+  type = other.type;
 }
 
 void eowu::Timeout::Reset() {
   timer.Reset();
-  SetOnEllapsed(&eowu::Timeout::on_ellapsed_noop);
+  
+  if (type == eowu::Timeout::TIMEOUT) {
+    SetCallback(&eowu::Timeout::noop);
+  }
+}
+
+void eowu::Timeout::Cancel() {
+  timer.Reset();
+  SetCallback(&eowu::Timeout::noop);
 }
 
 void eowu::Timeout::Update() {
   timer.Update();
   
-  if (timer.Ellapsed() >= duration.load()) {
-    std::unique_lock<std::recursive_mutex> lock(mut);
-    
-    on_ellapsed();
+  bool interval_crit = type == eowu::Timeout::INTERVAL && is_first_update.load();
+  bool duration_crit = timer.Ellapsed() >= duration.load();
+  
+  if (interval_crit) {
+    trigger_callback();
+    is_first_update = false;
+  } else if (duration_crit) {
+    trigger_callback();
   }
 }
 
-void eowu::Timeout::SetOnEllapsed(const std::function<void()> &cb) {
+void eowu::Timeout::trigger_callback() {
   std::unique_lock<std::recursive_mutex> lock(mut);
-  
-  on_ellapsed = cb;
+  callback();
+  Reset();
 }
 
-void eowu::Timeout::on_ellapsed_noop() {
+eowu::Timeout::Type eowu::Timeout::GetType() const {
+  return type;
+}
+
+void eowu::Timeout::SetCallback(const std::function<void()> &cb) {
+  std::unique_lock<std::recursive_mutex> lock(mut);
+  
+  callback = cb;
+}
+
+void eowu::Timeout::noop() {
   //
 }

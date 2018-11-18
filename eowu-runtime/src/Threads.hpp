@@ -53,15 +53,17 @@ namespace eowu {
     void task(eowu::thread::SharedState &state,
               eowu::StateRunner &state_runner,
               const std::vector<std::shared_ptr<eowu::XYTarget>> &targets,
-              eowu::TimeoutWrapperContainerType timeouts);
+              const eowu::TimeoutAggregateMapType *timeouts,
+              const eowu::TimeoutAggregateMapType *intervals);
     
     bool try_update_task(eowu::StateRunner &state_runner);
-    bool try_update_targets(const std::vector<std::shared_ptr<eowu::XYTarget>> &targets);
-    bool try_update_timeouts(const eowu::TimeoutWrapperContainerType &timeouts);
+    void try_update_targets(const std::vector<std::shared_ptr<eowu::XYTarget>> &targets);
+    void try_update_timeouts(const eowu::TimeoutAggregateMapType *timeouts, const char *const kind);
     
     void events(eowu::thread::SharedState &state,
                 std::shared_ptr<eowu::ContextManager> context_manager,
-                std::shared_ptr<eowu::AudioContext> audio_context);
+                std::shared_ptr<eowu::AudioContext> audio_context,
+                int stop_key_code);
     
     bool try_await_thread_finish(const eowu::thread::SharedState &state,
                               eowu::time::DurationType timeout);

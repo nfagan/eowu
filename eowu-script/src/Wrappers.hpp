@@ -18,6 +18,7 @@
 #include "TargetWrapper.hpp"
 #include "TargetSetWrapper.hpp"
 #include "TimeoutWrapper.hpp"
+#include "TimeoutHandleWrapper.hpp"
 #include "TimeWrapper.hpp"
 #include "VariableWrapper.hpp"
 #include "VariablesWrapper.hpp"
