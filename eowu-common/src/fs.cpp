@@ -17,7 +17,8 @@
 #include <windows.h>
 #else
 #include <dirent.h>
-#include <stdio.h> 
+#include <stdio.h>
+#include <unistd.h>
 #endif
 
 std::string eowu::fs::get_eowu_root_directory(bool *success) {
@@ -114,6 +115,20 @@ bool eowu::fs::directory_exists(const std::string &path) {
     return false;
   }
 }
+
+#ifndef EOWU_IS_WIN
+bool eowu::fs::change_directory(const std::string &path) {
+  return chdir(path.c_str()) == 0;
+}
+#else
+bool eowu::fs::change_directory(const std::string &path) {
+  if (!SetCurrentDirectory(path.c_str())) {
+    return false;
+  } else {
+    return true;
+  }
+}
+#endif
 
 std::string eowu::fs::nonexistent_directory_message(const std::string &path, const std::string &type) {
   return "Directory '" + path + "' of type '" + type + "' does not exist.";

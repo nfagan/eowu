@@ -169,21 +169,41 @@ int eowu::ScriptWrapper::SetRenderFunctionPair(lua_State *L) {
   eowu::LuaFunction *render_func = nullptr;
   eowu::LuaFunction *flip_func = nullptr;
   
+  int render_stack_index = -3;
+  int flip_stack_index = -2;
+  int offset = 0;
+  
+  bool is_async = true;
+  
   if (n_inputs == 1) {
-    const auto msg = eowu::util::get_message_not_enough_inputs(func_id, 1, 0);
-    throw eowu::LuaError(msg);
+    throw eowu::LuaError(util::get_message_not_enough_inputs(func_id, 1, 0));
+  } else if (n_inputs > 4) {
+    throw eowu::LuaError(util::get_message_wrong_number_of_inputs(func_id, 3, n_inputs));
   }
   
-  int input_index = n_inputs > 2 ? -2 : -1;
-  render_func = get_function_from_state(L, input_index, render_functions.get(), "render");
+  if (n_inputs == 2) {
+    offset = 2;
+  } else if (n_inputs == 3) {
+    offset = 1;
+  } else {
+    offset = 0;
+    is_async = eowu::parser::get_bool_or_error_from_state(L, -1);
+  }
   
-  if (n_inputs > 2) {
-    flip_func = get_function_from_state(L, -1, flip_functions.get(), "flip");
+  render_stack_index += offset;
+  flip_stack_index += offset;
+  
+  if (!lua_isnil(L, render_stack_index)) {
+    render_func = get_function_from_state(L, render_stack_index, render_functions.get(), "render");
+  }
+  
+  if (n_inputs > 2 && !lua_isnil(L, flip_stack_index)) {
+    flip_func = get_function_from_state(L, flip_stack_index, flip_functions.get(), "flip");
   }
   
   //  If this is the render thread, don't attempt
   //  to queue the functions -- just set them on the next frame.
-  if (is_render_thread()) {
+  if (is_render_thread() || !is_async) {
     lua_render_thread_functions->Set(render_func, flip_func);
   } else {
     lua_render_thread_functions->Queue(render_func, flip_func);
@@ -325,48 +345,13 @@ eowu::AudioSourceWrapper eowu::ScriptWrapper::GetAudioSourceWrapper(const std::s
   return source_wrapper;
 }
 
-#if false
-eowu::TimeoutWrapper* eowu::ScriptWrapper::MakeTimeout(const std::string &id, int ms, luabridge::LuaRef func) {
-  const char* const func_id = "MakeTimeout";
-  
-  auto lua_context = get_lua_context_for_thread();
-  
-  if (!func.isFunction()) {
-    lua_State *L = func.state();
-    auto type = func.type();
-    
-    std::string msg = eowu::util::get_message_wrong_input_type(func_id, "function", lua_typename(L, type));
-    
-    throw eowu::LuaError(msg);
-  }
-  
-  eowu::TimeoutWrapper *wrapper = nullptr;
-  eowu::time::DurationType duration = std::chrono::milliseconds(ms);
-  
-  eowu::ScriptWrapper::timeout_wrappers->Use([&](auto &timeout_map) -> void {
-    eowu::Timeout::Type timeout_type = eowu::Timeout::TIMEOUT;
-    
-    auto wrapper_to_store = std::make_unique<eowu::TimeoutWrapper>(lua_context, func, timeout_type, duration);
-    wrapper = wrapper_to_store.get();
-    
-    timeout_map[id] = std::move(wrapper_to_store);
-  });
-  
-  assert(wrapper);
-  
-  return wrapper;
-}
-#endif
-
 eowu::TimeoutHandleWrapper eowu::ScriptWrapper::MakeTimeout(const std::string &id, int ms, luabridge::LuaRef func) {
   auto *wrappers = &eowu::ScriptWrapper::timeout_wrappers;
-  
   return make_timeout(wrappers, id, ms, func, "MakeTimeout", eowu::Timeout::TIMEOUT);
 }
 
 eowu::TimeoutHandleWrapper eowu::ScriptWrapper::MakeInterval(const std::string &id, int ms, luabridge::LuaRef func) {
   auto *wrappers = &eowu::ScriptWrapper::interval_wrappers;
-  
   return make_timeout(wrappers, id, ms, func, "MakeInterval", eowu::Timeout::INTERVAL);
 }
 
@@ -558,16 +543,7 @@ eowu::LuaFunction* eowu::ScriptWrapper::get_function_from_state(lua_State *L,
                                                                 int stack_index,
                                                                 eowu::LuaFunctionMapType *funcs,
                                                                 const std::string &kind) {
-  using eowu::util::get_message_wrong_input_type;
-  
-  auto ref = luabridge::LuaRef::fromStack(L, stack_index);
-  
-  if (!ref.isString()) {
-    const std::string msg = get_message_wrong_input_type("Render", "function", lua_typename(L, ref.type()));
-    throw eowu::LuaError(msg);
-  }
-  
-  const std::string func_id = ref.cast<std::string>();
+  auto func_id = eowu::parser::get_string_or_error_from_state(L, stack_index);
   const auto &it = funcs->find(func_id);
   
   if (it == funcs->end()) {

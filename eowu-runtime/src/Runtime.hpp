@@ -15,18 +15,7 @@
 struct lua_State;
 
 namespace eowu {
-  class Runtime;
-  class GLPipeline;
-  
-  namespace thread {
-    struct SharedState;
+  namespace runtime {
+    int main(const std::string &file);
   }
 }
-
-class eowu::Runtime {
-public:
-  Runtime() = default;
-  ~Runtime() = default;
-  
-  int Main(const std::string &file);
-};

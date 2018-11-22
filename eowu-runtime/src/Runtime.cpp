@@ -21,7 +21,7 @@
 #include <iostream>
 #include <thread>
 
-int eowu::Runtime::Main(const std::string &file) {
+int eowu::runtime::main(const std::string &file) {
   eowu::ScriptWrapper script_wrapper;
   eowu::StateManager state_manager;
   eowu::StateRunner state_runner;
