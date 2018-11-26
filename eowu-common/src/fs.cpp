@@ -10,6 +10,7 @@
 #include <string_view>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <mutex>
 
 #include <iostream>
 
@@ -21,21 +22,19 @@
 #include <unistd.h>
 #endif
 
-std::string eowu::fs::get_eowu_root_directory(bool *success) {
-  std::string file = __FILE__;
-  return eowu::fs::get_outer_directory(file, 3, success);
+namespace {
+  static std::string eowu__root_directory = eowu::fs::get_outer_directory(__FILE__, 3);
+  static std::mutex eowu__root_directory_mutex;
+}
+
+void eowu::fs::set_eowu_root_directory(const std::string &path) {
+  std::lock_guard<std::mutex> lock(eowu__root_directory_mutex);
+  eowu__root_directory = path;
 }
 
 std::string eowu::fs::get_eowu_root_directory() {
-  bool success;
-  
-  std::string result = get_eowu_root_directory(&success);
-  
-  if (!success) {
-    return "";
-  }
-  
-  return result;
+  std::lock_guard<std::mutex> lock(eowu__root_directory_mutex);
+  return eowu__root_directory;
 }
 
 std::string eowu::fs::get_outer_directory(const std::string &inner_dir, std::size_t n_levels, bool *success) {
@@ -59,6 +58,18 @@ std::string eowu::fs::get_outer_directory(const std::string &inner_dir, std::siz
   }
   
   return result;
+}
+
+std::string eowu::fs::get_outer_directory(const std::string &inner_dir, std::size_t n_levels) {
+  bool success;
+  
+  auto res = get_outer_directory(inner_dir, n_levels, &success);
+  
+  if (!success) {
+    return "";
+  } else {
+    return res;
+  }
 }
 
 std::string eowu::fs::get_outer_directory(const std::string &inner_dir, bool *success) {

@@ -19,6 +19,7 @@ void eowu::FilesystemWrapper::CreateLuaSchema(lua_State *L) {
   .beginNamespace(eowu::constants::eowu_namespace)
   .beginNamespace(eowu::constants::eowu_fs_namespace)
   .addFunction("root", &eowu::FilesystemWrapper::get_eowu_root_directory)
+  .addFunction("setroot", &eowu::FilesystemWrapper::set_eowu_root_directory)
   .addFunction("fullfile", &eowu::FilesystemWrapper::full_file)
   .addCFunction("dir", &eowu::FilesystemWrapper::dir)
   .addCFunction("find", &eowu::FilesystemWrapper::find)
@@ -127,6 +128,10 @@ int eowu::FilesystemWrapper::dir(lua_State *L) {
   }
   
   return 1;
+}
+
+void eowu::FilesystemWrapper::set_eowu_root_directory(const std::string &path) {
+  eowu::fs::set_eowu_root_directory(path);
 }
 
 std::string eowu::FilesystemWrapper::get_eowu_root_directory() {
