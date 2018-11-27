@@ -20,22 +20,24 @@ void eowu::StateRunner::Begin(eowu::State *state) {
 bool eowu::StateRunner::Update() {
   timer.Update();
   
-  if (active_state == nullptr || runner_should_exit) {
+  eowu::State *current_active_state = active_state.load();
+  
+  if (current_active_state == nullptr || runner_should_exit) {
     return true;
   }
   
   //  If entering, loop will be called right afterwards.
   //  But if exiting, loop won't be called afterwards.
   if (IsNewState()) {
-    active_state->OnEntry();
+    current_active_state->OnEntry();
     is_new_state = false;
   }
   
-  if (active_state->ShouldExit()) {
-    active_state->OnExit();
-    next(active_state->GetNext());
+  if (current_active_state->ShouldExit()) {
+    current_active_state->OnExit();
+    next(current_active_state->GetNext());
   } else {
-    active_state->OnLoop();
+    current_active_state->OnLoop();
   }
   
   return false;
@@ -49,12 +51,18 @@ const eowu::Timer& eowu::StateRunner::GetTimer() const {
   return timer;
 }
 
+const eowu::State* eowu::StateRunner::GetActiveState() const {
+  return active_state;
+}
+
 bool eowu::StateRunner::IsNewState() const {
   return is_new_state;
 }
 
 bool eowu::StateRunner::ActiveStateWillExit() const {
-  return active_state != nullptr && active_state->ShouldExit();
+  eowu::State *current_active_state = active_state.load();
+  
+  return current_active_state != nullptr && current_active_state->ShouldExit();
 }
 
 void eowu::StateRunner::next(eowu::State *state) {

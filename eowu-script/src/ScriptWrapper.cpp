@@ -292,6 +292,18 @@ eowu::StateWrapper* eowu::ScriptWrapper::GetStateWrapper(const std::string &id) 
   return it->second.get();
 }
 
+eowu::StateWrapper* eowu::ScriptWrapper::GetActiveStateWrapper() const {
+  assert(IsComplete());
+  
+  const eowu::State *active_state = state_runner->GetActiveState();
+  
+  if (active_state == nullptr) {
+    throw eowu::LuaError("Requested a handle to the active state, but no active state was present.");
+  }
+  
+  return GetStateWrapper(active_state->GetId());
+}
+
 eowu::RendererWrapper eowu::ScriptWrapper::GetRendererWrapper() const {
   assert(IsComplete());
   
@@ -583,6 +595,7 @@ void eowu::ScriptWrapper::CreateLuaSchema(lua_State *L) {
   .addFunction("Timeout", &eowu::ScriptWrapper::GetTimeoutHandleWrapper)
   .addFunction("Interval", &eowu::ScriptWrapper::GetIntervalHandleWrapper)
   .addFunction("State", &eowu::ScriptWrapper::GetStateWrapper)
+  .addFunction("CurrentState", &eowu::ScriptWrapper::GetActiveStateWrapper)
   .addFunction("Render", &eowu::ScriptWrapper::SetRenderFunctionPair)
   .addFunction("Renderer", &eowu::ScriptWrapper::GetRendererWrapper)
   .addFunction("Variable", &eowu::ScriptWrapper::GetVariable)

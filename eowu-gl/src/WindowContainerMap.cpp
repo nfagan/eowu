@@ -20,6 +20,11 @@ bool eowu::WindowContainerMap::Has(const std::string &id) const {
   return windows.count(id) > 0;
 }
 
+std::size_t eowu::WindowContainerMap::Size() const {
+  std::lock_guard<std::mutex> lock(mut);
+  return windows.size();
+}
+
 std::vector<std::string> eowu::WindowContainerMap::Keys() const {
   return keys;
 }

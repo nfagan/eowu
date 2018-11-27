@@ -542,7 +542,8 @@ std::string eowu::parser::get_string_or(const eowu::parser::MapTableType &table,
 }
 
 std::string eowu::parser::get_string_or_type_error(const eowu::parser::MapTableType &table,
-                                                   const std::string &key, const std::string &dflt) {
+                                                   const std::string &key,
+                                                   const std::string &dflt) {
   
   if (table.count(key) == 0) {
     return dflt;

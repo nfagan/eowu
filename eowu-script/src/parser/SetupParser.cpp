@@ -332,7 +332,6 @@ eowu::parser::ParseResult<eowu::schema::Stimulus> eowu::parser::stimulus(const l
   auto kv = get_string_map_from_table(table);
   
   try {
-    //  geometry is required
     value.stimulus_id = stimulus_id;
     value.geometry_id = get_string_or_type_error(kv, "geometry", "");
     value.texture_id = get_string_or_type_error(kv, "texture", "");

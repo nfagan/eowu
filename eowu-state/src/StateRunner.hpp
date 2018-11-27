@@ -31,8 +31,10 @@ public:
   bool ActiveStateWillExit() const;
   
   const eowu::Timer& GetTimer() const;
+  const eowu::State* GetActiveState() const;
 private:
-  eowu::State *active_state;
+  std::atomic<eowu::State*> active_state;
+  
   bool is_new_state;
   eowu::Timer timer;
   

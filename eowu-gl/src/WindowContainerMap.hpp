@@ -12,6 +12,7 @@
 #include <mutex>
 #include <vector>
 #include <string>
+#include <cstddef>
 
 namespace eowu {
   class Window;
@@ -28,6 +29,8 @@ public:
   std::shared_ptr<eowu::Window> Get() const;
   bool Has(const std::string &id) const;
   std::vector<std::string> Keys() const;
+  
+  std::size_t Size() const;
   
 private:
   mutable std::mutex mut;

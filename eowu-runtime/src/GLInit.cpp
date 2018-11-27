@@ -47,6 +47,16 @@ eowu::SetupStatus eowu::init::create_textures(std::shared_ptr<eowu::GLPipeline> 
                                               const eowu::schema::Setup &schema) {
   eowu::SetupStatus result;
   
+  auto n_windows = gl_pipeline->GetWindowContainer()->Size();
+  
+  if (n_windows == 0) {
+    EOWU_LOG_INFO("init::create_texture: No windows specified. Ignoring textures.");
+    
+    result.success = true;
+    
+    return result;
+  }
+  
   auto texture_manager = gl_pipeline->GetTextureManager();
   
   const auto &textures = schema.textures.mapping;

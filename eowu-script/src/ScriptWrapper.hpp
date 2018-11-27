@@ -90,6 +90,7 @@ public:
   const eowu::TimeoutAggregateMapType* GetTimeoutWrappers() const;
   
   eowu::StateWrapper* GetStateWrapper(const std::string &id) const;
+  eowu::StateWrapper* GetActiveStateWrapper() const;
   eowu::KeyboardWrapper* GetKeyboardWrapper() const;
   eowu::TargetWrapper* GetTargetWrapper(const std::string &id);
   eowu::TargetSetWrapper* GetTargetSetWrapper(const std::string &id);
