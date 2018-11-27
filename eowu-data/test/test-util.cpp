@@ -10,11 +10,7 @@
 #include <assert.h>
 
 std::string eowu::test::util::get_test_data_dir() {
-  bool success;
-  
-  const auto eowu_root = eowu::fs::get_eowu_root_directory(&success);
-  
-  assert(success);
+  const auto eowu_root = eowu::fs::get_eowu_root_directory();
   
   return eowu_root + "/eowu-data/data";
 }

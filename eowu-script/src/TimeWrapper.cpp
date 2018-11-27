@@ -20,8 +20,10 @@ void eowu::time::wrapper::CreateLuaSchema(lua_State *L) {
 }
 
 double eowu::time::wrapper::now() {
-  auto c_time = eowu::time::now();
-  auto msecs = std::chrono::time_point_cast<std::chrono::milliseconds>(c_time);
+  static auto start_time = eowu::time::now();
   
-  return msecs.time_since_epoch().count();
+  auto c_time = eowu::time::now();
+  auto micro_secs = std::chrono::duration_cast<std::chrono::microseconds>(c_time - start_time);
+  
+  return micro_secs.count();
 }

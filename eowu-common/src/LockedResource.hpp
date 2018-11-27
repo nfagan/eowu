@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <thread>
 #include <functional>
 #include <mutex>
 
@@ -26,8 +27,15 @@ public:
   void Use(const std::function<void(const T&)> &cb) const;
   void Use(const std::function<void(T&)> &cb);
   
+  void UnsafeUseUnlocked(const std::function<void(T*)> &cb);
+  void UnsafeUseUnlocked(const std::function<void(const T&)> &cb) const;
+  void UnsafeUseUnlocked(const std::function<void(T&)> &cb);
+  
+  std::thread::id GetLockingThreadId() const;
+  
 private:
   mutable Mutex mut;
+  mutable std::atomic<std::thread::id> locking_thread_id;
   
   T value;
 };

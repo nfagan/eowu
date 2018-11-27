@@ -15,6 +15,7 @@
 #include <string>
 #include <memory>
 #include <mutex>
+#include <atomic>
 
 namespace eowu {
   class LuaContext;
@@ -30,6 +31,7 @@ class eowu::TimeoutWrapper {
 public:
   TimeoutWrapper(std::shared_ptr<eowu::LuaContext> lua_context,
                  const luabridge::LuaRef &func,
+                 eowu::Timeout::Type timeout_type,
                  const eowu::time::DurationType &duration);
   
   ~TimeoutWrapper();
@@ -37,11 +39,15 @@ public:
   void Update();
   void Cancel();
   
+  bool IsCancelled() const;
+  
   static void CreateLuaSchema(lua_State *L);
 private:
   eowu::Timeout timeout;
   std::shared_ptr<eowu::LuaContext> lua_context;
-  eowu::LuaFunction on_ellapsed;
+  eowu::LuaFunction callback;
+  
+  std::atomic<bool> is_canceled;
   
   void configure_timeout();
 };

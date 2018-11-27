@@ -10,29 +10,29 @@
 #include <string_view>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <mutex>
 
 #ifdef EOWU_IS_WIN
 #include <windows.h>
 #else
 #include <dirent.h>
-#include <stdio.h> 
+#include <stdio.h>
+#include <unistd.h>
 #endif
 
-std::string eowu::fs::get_eowu_root_directory(bool *success) {
-  std::string file = __FILE__;
-  return eowu::fs::get_outer_directory(file, 3, success);
+namespace {
+  static std::string eowu__root_directory = eowu::fs::get_outer_directory(__FILE__, 3);
+  static std::mutex eowu__root_directory_mutex;
+}
+
+void eowu::fs::set_eowu_root_directory(const std::string &path) {
+  std::lock_guard<std::mutex> lock(eowu__root_directory_mutex);
+  eowu__root_directory = path;
 }
 
 std::string eowu::fs::get_eowu_root_directory() {
-  bool success;
-  
-  std::string result = get_eowu_root_directory(&success);
-  
-  if (!success) {
-    return "";
-  }
-  
-  return result;
+  std::lock_guard<std::mutex> lock(eowu__root_directory_mutex);
+  return eowu__root_directory;
 }
 
 std::string eowu::fs::get_outer_directory(const std::string &inner_dir, std::size_t n_levels, bool *success) {
@@ -56,6 +56,18 @@ std::string eowu::fs::get_outer_directory(const std::string &inner_dir, std::siz
   }
   
   return result;
+}
+
+std::string eowu::fs::get_outer_directory(const std::string &inner_dir, std::size_t n_levels) {
+  bool success;
+  
+  auto res = get_outer_directory(inner_dir, n_levels, &success);
+  
+  if (!success) {
+    return "";
+  } else {
+    return res;
+  }
 }
 
 std::string eowu::fs::get_outer_directory(const std::string &inner_dir, bool *success) {
@@ -112,6 +124,20 @@ bool eowu::fs::directory_exists(const std::string &path) {
     return false;
   }
 }
+
+#ifndef EOWU_IS_WIN
+bool eowu::fs::change_directory(const std::string &path) {
+  return chdir(path.c_str()) == 0;
+}
+#else
+bool eowu::fs::change_directory(const std::string &path) {
+  if (!SetCurrentDirectory(path.c_str())) {
+    return false;
+  } else {
+    return true;
+  }
+}
+#endif
 
 std::string eowu::fs::nonexistent_directory_message(const std::string &path, const std::string &type) {
   return "Directory '" + path + "' of type '" + type + "' does not exist.";
@@ -170,8 +196,16 @@ std::string eowu::fs::full_file(const std::vector<std::string> &components) {
   return result;
 }
 
-#ifdef EOWU_IS_WIN
 bool eowu::fs::require_directory(const std::string &path) {
+  if (eowu::fs::directory_exists(path)) {
+    return true;
+  }
+  
+  return eowu::fs::make_directory(path);
+}
+
+#ifdef EOWU_IS_WIN
+bool eowu::fs::make_directory(const std::string &path) {
   const char *path_str = path.c_str();
   
   if (CreateDirectory(path_str, NULL)) {
@@ -181,7 +215,7 @@ bool eowu::fs::require_directory(const std::string &path) {
   }
 }
 #else
-bool eowu::fs::require_directory(const std::string &path) {
+bool eowu::fs::make_directory(const std::string &path) {
   // https://codeyarns.com/2014/08/07/how-to-create-directory-using-c-on-linux/
   const int dir_err = mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
   

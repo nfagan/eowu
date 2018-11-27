@@ -10,9 +10,23 @@
 #include <string>
 #include <iostream>
 
+namespace {
+  std::string get_example_file(int argc, char** argv) {
+    auto repo_root = eowu::fs::get_eowu_root_directory();
+    
+    std::string demo_folder;
+    
+    if (argc > 2) {
+      demo_folder = argv[2];
+    } else {
+      demo_folder = "sound";
+    }
+    
+    return eowu::fs::full_file({repo_root, "examples", demo_folder, "setup.lua"});
+  }
+}
+
 int main(int argc, char** argv) {
-  eowu::Runtime runtime;
-  
   std::string file;
   
   if (argc < 2) {
@@ -21,11 +35,10 @@ int main(int argc, char** argv) {
   } else {
     file = argv[1];
     
-    if (file == "--demo") {
-      auto repo_root = eowu::fs::get_eowu_root_directory();
-      file = eowu::fs::full_file({repo_root, "examples", "sound", "setup.lua"});
+    if (file == "--example") {
+      file = get_example_file(argc, argv);
     }
   }
   
-  return runtime.Main(file);
+  return eowu::runtime::main(file);
 }

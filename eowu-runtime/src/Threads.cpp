@@ -6,6 +6,7 @@
 //
 
 #include "Threads.hpp"
+#include "Error.hpp"
 #include <eowu-script/eowu-script.hpp>
 #include <eowu-state/eowu-state.hpp>
 #include <eowu-common/logging.hpp>
@@ -15,6 +16,8 @@
 #include <stdexcept>
 #include <cstddef>
 #include <chrono>
+#include <unordered_set>
+#include <string>
 
 #ifdef EOWU_DEBUG
 #include <iostream>
@@ -30,7 +33,8 @@ timing(task_timer) {
 void eowu::thread::task(eowu::thread::SharedState &state,
                         eowu::StateRunner &state_runner,
                         const std::vector<std::shared_ptr<eowu::XYTarget>> &targets,
-                        eowu::TimeoutWrapperContainerType timeouts) {
+                        const eowu::TimeoutAggregateMapType *timeouts,
+                        const eowu::TimeoutAggregateMapType *intervals) {
   
   state.task_thread_initialized.store(true);
   
@@ -42,31 +46,35 @@ void eowu::thread::task(eowu::thread::SharedState &state,
   
   bool should_proceed = true;
   
+  const char* const interval_id = "INTERVAL";
+  const char* const timeout_id = "TIMEOUT";
+  
   while (state.threads_should_continue && should_proceed) {
     
     //  If the current state will exit on this frame, update the targets
     //  before calling the user-supplied exit() function. Otherwise, update
     //  the targets *after* the user-supplied entry() or loop() functions.
-    bool active_state_will_exit = state_runner.ActiveStateWillExit();
     
-    if (active_state_will_exit) {
-      should_proceed = eowu::thread::try_update_targets(targets);
+    try {
+      bool active_state_will_exit = state_runner.ActiveStateWillExit();
       
-      if (should_proceed) {
-        should_proceed = eowu::thread::try_update_timeouts(timeouts); //  should go after targets so they can cancel.
+      if (active_state_will_exit) {
+        eowu::thread::try_update_targets(targets);
+        eowu::thread::try_update_timeouts(timeouts, timeout_id); //  should go after targets so they can cancel.
+        eowu::thread::try_update_timeouts(intervals, interval_id);
       }
-    }
-    
-    if (should_proceed) {
+      
       should_proceed = eowu::thread::try_update_task(state_runner);
-    }
-    
-    if (should_proceed && !active_state_will_exit) {
-      should_proceed = eowu::thread::try_update_targets(targets);
       
-      if (should_proceed) {
-        should_proceed = eowu::thread::try_update_timeouts(timeouts);
+      if (should_proceed && !active_state_will_exit) {
+        eowu::thread::try_update_targets(targets);
+        eowu::thread::try_update_timeouts(timeouts, timeout_id);
+        eowu::thread::try_update_timeouts(intervals, interval_id);
       }
+    } catch (const eowu::RuntimeError &e) {
+      eowu::thread::print_error(e.context, e.what());
+      
+      should_proceed = false;
     }
   }
   
@@ -74,22 +82,17 @@ void eowu::thread::task(eowu::thread::SharedState &state,
   state.task_thread_completed = true;
 }
 
-bool eowu::thread::try_update_timeouts(const eowu::TimeoutWrapperContainerType &timeouts) {
-  bool should_proceed = true;
-  
-  timeouts->Use([&should_proceed](auto &timeout_map) -> void {
-    for (auto &it : timeout_map) {
+void eowu::thread::try_update_timeouts(const eowu::TimeoutAggregateMapType *timeouts,
+                                       const char* const kind) {
+  timeouts->Use([kind](auto &map) -> void {
+    for (const auto &it : map) {
       try {
-        it.second->Update();
+        it.second.wrapper->Update();
       } catch (const std::exception &e) {
-        eowu::thread::print_error("TIMEOUT", e.what());
-        should_proceed = false;
-        return;
+        throw eowu::RuntimeError(kind, e.what());
       }
     }
   });
-  
-  return should_proceed;
 }
 
 bool eowu::thread::try_update_task(eowu::StateRunner &state_runner) {
@@ -103,15 +106,13 @@ bool eowu::thread::try_update_task(eowu::StateRunner &state_runner) {
     should_proceed = !state_runner.Update();
     
   } catch (const std::exception &e) {
-    eowu::thread::print_error("TASK", e.what());
-    
-    should_proceed = false;
+    throw eowu::RuntimeError("TASK", e.what());
   }
   
   return should_proceed;
 }
 
-bool eowu::thread::try_update_targets(const std::vector<std::shared_ptr<eowu::XYTarget>> &targets) {
+void eowu::thread::try_update_targets(const std::vector<std::shared_ptr<eowu::XYTarget>> &targets) {
   std::size_t sz = targets.size();
   
   for (std::size_t i = 0; i < sz; i++) {
@@ -120,13 +121,9 @@ bool eowu::thread::try_update_targets(const std::vector<std::shared_ptr<eowu::XY
     try {
       targ->Update();
     } catch (const std::exception &e) {
-      eowu::thread::print_error("TARGET", e.what());
-      
-      return false;
+      throw eowu::RuntimeError("TARGET", e.what());
     }
   }
-  
-  return true;
 }
 
 void eowu::thread::render(eowu::thread::SharedState &state,
@@ -251,9 +248,9 @@ bool eowu::thread::try_call_render(const std::shared_ptr<eowu::LuaContext> &lua_
 
 void eowu::thread::events(eowu::thread::SharedState &state,
                           std::shared_ptr<eowu::ContextManager> context_manager,
-                          std::shared_ptr<eowu::AudioContext> audio_context) {
+                          std::shared_ptr<eowu::AudioContext> audio_context,
+                          int stop_key_code) {
   
-  int key_code = eowu::Keyboard::GetKeyCode("escape");
   auto &kb = context_manager->GetKeyboard();
   
   //  main events loop
@@ -261,7 +258,7 @@ void eowu::thread::events(eowu::thread::SharedState &state,
     context_manager->PollEvents();
     audio_context->Update();
     
-    if (kb.IsPressed(key_code)) {
+    if (kb.IsPressed(stop_key_code)) {
       state.threads_should_continue = false;
     }
   }

@@ -9,6 +9,7 @@
 #include "Wrappers.hpp"
 #include "Constants.hpp"
 #include "LockedLuaRenderFunctions.hpp"
+#include "TimeoutHandle.hpp"
 #include "Lua.hpp"
 #include "Error.hpp"
 #include "RuntimeUtil.hpp"
@@ -57,7 +58,10 @@ std::unordered_map<std::string, std::shared_ptr<eowu::AudioBufferSource>> eowu::
 std::unordered_map<std::string, std::unique_ptr<eowu::TargetSetWrapper>> eowu::ScriptWrapper::target_sets{};
 //
 //  timeouts
-eowu::TimeoutWrapperContainerType eowu::ScriptWrapper::timeout_wrappers = nullptr;
+eowu::TimeoutAggregateMapType eowu::ScriptWrapper::timeout_wrappers{};
+//
+//  intervals
+eowu::TimeoutAggregateMapType eowu::ScriptWrapper::interval_wrappers{};
 //
 //  keyboard
 std::unique_ptr<eowu::KeyboardWrapper> eowu::ScriptWrapper::keyboard = nullptr;
@@ -153,10 +157,6 @@ void eowu::ScriptWrapper::SetTargetWrapperContainer(const std::unordered_map<std
   eowu::ScriptWrapper::target_wrappers = targets;
 }
 
-void eowu::ScriptWrapper::SetTimeoutWrapperContainer(eowu::TimeoutWrapperContainerType timeouts) {
-  eowu::ScriptWrapper::timeout_wrappers = timeouts;
-}
-
 void eowu::ScriptWrapper::SetXYTargets(const std::unordered_map<std::string, std::shared_ptr<eowu::XYTarget>> &targets) {
   eowu::ScriptWrapper::xy_targets = targets;
 }
@@ -169,21 +169,41 @@ int eowu::ScriptWrapper::SetRenderFunctionPair(lua_State *L) {
   eowu::LuaFunction *render_func = nullptr;
   eowu::LuaFunction *flip_func = nullptr;
   
+  int render_stack_index = -3;
+  int flip_stack_index = -2;
+  int offset = 0;
+  
+  bool is_async = true;
+  
   if (n_inputs == 1) {
-    const auto msg = eowu::util::get_message_not_enough_inputs(func_id, 1, 0);
-    throw eowu::LuaError(msg);
+    throw eowu::LuaError(util::get_message_not_enough_inputs(func_id, 1, 0));
+  } else if (n_inputs > 4) {
+    throw eowu::LuaError(util::get_message_wrong_number_of_inputs(func_id, 3, n_inputs));
   }
   
-  int input_index = n_inputs > 2 ? -2 : -1;
-  render_func = get_function_from_state(L, input_index, render_functions.get(), "render");
+  if (n_inputs == 2) {
+    offset = 2;
+  } else if (n_inputs == 3) {
+    offset = 1;
+  } else {
+    offset = 0;
+    is_async = eowu::parser::get_bool_or_error_from_state(L, -1);
+  }
   
-  if (n_inputs > 2) {
-    flip_func = get_function_from_state(L, -1, flip_functions.get(), "flip");
+  render_stack_index += offset;
+  flip_stack_index += offset;
+  
+  if (!lua_isnil(L, render_stack_index)) {
+    render_func = get_function_from_state(L, render_stack_index, render_functions.get(), "render");
+  }
+  
+  if (n_inputs > 2 && !lua_isnil(L, flip_stack_index)) {
+    flip_func = get_function_from_state(L, flip_stack_index, flip_functions.get(), "flip");
   }
   
   //  If this is the render thread, don't attempt
   //  to queue the functions -- just set them on the next frame.
-  if (is_render_thread()) {
+  if (is_render_thread() || !is_async) {
     lua_render_thread_functions->Set(render_func, flip_func);
   } else {
     lua_render_thread_functions->Queue(render_func, flip_func);
@@ -194,6 +214,14 @@ int eowu::ScriptWrapper::SetRenderFunctionPair(lua_State *L) {
 
 double eowu::ScriptWrapper::GetEllapsedTime() const {
   return eowu::ScriptWrapper::state_runner->GetTimer().Ellapsed().count();
+}
+
+const eowu::TimeoutAggregateMapType* eowu::ScriptWrapper::GetIntervalWrappers() const {
+  return &eowu::ScriptWrapper::interval_wrappers;
+}
+
+const eowu::TimeoutAggregateMapType* eowu::ScriptWrapper::GetTimeoutWrappers() const {
+  return &eowu::ScriptWrapper::timeout_wrappers;
 }
 
 eowu::ModelWrapper eowu::ScriptWrapper::GetModelWrapper(const std::string &id) const {
@@ -238,22 +266,12 @@ eowu::TargetSetWrapper* eowu::ScriptWrapper::GetTargetSetWrapper(const std::stri
   return it->second.get();
 }
 
-eowu::TimeoutWrapper* eowu::ScriptWrapper::GetTimeoutWrapper(const std::string &id) {
-  assert(IsComplete());
-  
-  eowu::TimeoutWrapper *wrapper = nullptr;
-  
-  timeout_wrappers->Use([&](auto *target_map) -> void {
-    const auto &it = target_map->find(id);
-    
-    if (it == target_map->end()) {
-      throw eowu::NonexistentResourceError::MessageKindId("Timeout", id);
-    }
-    
-    wrapper = it->second.get();
-  });
-  
-  return wrapper;
+eowu::TimeoutHandleWrapper eowu::ScriptWrapper::GetTimeoutHandleWrapper(const std::string &id) {
+  return get_timeout_handle_wrapper(id, &timeout_wrappers, "Timeout");
+}
+
+eowu::TimeoutHandleWrapper eowu::ScriptWrapper::GetIntervalHandleWrapper(const std::string &id) {
+  return get_timeout_handle_wrapper(id, &interval_wrappers, "Interval");
 }
 
 eowu::KeyboardWrapper* eowu::ScriptWrapper::GetKeyboardWrapper() const {
@@ -327,41 +345,14 @@ eowu::AudioSourceWrapper eowu::ScriptWrapper::GetAudioSourceWrapper(const std::s
   return source_wrapper;
 }
 
-eowu::TimeoutWrapper* eowu::ScriptWrapper::MakeTimeout(const std::string &id, int ms, luabridge::LuaRef func) {
-  const char* const func_id = "MakeTimeout";
-  
-  std::shared_ptr<eowu::LuaContext> lua_context = nullptr;
-  
-  if (is_task_thread()) {
-    lua_context = lua_contexts.task;
-  } else if (is_render_thread()) {
-    lua_context = lua_contexts.render;
-  } else {
-    throw eowu::LuaError("Unrecognized thread type.");
-  }
-  
-  if (!func.isFunction()) {
-    lua_State *L = func.state();
-    auto type = func.type();
-    
-    std::string msg = eowu::util::get_message_wrong_input_type(func_id, "function", lua_typename(L, type));
-    
-    throw eowu::LuaError(msg);
-  }
-  
-  eowu::TimeoutWrapper *wrapper = nullptr;
-  eowu::time::DurationType duration = std::chrono::milliseconds(ms);
-  
-  eowu::ScriptWrapper::timeout_wrappers->Use([&](auto &timeout_map) -> void {
-    auto wrapper_to_store = std::make_unique<eowu::TimeoutWrapper>(lua_context, func, duration);
-    wrapper = wrapper_to_store.get();
-    
-    timeout_map[id] = std::move(wrapper_to_store);
-  });
-  
-  assert(wrapper);
-  
-  return wrapper;
+eowu::TimeoutHandleWrapper eowu::ScriptWrapper::MakeTimeout(const std::string &id, int ms, luabridge::LuaRef func) {
+  auto *wrappers = &eowu::ScriptWrapper::timeout_wrappers;
+  return make_timeout(wrappers, id, ms, func, "MakeTimeout", eowu::Timeout::TIMEOUT);
+}
+
+eowu::TimeoutHandleWrapper eowu::ScriptWrapper::MakeInterval(const std::string &id, int ms, luabridge::LuaRef func) {
+  auto *wrappers = &eowu::ScriptWrapper::interval_wrappers;
+  return make_timeout(wrappers, id, ms, func, "MakeInterval", eowu::Timeout::INTERVAL);
 }
 
 eowu::TargetSetWrapper* eowu::ScriptWrapper::MakeTargetSet(const std::string &id, lua_State *L) {
@@ -416,6 +407,77 @@ void eowu::ScriptWrapper::Exit() {
   assert(state_runner);
   
   state_runner->Exit();
+}
+
+eowu::TimeoutHandleWrapper eowu::ScriptWrapper::get_timeout_handle_wrapper(const std::string &id,
+                                                                           const eowu::TimeoutAggregateMapType *aggregate,
+                                                                           const char* const kind) {
+  eowu::TimeoutHandleWrapper timeout_wrapper;
+  
+  aggregate->Use([&](const auto &map) -> void {
+    const auto &it = map.find(id);
+    
+    if (it == map.end()) {
+      throw eowu::NonexistentResourceError::MessageKindId(kind, id);
+    }
+    
+    timeout_wrapper = it->second.handle;
+  });
+  
+  return timeout_wrapper;
+}
+
+eowu::TimeoutHandleWrapper eowu::ScriptWrapper::make_timeout(eowu::TimeoutAggregateMapType *aggregate,
+                                                             const std::string &id,
+                                                             int ms,
+                                                             const luabridge::LuaRef &func,
+                                                             const char* const make_func_id,
+                                                             eowu::Timeout::Type timeout_type) {
+  //  Ensure we're calling from the task thread.
+  if (!is_task_thread()) {
+    throw eowu::LuaError(eowu::util::get_message_wrong_thread(make_func_id, "Render"));
+  }
+  
+  auto lua_context = lua_contexts.task;
+  
+  if (!func.isFunction()) {
+    lua_State *L = func.state();
+    auto type = func.type();
+    
+    std::string msg = eowu::util::get_message_wrong_input_type(make_func_id, "function", lua_typename(L, type));
+    
+    throw eowu::LuaError(msg);
+  }
+  
+  eowu::time::DurationType duration = std::chrono::milliseconds(ms);
+  
+  eowu::TimeoutHandleWrapper handle_wrapper;
+  
+  aggregate->Use([&](auto &map) -> void {
+    auto timeout_wrapper = std::make_shared<eowu::TimeoutWrapper>(lua_context, func, timeout_type, duration);
+    auto timeout_handle = std::make_shared<eowu::TimeoutHandle>(timeout_wrapper.get());
+    
+    auto it = map.find(id);
+    
+    //  We already have a handle / wrapper with this id.
+    if (it != map.end()) {
+      auto &aggregate = it->second;
+      
+      aggregate.wrapper->Cancel();
+      aggregate.handle->Invalidate();
+      aggregate.handle = timeout_handle;
+      
+      aggregate.wrapper = timeout_wrapper;
+    } else {
+      eowu::TimeoutAggregateContents timeout_aggregate{timeout_wrapper, timeout_handle};
+      
+      map.emplace(id, timeout_aggregate);
+    }
+    
+    handle_wrapper = eowu::TimeoutHandleWrapper(timeout_handle);
+  });
+  
+  return handle_wrapper;
 }
 
 void eowu::ScriptWrapper::CommitData() const {
@@ -481,16 +543,7 @@ eowu::LuaFunction* eowu::ScriptWrapper::get_function_from_state(lua_State *L,
                                                                 int stack_index,
                                                                 eowu::LuaFunctionMapType *funcs,
                                                                 const std::string &kind) {
-  using eowu::util::get_message_wrong_input_type;
-  
-  auto ref = luabridge::LuaRef::fromStack(L, stack_index);
-  
-  if (!ref.isString()) {
-    const std::string msg = get_message_wrong_input_type("Render", "function", lua_typename(L, ref.type()));
-    throw eowu::LuaError(msg);
-  }
-  
-  const std::string func_id = ref.cast<std::string>();
+  auto func_id = eowu::parser::get_string_or_error_from_state(L, stack_index);
   const auto &it = funcs->find(func_id);
   
   if (it == funcs->end()) {
@@ -508,6 +561,16 @@ bool eowu::ScriptWrapper::is_task_thread() {
   return std::this_thread::get_id() == eowu::ScriptWrapper::thread_ids.task;
 }
 
+std::shared_ptr<eowu::LuaContext> eowu::ScriptWrapper::get_lua_context_for_thread() {
+  if (is_task_thread()) {
+    return lua_contexts.task;
+  } else if (is_render_thread()) {
+    return lua_contexts.render;
+  } else {
+    throw eowu::LuaError("Unrecognized thread type.");
+  }
+}
+
 void eowu::ScriptWrapper::CreateLuaSchema(lua_State *L) {
   luabridge::getGlobalNamespace(L)
   .beginNamespace(eowu::constants::eowu_namespace)
@@ -517,7 +580,8 @@ void eowu::ScriptWrapper::CreateLuaSchema(lua_State *L) {
   .addFunction("Stimulus", &eowu::ScriptWrapper::GetModelWrapper)
   .addFunction("Target", &eowu::ScriptWrapper::GetTargetWrapper)
   .addFunction("TargetSet", &eowu::ScriptWrapper::GetTargetSetWrapper)
-  .addFunction("Timeout", &eowu::ScriptWrapper::GetTimeoutWrapper)
+  .addFunction("Timeout", &eowu::ScriptWrapper::GetTimeoutHandleWrapper)
+  .addFunction("Interval", &eowu::ScriptWrapper::GetIntervalHandleWrapper)
   .addFunction("State", &eowu::ScriptWrapper::GetStateWrapper)
   .addFunction("Render", &eowu::ScriptWrapper::SetRenderFunctionPair)
   .addFunction("Renderer", &eowu::ScriptWrapper::GetRendererWrapper)
@@ -529,6 +593,7 @@ void eowu::ScriptWrapper::CreateLuaSchema(lua_State *L) {
   .addFunction("Exit", &eowu::ScriptWrapper::Exit)
   .addFunction("MakeTargetSet", &eowu::ScriptWrapper::MakeTargetSet)
   .addFunction("MakeTimeout", &eowu::ScriptWrapper::MakeTimeout)
+  .addFunction("MakeInterval", &eowu::ScriptWrapper::MakeInterval)
   .endClass()
   .endNamespace();
 }

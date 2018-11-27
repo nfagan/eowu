@@ -48,6 +48,7 @@ void eowu::init::init_state_schema(lua_State *L) {
   eowu::TargetWrapper::CreateLuaSchema(L);
   eowu::TargetSetWrapper::CreateLuaSchema(L);
   eowu::TimeoutWrapper::CreateLuaSchema(L);
+  eowu::TimeoutHandleWrapper::CreateLuaSchema(L);
 }
 
 void eowu::init::init_audio_schemas(lua_State *L) {

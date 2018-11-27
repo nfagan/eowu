@@ -13,16 +13,20 @@
 
 namespace eowu {
   namespace fs {
-    std::string get_eowu_root_directory(bool *success);
     std::string get_eowu_root_directory();
+    void set_eowu_root_directory(const std::string &path);
     
     std::string get_outer_directory(const std::string &inner_dir, bool *success);
     std::string get_outer_directory(const std::string &inner_dir, std::size_t n_levels, bool *success);
+    std::string get_outer_directory(const std::string &inner_dir, std::size_t n_levels);
     std::string get_outer_directory(const std::string &inner_dir);
     
+    bool make_directory(const std::string &path);
     bool require_directory(const std::string &path);
     
     bool directory_exists(const std::string &path);
+    bool change_directory(const std::string &path);
+    
     std::string nonexistent_directory_message(const std::string &path, const std::string &type);
     
     std::string full_file(const std::vector<std::string> &components);

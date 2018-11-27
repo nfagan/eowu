@@ -11,8 +11,9 @@
 
 eowu::TimeoutWrapper::TimeoutWrapper(std::shared_ptr<eowu::LuaContext> context,
                                      const luabridge::LuaRef &func,
+                                     eowu::Timeout::Type timeout_type,
                                      const eowu::time::DurationType &duration) :
-timeout(duration), lua_context(context), on_ellapsed(func) {
+timeout(timeout_type, duration), lua_context(context), callback(func), is_canceled(false) {
   configure_timeout();
 }
 
@@ -25,14 +26,22 @@ void eowu::TimeoutWrapper::Update() {
 }
 
 void eowu::TimeoutWrapper::Cancel() {
-  timeout.Reset();
+  timeout.Cancel();
+  is_canceled = true;
+}
+
+bool eowu::TimeoutWrapper::IsCancelled() const {
+  return is_canceled;
 }
 
 void eowu::TimeoutWrapper::configure_timeout() {
   timeout.Reset();
-  timeout.SetOnEllapsed([&]() -> void {
-    lua_context->Call(on_ellapsed);
-    Cancel();
+  timeout.SetCallback([&]() -> void {
+    lua_context->Call(callback);
+    
+    if (timeout.GetType() == eowu::Timeout::TIMEOUT) {
+      is_canceled = true;
+    }
   });
 }
 

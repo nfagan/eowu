@@ -25,6 +25,7 @@ public:
   
 private:
   static std::string get_eowu_root_directory();
+  static void set_eowu_root_directory(const std::string &path);
   static std::string full_file(lua_State *L);
   static int dir(lua_State *L);
   static int find(lua_State *L);

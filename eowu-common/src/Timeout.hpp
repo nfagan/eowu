@@ -18,23 +18,38 @@ namespace eowu {
 
 class eowu::Timeout {
 public:
+  enum Type {
+    TIMEOUT,
+    INTERVAL
+  };
+  
+public:
   Timeout();
   Timeout(const eowu::time::DurationType &duration);
+  Timeout(eowu::Timeout::Type type, const eowu::time::DurationType &duration);
   Timeout(const eowu::Timeout &other);
   ~Timeout() = default;
   
   void Update();
   void Reset();
-  void SetOnEllapsed(const std::function<void()> &cb);
-  bool Ellapsed() const;
+  void Cancel();
+  
+  eowu::Timeout::Type GetType() const;
+  
+  void SetCallback(const std::function<void()> &cb);
   
 private:
   mutable std::recursive_mutex mut;
   
+  eowu::Timeout::Type type;
+  
   eowu::Timer timer;
   std::atomic<eowu::time::DurationType> duration;
+  std::atomic<bool> is_first_update;
   
-  std::function<void()> on_ellapsed;
+  std::function<void()> callback;
   
-  static void on_ellapsed_noop();
+  void trigger_callback();
+  
+  static void noop();
 };
