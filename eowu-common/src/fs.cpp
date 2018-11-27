@@ -11,8 +11,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include <iostream>
-
 #ifdef EOWU_IS_WIN
 #include <windows.h>
 #else
