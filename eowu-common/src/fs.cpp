@@ -12,8 +12,6 @@
 #include <sys/stat.h>
 #include <mutex>
 
-#include <iostream>
-
 #ifdef EOWU_IS_WIN
 #include <windows.h>
 #else
