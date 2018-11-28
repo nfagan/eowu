@@ -102,7 +102,7 @@ public:
   eowu::WindowWrapper GetWindowWrapper(const std::string &id);
   eowu::AudioSourceWrapper GetAudioSourceWrapper(const std::string &id) const;
   
-  double GetEllapsedTime() const;
+  double GetElapsedTime() const;
   void Exit();
   
   std::shared_ptr<eowu::LockedLuaRenderFunctions> GetLockedRenderFunctions() const;

@@ -75,7 +75,7 @@ void test_exit_condition() {
   auto t2 = eowu::time::now();
   
   auto ellapsed = std::chrono::duration<double>(t2 - t1);
-  auto time_ellapsed = res->GetTimer().Ellapsed();
+  auto time_ellapsed = res->GetTimer().Elapsed();
   
   double difference = time_ellapsed.count() - ellapsed.count();
   

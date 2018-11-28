@@ -127,14 +127,14 @@ void eowu::State::entry() {
   
   //  Mark the time of entry in terms of the global clock.
   if (global_timer) {
-    global_time_points.entry = global_timer->Ellapsed();
+    global_time_points.entry = global_timer->Elapsed();
   }
 }
 
 void eowu::State::exit() {
   //  Mark the time of exit in terms of the global clock.
   if (global_timer) {
-    global_time_points.exit = global_timer->Ellapsed();
+    global_time_points.exit = global_timer->Elapsed();
   }
 }
 

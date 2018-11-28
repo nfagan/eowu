@@ -68,7 +68,7 @@ void eowu::Renderer::SetClearColor(const glm::vec3 &color) {
 eowu::time::DurationType eowu::Renderer::Delta() {
   std::lock_guard<std::mutex> guard(mut);
   
-  auto ellapsed = frame_timing.timer.Ellapsed();
+  auto ellapsed = frame_timing.timer.Elapsed();
   frame_timing.timer.Reset();
   
   return ellapsed;

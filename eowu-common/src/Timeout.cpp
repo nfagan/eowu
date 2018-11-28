@@ -61,7 +61,7 @@ void eowu::Timeout::Update() {
   timer.Update();
   
   bool interval_crit = type == eowu::Timeout::INTERVAL && is_first_update.load();
-  bool duration_crit = timer.Ellapsed() >= duration.load();
+  bool duration_crit = timer.Elapsed() >= duration.load();
   
   if (interval_crit) {
     trigger_callback();

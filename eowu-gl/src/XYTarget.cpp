@@ -282,7 +282,7 @@ eowu::time::DurationType eowu::XYTarget::GetTotalTimeInBounds() const {
 
 void eowu::XYTarget::in_bounds() {
   is_in_bounds = true;
-  total_time_in_bounds = timer.Ellapsed();
+  total_time_in_bounds = timer.Elapsed();
   on_ib(this);
 }
 

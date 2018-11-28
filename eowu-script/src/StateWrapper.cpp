@@ -81,8 +81,8 @@ void eowu::StateWrapper::Write(eowu::serialize::ByteArrayType &into) const {
   }
 }
 
-double eowu::StateWrapper::Ellapsed() const {
-  return state->GetTimer().Ellapsed().count();
+double eowu::StateWrapper::Elapsed() const {
+  return state->GetTimer().Elapsed().count();
 }
 
 int eowu::StateWrapper::Exit(lua_State *L) {
@@ -169,7 +169,7 @@ void eowu::StateWrapper::CreateLuaSchema(lua_State *L) {
   .addFunction("Duration", &eowu::StateWrapper::SetDuration)
   .addFunction("Next", &eowu::StateWrapper::SetNextState)
   .addFunction("Exit", &eowu::StateWrapper::Exit)
-  .addFunction("Ellapsed", &eowu::StateWrapper::Ellapsed)
+  .addFunction("Elapsed", &eowu::StateWrapper::Elapsed)
   .addProperty("name", &eowu::StateWrapper::GetName)
   .endClass()
   .endNamespace();

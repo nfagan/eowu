@@ -147,7 +147,7 @@ void eowu::thread::render(eowu::thread::SharedState &state,
   
   //  update the time relative to the task time
   renderer->SetOnBufferSwap([&](auto &win) -> void {
-    render_time.SetCurrentTime(win->GetAlias(), task_timer->Ellapsed().count());
+    render_time.SetCurrentTime(win->GetAlias(), task_timer->Elapsed().count());
   });
   
   //  main loop
@@ -271,11 +271,11 @@ bool eowu::thread::try_await_thread_finish(const eowu::thread::SharedState &stat
   bool threads_completed = state.render_thread_completed && state.task_thread_completed;
   bool did_warn = false;
   
-  while (!threads_completed && timer.Ellapsed() < timeout) {
+  while (!threads_completed && timer.Elapsed() < timeout) {
     threads_completed = state.render_thread_completed && state.task_thread_completed;
     timer.Update();
     
-    if (!did_warn && timer.Ellapsed() >= std::chrono::seconds(1)) {
+    if (!did_warn && timer.Elapsed() >= std::chrono::seconds(1)) {
       std::cout << "WARN: More than 1 second ellapsed waiting for render and/or task threads to complete." << std::endl;
       did_warn = true;
     }

@@ -23,7 +23,7 @@ public:
   
   void Reset();
   void Update();
-  eowu::time::DurationType Ellapsed() const;
+  eowu::time::DurationType Elapsed() const;
   
 private:
   std::atomic<eowu::time::TimePointType> current_time;

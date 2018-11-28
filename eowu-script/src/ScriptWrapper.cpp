@@ -212,8 +212,8 @@ int eowu::ScriptWrapper::SetRenderFunctionPair(lua_State *L) {
   return 0;
 }
 
-double eowu::ScriptWrapper::GetEllapsedTime() const {
-  return eowu::ScriptWrapper::state_runner->GetTimer().Ellapsed().count();
+double eowu::ScriptWrapper::GetElapsedTime() const {
+  return eowu::ScriptWrapper::state_runner->GetTimer().Elapsed().count();
 }
 
 const eowu::TimeoutAggregateMapType* eowu::ScriptWrapper::GetIntervalWrappers() const {
@@ -602,7 +602,7 @@ void eowu::ScriptWrapper::CreateLuaSchema(lua_State *L) {
   .addFunction("Window", &eowu::ScriptWrapper::GetWindowWrapper)
   .addFunction("Keyboard", &eowu::ScriptWrapper::GetKeyboardWrapper)
   .addFunction("Sound", &eowu::ScriptWrapper::GetAudioSourceWrapper)
-  .addFunction("Ellapsed", &eowu::ScriptWrapper::GetEllapsedTime)
+  .addFunction("Elapsed", &eowu::ScriptWrapper::GetElapsedTime)
   .addFunction("Exit", &eowu::ScriptWrapper::Exit)
   .addFunction("MakeTargetSet", &eowu::ScriptWrapper::MakeTargetSet)
   .addFunction("MakeTimeout", &eowu::ScriptWrapper::MakeTimeout)

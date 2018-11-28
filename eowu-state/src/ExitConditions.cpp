@@ -9,5 +9,5 @@
 #include "State.hpp"
 
 bool eowu::exit_conditions::time_exceeded(const State *state, eowu::time::DurationType duration) {
-  return state->GetTimer().Ellapsed() > duration;
+  return state->GetTimer().Elapsed() > duration;
 }

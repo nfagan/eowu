@@ -29,7 +29,7 @@ void test_timer_ellapsed() {
     }
   }
   
-  auto ellapsed = timer.Ellapsed();
+  auto ellapsed = timer.Elapsed();
   
   if (abs(ellapsed.count() - limit) < thresh) {
     std::cout << "ERROR: Ellapsed time was more than " << limit << " seconds off from actual time." << std::endl;

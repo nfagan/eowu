@@ -24,6 +24,6 @@ void eowu::Timer::Update() {
   current_time = eowu::time::now();
 }
 
-eowu::time::DurationType eowu::Timer::Ellapsed() const {
+eowu::time::DurationType eowu::Timer::Elapsed() const {
   return current_time.load() - last_time.load();
 }
