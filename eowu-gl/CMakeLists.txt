@@ -24,6 +24,10 @@ include_directories(deps/variant/include)
 #  STB
 include_directories(deps/stb)
 
+#  FREETYPE
+add_subdirectory(deps/freetype-2.9.1)
+include_directories(deps/freetype-2.9.1/include)
+
 file(GLOB TEST_SRC
   test/*.cpp 
   test/*.h

@@ -25,5 +25,6 @@ void eowu::Timer::Update() {
 }
 
 eowu::time::DurationType eowu::Timer::Elapsed() const {
-  return current_time.load() - last_time.load();
+  return eowu::time::now() - last_time.load();
+//  return current_time.load() - last_time.load();
 }

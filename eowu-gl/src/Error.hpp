@@ -28,6 +28,8 @@ namespace eowu {
   EOWU_GENERIC_ERROR(TextureLoadError);
   EOWU_GENERIC_ERROR(IncompleteModelError);
   
+  EOWU_GENERIC_ERROR(FontError);
+  
   class NonexistentResourceError : public std::runtime_error {
   public:
     NonexistentResourceError(const std::string &msg) : std::runtime_error(msg) {}
