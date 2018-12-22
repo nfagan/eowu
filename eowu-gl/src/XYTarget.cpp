@@ -159,8 +159,6 @@ void eowu::XYTarget::Reset() {
 void eowu::XYTarget::Update() {
   std::unique_lock<std::mutex> lock(mut);
   
-  timer.Update();
-  
   if (source == nullptr || !source->IsValid()) {
     return;
   }

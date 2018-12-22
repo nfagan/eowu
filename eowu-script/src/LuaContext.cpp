@@ -7,8 +7,8 @@
 
 #include "LuaContext.hpp"
 
-eowu::LuaContext::LuaContext() {
-  lua_state = nullptr;
+eowu::LuaContext::LuaContext() : lua_state(nullptr) {
+  //
 }
 
 eowu::LuaContext::LuaContext(lua_State *state) {

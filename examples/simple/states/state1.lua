@@ -10,18 +10,16 @@ state.Variables = {     --  Variables are accessible across render and task cont
 --  entry function: Called once upon entering the state.
 function state.Entry()
 
-  --  eowu.script() is the global object through which other resources are accessed.
-  local script = eowu.script()
-  local state = script:State('state1')
+  local state = eowu.State('state1')
   local trial = state:Variable('trial')
   local trial_number = trial:Get()
 
   --  Set the active render function. This function will be called beginning 
   --  on the next available render frame.
   if trial_number % 2 == 0 then
-    script:Render('even')
+    eowu.Render('even')
   else
-    script:Render('odd')
+    eowu.Render('odd')
   end
 
   --  When the time limit for this state is met, proceed to the state given by 'state2'
@@ -33,7 +31,7 @@ end
 
 --  exit function: Called once upon exiting the state.
 function state.Exit()
-  local state = eowu.script():State('state1')
+  local state = eowu.CurrentState()
   local trial = state:Variable('trial')
 
   trial:Set(trial:Get() + 1)
@@ -42,9 +40,8 @@ end
 --  render function: Called each render frame. Below,
 --  state.Render{} maps this function to the id 'even'.
 local function render_even()
-  local script = eowu.script()
-  local s1 = script:Stimulus('s1')
-  local kb = script:Keyboard()
+  local s1 = eowu.Stimulus('s1')
+  local kb = eowu.Keyboard()
   local color
 
   if kb:Down('space') then
@@ -71,9 +68,8 @@ end
 --  Another render function. This one's called every odd-numbered trial.
 
 local function render_odd()
-  local script = eowu.script()
-  local kb = script:Keyboard()
-  local s1 = script:Stimulus('s1')
+  local kb = eowu.Keyboard()
+  local s1 = eowu.Stimulus('s1')
 
   s1:Color({1, 1, 1})
 

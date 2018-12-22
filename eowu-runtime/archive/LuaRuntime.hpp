@@ -30,8 +30,7 @@ public:
   ~LuaRuntime() = default;
   
   bool InitializeSchema(const std::string &file);
-  void InitializeScriptWrapper(eowu::ScriptWrapper &script_wrapper,
-                               const std::string &file,
+  void InitializeScriptWrapper(const std::string &file,
                                std::shared_ptr<eowu::GLPipeline> gl_pipeline);
   
   eowu::State* GetFirstState();

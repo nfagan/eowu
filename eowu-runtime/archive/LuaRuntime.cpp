@@ -102,8 +102,7 @@ bool eowu::LuaRuntime::InitializeSchema(const std::string &file) {
   return true;
 }
 
-void eowu::LuaRuntime::InitializeScriptWrapper(eowu::ScriptWrapper &script_wrapper,
-                                               const std::string &file,
+void eowu::LuaRuntime::InitializeScriptWrapper(const std::string &file,
                                                std::shared_ptr<eowu::GLPipeline> gl_pipeline) {
   
   const auto render_state_schema = get_render_state_schema(file);
@@ -117,16 +116,16 @@ void eowu::LuaRuntime::InitializeScriptWrapper(eowu::ScriptWrapper &script_wrapp
   auto lua_render_functions = std::make_shared<eowu::LockedLuaRenderFunctions>(nullptr, nullptr);
   auto keyboard_wrapper = create_keyboard(gl_pipeline->GetContextManager());
   
-  script_wrapper.SetVariables(setup_schema.variables.mapping);
-  script_wrapper.SetStateWrapperContainer(std::move(states));
-  script_wrapper.SetGLPipeline(gl_pipeline);
-  script_wrapper.SetRenderFunctions(std::move(render_functions));
-  script_wrapper.SetFlipFunctions(std::move(flip_functions));
-  script_wrapper.SetLuaRenderFunctionPair(lua_render_functions);
-  script_wrapper.SetKeyboardWrapper(std::move(keyboard_wrapper));
-  script_wrapper.SetLuaTaskContext(lua_contexts.task);
-  script_wrapper.SetLuaRenderContext(lua_contexts.render);
-  script_wrapper.SetStateRunner(&state_runner);
+  eowu::ScriptWrapper::SetVariables(setup_schema.variables.mapping);
+  eowu::ScriptWrapper::SetStateWrapperContainer(std::move(states));
+  eowu::ScriptWrapper::SetGLPipeline(gl_pipeline);
+  eowu::ScriptWrapper::SetRenderFunctions(std::move(render_functions));
+  eowu::ScriptWrapper::SetFlipFunctions(std::move(flip_functions));
+  eowu::ScriptWrapper::SetLuaRenderFunctionPair(lua_render_functions);
+  eowu::ScriptWrapper::SetKeyboardWrapper(std::move(keyboard_wrapper));
+  eowu::ScriptWrapper::SetLuaTaskContext(lua_contexts.task);
+  eowu::ScriptWrapper::SetLuaRenderContext(lua_contexts.render);
+  eowu::ScriptWrapper::SetStateRunner(&state_runner);
 }
 
 eowu::State* eowu::LuaRuntime::GetFirstState() {

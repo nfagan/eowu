@@ -9,31 +9,19 @@
 #include <eowu-gl/eowu-gl.hpp>
 #include <eowu-script/eowu-script.hpp>
 
-#define EOWU_SOURCE_RESULT_EARLY_RETURN(from, to) \
-  if (!from.status.success) { \
-    to.status.message = from.status.message; \
-    to.status.context = from.status.context; \
-    return to; \
-  }
-
 eowu::init::SourceResult eowu::init::initialize_sources(const eowu::schema::Sources &schema,
                                                         std::shared_ptr<eowu::GLPipeline> gl_pipeline) {
   eowu::init::SourceResult result;
   
-  //  get xy sources
-  auto xy_source_result = eowu::init::initialize_xy_sources(schema, gl_pipeline);
-  EOWU_SOURCE_RESULT_EARLY_RETURN(xy_source_result, result);
-  
-  result.result.xy_source_init = std::move(xy_source_result.result);
-  
+  result.result.xy_source_init = eowu::init::initialize_xy_sources(schema, gl_pipeline);
   result.status.success = true;
   
   return result;
 }
 
-eowu::init::XYSourceResult eowu::init::initialize_xy_sources(const eowu::schema::Sources &schema,
-                                                             std::shared_ptr<eowu::GLPipeline> gl_pipeline) {
-  eowu::init::XYSourceResult result;
+eowu::init::XYSourceInit eowu::init::initialize_xy_sources(const eowu::schema::Sources &schema,
+                                                           std::shared_ptr<eowu::GLPipeline> gl_pipeline) {
+  eowu::init::XYSourceInit result;
   
   const auto context_manager = gl_pipeline->GetContextManager();
   
@@ -49,12 +37,10 @@ eowu::init::XYSourceResult eowu::init::initialize_xy_sources(const eowu::schema:
       const auto &win = context_manager->GetWindowByAlias(window_id);
       const eowu::XYSource *source = &win->GetMouse();
       
-      result.result.xy_sources.emplace(id, source);
-      result.result.xy_source_window_mapping.emplace(id, window_id);
+      result.xy_sources.emplace(id, source);
+      result.xy_source_window_mapping.emplace(id, window_id);
     }
   }
-  
-  result.status.success = true;
   
   return result;
 }

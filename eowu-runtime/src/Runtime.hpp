@@ -7,9 +7,6 @@
 
 #pragma once
 
-#include "LuaRuntime.hpp"
-#include <eowu-common/time.hpp>
-#include <string>
 #include <memory>
 
 struct lua_State;

@@ -11,6 +11,7 @@
 #include "DataInit.hpp"
 #include "SourceInit.hpp"
 #include "TargetInit.hpp"
+#include "LuaInit.hpp"
 #include "Threads.hpp"
 #include <eowu-script/eowu-script.hpp>
 #include <eowu-gl/eowu-gl.hpp>
@@ -22,101 +23,123 @@
 #include <thread>
 
 int eowu::runtime::main(const std::string &file) {
-  eowu::ScriptWrapper script_wrapper;
   eowu::StateManager state_manager;
   eowu::StateRunner state_runner;
   
-  eowu::LuaRuntime lua_runtime(state_manager, state_runner);
+  auto lua_context_result = eowu::init::initialize_lua_contexts();
+  auto setup_schema_result = eowu::init::initialize_schema(file, lua_context_result.result.task);
   
-  //  initial file + schema validation
-  if (!lua_runtime.InitializeSchema(file)) {
-    return 1;
+  if (!setup_schema_result.status.success) {
+    setup_schema_result.status.file = file;
+    setup_schema_result.status.print();
+    return EXIT_FAILURE;
   }
   
+  const auto &setup_schema = setup_schema_result.result;
+  const auto &lua_contexts = lua_context_result.result;
+  
   //  task data store
-  const auto &data_root_directory = lua_runtime.setup_schema.paths.data;
-  const auto &save_schema = lua_runtime.setup_schema.save;
+  const auto &data_root_directory = setup_schema.paths.data;
+  const auto &save_schema = setup_schema.save;
   
   auto data_init_result = eowu::data::initialize_data_pipeline(data_root_directory, save_schema);
   
   if (!data_init_result.status.success) {
     data_init_result.status.file = file;
     data_init_result.status.print();
-    return 1;
+    return EXIT_FAILURE;
   }
   
-  //  otherwise, the task data store is ok.
-  script_wrapper.SetTaskDataStore(data_init_result.result.task_data_store);
+  eowu::ScriptWrapper::SetTaskDataStore(data_init_result.result.task_data_store);
   
   //  sounds
-  auto sound_status = eowu::init::initialize_audio_pipeline(lua_runtime.setup_schema.sounds);
+  auto sound_status = eowu::init::initialize_audio_pipeline(setup_schema.sounds);
   
   if (!sound_status.status.success) {
     sound_status.status.file = file;
     sound_status.status.print();
-    return 1;
+    return EXIT_FAILURE;
   }
   
-  //  otherwise, audio context + sounds are ok.
   auto audio_context = sound_status.result.audio_context;
   
-  script_wrapper.SetAudioContext(audio_context);
-  script_wrapper.SetSounds(sound_status.result.sounds);
+  eowu::ScriptWrapper::SetAudioContext(audio_context);
+  eowu::ScriptWrapper::SetSounds(sound_status.result.sounds);
   
   //  gl pipeline
   auto gl_pipeline = eowu::GLPipeline::GetInstance();
-  auto gl_status = init::initialize_gl_pipeline(gl_pipeline, lua_runtime.setup_schema);
+  auto gl_status = init::initialize_gl_pipeline(gl_pipeline, setup_schema);
   
   if (!gl_status.success) {
     gl_status.file = file;
     gl_status.print();
-    return 1;
+    return EXIT_FAILURE;
   }
   
   //  sources
-  auto source_status = eowu::init::initialize_sources(lua_runtime.setup_schema.sources, gl_pipeline);
+  auto source_status = eowu::init::initialize_sources(setup_schema.sources, gl_pipeline);
   
   if (!source_status.status.success) {
     source_status.status.file = file;
     source_status.status.print();
-    return 1;
+    return EXIT_FAILURE;
   }
   
+  const auto &xy_source_init = source_status.result.xy_source_init;
+  const auto &xy_sources = xy_source_init.xy_sources;
+  const auto &xy_source_window_mapping = xy_source_init.xy_source_window_mapping;
+  
   //  targets
-  auto target_status = eowu::init::initialize_targets(lua_runtime.setup_schema.targets,
-                                                      source_status.result.xy_source_init.xy_sources,
-                                                      source_status.result.xy_source_init.xy_source_window_mapping,
-                                                      lua_runtime.lua_contexts.task,
+  auto target_status = eowu::init::initialize_targets(setup_schema.targets,
+                                                      xy_sources,
+                                                      xy_source_window_mapping,
+                                                      lua_contexts.task,
                                                       gl_pipeline);
   
   if (!target_status.status.success) {
     target_status.status.file = file;
     target_status.status.print();
-    return 1;
+    return EXIT_FAILURE;
   }
   
   //  maps each target to an id.
   const auto &target_map = target_status.result.targets;
   const auto &target_wrappers = target_status.result.target_wrappers;
   
-  script_wrapper.SetTargetWrapperContainer(target_wrappers);
-  script_wrapper.SetXYTargets(target_map);
+  eowu::ScriptWrapper::SetTargetWrapperContainer(target_wrappers);
+  eowu::ScriptWrapper::SetXYTargets(target_map);
+  eowu::ScriptWrapper::SetXYSources(xy_sources);
   
   //
   //  make timeout wrappers
-  const auto *interval_wrappers = script_wrapper.GetIntervalWrappers();
-  const auto *timeout_wrappers = script_wrapper.GetTimeoutWrappers();
+  const auto *interval_wrappers = eowu::ScriptWrapper::GetIntervalWrappers();
+  const auto *timeout_wrappers = eowu::ScriptWrapper::GetTimeoutWrappers();
   
   //
   //  otherwise, the gl pipeline and sources are ok.
-  lua_runtime.InitializeScriptWrapper(script_wrapper, file, gl_pipeline);
   
+  auto script_wrapper_result = eowu::init::initialize_script_wrapper(file,
+                                                                     setup_schema,
+                                                                     gl_pipeline,
+                                                                     lua_contexts,
+                                                                     state_manager,
+                                                                     state_runner);
+  
+  if (!script_wrapper_result.status.success) {
+    script_wrapper_result.status.file = file;
+    script_wrapper_result.status.print();
+    return EXIT_FAILURE;
+  }
+  
+  //
+  //  Shared state
   eowu::thread::SharedState thread_state(&state_runner.GetTimer());
   
   //
   //  Task thread
   auto vec_targets = eowu::validate::get_values(target_map);
-  state_runner.Begin(lua_runtime.GetFirstState());
+  
+  state_runner.Begin(script_wrapper_result.result.first_state);
   
   auto task_thread = std::thread(eowu::thread::task,
                                  std::ref(thread_state),
@@ -132,8 +155,8 @@ int eowu::runtime::main(const std::string &file) {
   
   //
   //  Render thread
-  auto locked_lua_functions = script_wrapper.GetLockedRenderFunctions();
-  const auto &lua_render_context = lua_runtime.lua_contexts.render;
+  auto locked_lua_functions = eowu::ScriptWrapper::GetLockedRenderFunctions();
+  const auto &lua_render_context = lua_contexts.render;
   
   auto render_thread = std::thread(eowu::thread::render,
                                    std::ref(thread_state),
@@ -143,7 +166,7 @@ int eowu::runtime::main(const std::string &file) {
   
   //
   //  Assign thread ids
-  script_wrapper.SetThreadIds(render_thread.get_id(), task_thread.get_id());
+  eowu::ScriptWrapper::SetThreadIds(render_thread.get_id(), task_thread.get_id());
   thread_state.assigned_thread_ids = true;
   
   //
@@ -162,5 +185,5 @@ int eowu::runtime::main(const std::string &file) {
     task_thread.join();
   }
   
-  return 0;
+  return EXIT_SUCCESS;
 }

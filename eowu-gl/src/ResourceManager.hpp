@@ -8,6 +8,7 @@
 #pragma once
 
 #include "Error.hpp"
+#include <eowu-common/random.hpp>
 #include <memory>
 #include <unordered_map>
 #include <tuple>

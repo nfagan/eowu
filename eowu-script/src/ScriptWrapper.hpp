@@ -33,7 +33,9 @@ namespace eowu {
   class StateWrapper;
   class VariableWrapper;
   class WindowWrapper;
+  class XYSourceWrapper;
   class XYTarget;
+  class XYSource;
   class StateRunner;
   class TimeoutHandleWrapper;
   
@@ -55,60 +57,64 @@ namespace eowu {
 
 class eowu::ScriptWrapper {
 public:
-  ScriptWrapper() = default;
-  ~ScriptWrapper() = default;
+  ScriptWrapper() = delete;
+  ~ScriptWrapper() = delete;
   
-  void SetStateWrapperContainer(eowu::StateWrapperContainerType states);
-  void SetTargetWrapperContainer(const std::unordered_map<std::string, std::shared_ptr<eowu::TargetWrapper>> &targets);
-  void SetXYTargets(const std::unordered_map<std::string, std::shared_ptr<eowu::XYTarget>> &targets);
+  static void SetStateWrapperContainer(eowu::StateWrapperContainerType states);
+  static void SetTargetWrapperContainer(const std::unordered_map<std::string,
+                                        std::shared_ptr<eowu::TargetWrapper>> &targets);
+  static void SetXYTargets(const std::unordered_map<std::string, std::shared_ptr<eowu::XYTarget>> &targets);
+  static void SetXYSources(const std::unordered_map<std::string, const eowu::XYSource*> &sources);
   
-  void SetGLPipeline(std::shared_ptr<eowu::GLPipeline> pipeline);
-  void SetAudioContext(std::shared_ptr<eowu::AudioContext> context);
-  void SetRenderFunctions(eowu::LuaFunctionContainerType render_functions);
-  void SetFlipFunctions(eowu::LuaFunctionContainerType render_functions);
-  void SetLuaRenderFunctionPair(std::shared_ptr<eowu::LockedLuaRenderFunctions> lua_render_functions);
-  void SetKeyboardWrapper(std::unique_ptr<eowu::KeyboardWrapper> keyboard);
-  void SetLuaTaskContext(std::shared_ptr<eowu::LuaContext> context);
-  void SetLuaRenderContext(std::shared_ptr<eowu::LuaContext> context);
+  static void SetGLPipeline(std::shared_ptr<eowu::GLPipeline> pipeline);
+  static void SetAudioContext(std::shared_ptr<eowu::AudioContext> context);
+  static void SetRenderFunctions(eowu::LuaFunctionContainerType render_functions);
+  static void SetFlipFunctions(eowu::LuaFunctionContainerType render_functions);
+  static void SetLuaRenderFunctionPair(std::shared_ptr<eowu::LockedLuaRenderFunctions> lua_render_functions);
+  static void SetKeyboardWrapper(std::unique_ptr<eowu::KeyboardWrapper> keyboard);
+  static void SetLuaTaskContext(std::shared_ptr<eowu::LuaContext> context);
+  static void SetLuaRenderContext(std::shared_ptr<eowu::LuaContext> context);
   
-  void SetVariables(const std::unordered_map<std::string, eowu::data::Commitable> &variables);
-  void SetTaskDataStore(std::shared_ptr<eowu::data::Store> task_data_store);
-  void SetLockedRenderFunctions(std::shared_ptr<eowu::LockedLuaRenderFunctions> locked_functions);
-  void SetThreadIds(const std::thread::id &render, const std::thread::id &task);
-  void SetStateRunner(eowu::StateRunner *runner);
-  void SetSounds(const std::unordered_map<std::string, std::shared_ptr<eowu::AudioBufferSource>> &sounds);
+  static void SetVariables(const std::unordered_map<std::string, eowu::data::Commitable> &variables);
+  static void SetTaskDataStore(std::shared_ptr<eowu::data::Store> task_data_store);
+  static void SetLockedRenderFunctions(std::shared_ptr<eowu::LockedLuaRenderFunctions> locked_functions);
+  static void SetThreadIds(const std::thread::id &render, const std::thread::id &task);
+  static void SetStateRunner(eowu::StateRunner *runner);
+  static void SetSounds(const std::unordered_map<std::string, std::shared_ptr<eowu::AudioBufferSource>> &sounds);
   
-  int SetRenderFunctionPair(lua_State *L);
+  static int SetRenderFunctionPair(lua_State *L);
   
-  eowu::TargetSetWrapper* MakeTargetSet(const std::string &id, lua_State *L);
-  eowu::TimeoutHandleWrapper MakeTimeout(const std::string &id, int ms, luabridge::LuaRef func);
-  eowu::TimeoutHandleWrapper MakeInterval(const std::string &id, int ms, luabridge::LuaRef func);
+  static eowu::TargetSetWrapper* MakeTargetSet(const std::string &id, lua_State *L);
+  static eowu::TimeoutHandleWrapper MakeTimeout(const std::string &id, int ms, luabridge::LuaRef func);
+  static eowu::TimeoutHandleWrapper MakeInterval(const std::string &id, int ms, luabridge::LuaRef func);
+  static eowu::ModelWrapper MakeModelWrapper(const std::string &id);
   
-  bool IsComplete() const;
+  static bool IsComplete();
   
-  const eowu::TimeoutAggregateMapType* GetIntervalWrappers() const;
-  const eowu::TimeoutAggregateMapType* GetTimeoutWrappers() const;
+  static const eowu::TimeoutAggregateMapType* GetIntervalWrappers();
+  static const eowu::TimeoutAggregateMapType* GetTimeoutWrappers();
   
-  eowu::StateWrapper* GetStateWrapper(const std::string &id) const;
-  eowu::StateWrapper* GetActiveStateWrapper() const;
-  eowu::KeyboardWrapper* GetKeyboardWrapper() const;
-  eowu::TargetWrapper* GetTargetWrapper(const std::string &id);
-  eowu::TargetSetWrapper* GetTargetSetWrapper(const std::string &id);
-  eowu::TimeoutHandleWrapper GetTimeoutHandleWrapper(const std::string &id);
-  eowu::TimeoutHandleWrapper GetIntervalHandleWrapper(const std::string &id);
-  eowu::RendererWrapper GetRendererWrapper() const;
-  eowu::ModelWrapper GetModelWrapper(const std::string &id) const;
-  eowu::VariableWrapper GetVariable(const std::string &id);
-  eowu::WindowWrapper GetWindowWrapper(const std::string &id);
-  eowu::AudioSourceWrapper GetAudioSourceWrapper(const std::string &id) const;
+  static eowu::StateWrapper* GetStateWrapper(const std::string &id);
+  static eowu::StateWrapper* GetActiveStateWrapper();
+  static eowu::KeyboardWrapper* GetKeyboardWrapper();
+  static eowu::TargetWrapper* GetTargetWrapper(const std::string &id);
+  static eowu::TargetSetWrapper* GetTargetSetWrapper(const std::string &id);
+  static eowu::TimeoutHandleWrapper GetTimeoutHandleWrapper(const std::string &id);
+  static eowu::TimeoutHandleWrapper GetIntervalHandleWrapper(const std::string &id);
+  static eowu::RendererWrapper GetRendererWrapper();
+  static eowu::ModelWrapper GetModelWrapper(const std::string &id);
+  static eowu::VariableWrapper GetVariable(const std::string &id);
+  static eowu::WindowWrapper GetWindowWrapper(const std::string &id);
+  static eowu::AudioSourceWrapper GetAudioSourceWrapper(const std::string &id);
+  static eowu::XYSourceWrapper GetXYSourceWrapper(const std::string &id);
   
-  double GetElapsedTime() const;
-  void Exit();
+  static double GetElapsedTime();
+  static void Exit();
   
-  std::shared_ptr<eowu::LockedLuaRenderFunctions> GetLockedRenderFunctions() const;
+  static std::shared_ptr<eowu::LockedLuaRenderFunctions> GetLockedRenderFunctions();
   
-  std::size_t CountVariables() const;
-  void CommitData() const;
+  static std::size_t CountVariables();
+  static void CommitData();
   
   static void CreateLuaSchema(lua_State *L);
 private:
@@ -140,33 +146,34 @@ private:
   static std::shared_ptr<eowu::LockedLuaRenderFunctions> lua_render_thread_functions;
   static std::unordered_map<std::string, std::unique_ptr<eowu::TargetSetWrapper>> target_sets;
   static std::unordered_map<std::string, std::shared_ptr<eowu::XYTarget>> xy_targets;
+  static std::unordered_map<std::string, const eowu::XYSource*> xy_sources;
   static std::unordered_map<std::string, std::shared_ptr<eowu::AudioBufferSource>> sounds;
   static std::unique_ptr<eowu::KeyboardWrapper> keyboard;
   static ThreadIds thread_ids;
   static eowu::StateRunner *state_runner;
   static LuaContexts lua_contexts;
   
-  eowu::TimeoutHandleWrapper make_timeout(eowu::TimeoutAggregateMapType *aggregate,
-                                          const std::string &id,
-                                          int ms,
-                                          const luabridge::LuaRef &func,
-                                          const char* const make_func_id,
-                                          eowu::Timeout::Type timeout_type);
+  static eowu::TimeoutHandleWrapper make_timeout(eowu::TimeoutAggregateMapType *aggregate,
+                                                 const std::string &id,
+                                                 int ms,
+                                                 const luabridge::LuaRef &func,
+                                                 const char* const make_func_id,
+                                                 eowu::Timeout::Type timeout_type);
   
-  eowu::TimeoutHandleWrapper get_timeout_handle_wrapper(const std::string &id,
-                                                        const eowu::TimeoutAggregateMapType *aggregate,
-                                                        const char* const kind);
+  static eowu::TimeoutHandleWrapper get_timeout_handle_wrapper(const std::string &id,
+                                                               const eowu::TimeoutAggregateMapType *aggregate,
+                                                               const char* const kind);
   
-  void commit_variables(std::vector<char> &into) const;
-  void commit_states(std::vector<char> &into) const;
+  static void commit_variables(std::vector<char> &into);
+  static void commit_states(std::vector<char> &into);
   
-  eowu::LuaFunction* get_function_from_state(lua_State *L,
-                                             int stack_index,
-                                             eowu::LuaFunctionMapType *funcs,
-                                             const std::string &kind);
+  static eowu::LuaFunction* get_function_from_state(lua_State *L,
+                                                    int stack_index,
+                                                    eowu::LuaFunctionMapType *funcs,
+                                                    const std::string &kind);
   
-  std::shared_ptr<eowu::LuaContext> get_lua_context_for_thread();
+  static std::shared_ptr<eowu::LuaContext> get_lua_context_for_thread();
   
-  bool is_render_thread();
-  bool is_task_thread();
+  static bool is_render_thread();
+  static bool is_task_thread();
 };

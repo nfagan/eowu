@@ -51,6 +51,9 @@ std::unordered_map<std::string, std::shared_ptr<eowu::TargetWrapper>> eowu::Scri
 //  xy-targets
 std::unordered_map<std::string, std::shared_ptr<eowu::XYTarget>> eowu::ScriptWrapper::xy_targets{};
 //
+//  xy-sources
+std::unordered_map<std::string, const eowu::XYSource*> eowu::ScriptWrapper::xy_sources{};
+//
 //  sounds
 std::unordered_map<std::string, std::shared_ptr<eowu::AudioBufferSource>> eowu::ScriptWrapper::sounds{};
 //
@@ -75,7 +78,7 @@ eowu::ScriptWrapper::ThreadIds eowu::ScriptWrapper::thread_ids{};
 //  state runner
 eowu::StateRunner *eowu::ScriptWrapper::state_runner = nullptr;
 
-bool eowu::ScriptWrapper::IsComplete() const {
+bool eowu::ScriptWrapper::IsComplete() {
 #ifdef EOWU_DEBUG
   bool sc = states != nullptr;
   bool pc = pipeline != nullptr;
@@ -161,6 +164,10 @@ void eowu::ScriptWrapper::SetXYTargets(const std::unordered_map<std::string, std
   eowu::ScriptWrapper::xy_targets = targets;
 }
 
+void eowu::ScriptWrapper::SetXYSources(const std::unordered_map<std::string, const eowu::XYSource *> &sources) {
+  eowu::ScriptWrapper::xy_sources = sources;
+}
+
 int eowu::ScriptWrapper::SetRenderFunctionPair(lua_State *L) {
   const char* const func_id = "Render";
   
@@ -169,24 +176,25 @@ int eowu::ScriptWrapper::SetRenderFunctionPair(lua_State *L) {
   eowu::LuaFunction *render_func = nullptr;
   eowu::LuaFunction *flip_func = nullptr;
   
-  int render_stack_index = -3;
-  int flip_stack_index = -2;
+  int render_stack_index = -2;
+  int flip_stack_index = -1;
   int offset = 0;
   
   bool is_async = true;
   
-  if (n_inputs == 1) {
+  if (n_inputs == 0) {
     throw eowu::LuaError(util::get_message_not_enough_inputs(func_id, 1, 0));
-  } else if (n_inputs > 4) {
+  } else if (n_inputs > 3) {
     throw eowu::LuaError(util::get_message_wrong_number_of_inputs(func_id, 3, n_inputs));
   }
   
-  if (n_inputs == 2) {
-    offset = 2;
-  } else if (n_inputs == 3) {
+  //  Only render function is provided
+  if (n_inputs == 1) {
     offset = 1;
-  } else {
-    offset = 0;
+    
+  //  Render, flip, and is_async is provided
+  } else if (n_inputs == 3) {
+    offset = -1;
     is_async = eowu::parser::get_bool_or_error_from_state(L, -1);
   }
   
@@ -197,7 +205,7 @@ int eowu::ScriptWrapper::SetRenderFunctionPair(lua_State *L) {
     render_func = get_function_from_state(L, render_stack_index, render_functions.get(), "render");
   }
   
-  if (n_inputs > 2 && !lua_isnil(L, flip_stack_index)) {
+  if (n_inputs > 1 && !lua_isnil(L, flip_stack_index)) {
     flip_func = get_function_from_state(L, flip_stack_index, flip_functions.get(), "flip");
   }
   
@@ -212,19 +220,19 @@ int eowu::ScriptWrapper::SetRenderFunctionPair(lua_State *L) {
   return 0;
 }
 
-double eowu::ScriptWrapper::GetElapsedTime() const {
+double eowu::ScriptWrapper::GetElapsedTime() {
   return eowu::ScriptWrapper::state_runner->GetTimer().Elapsed().count();
 }
 
-const eowu::TimeoutAggregateMapType* eowu::ScriptWrapper::GetIntervalWrappers() const {
+const eowu::TimeoutAggregateMapType* eowu::ScriptWrapper::GetIntervalWrappers() {
   return &eowu::ScriptWrapper::interval_wrappers;
 }
 
-const eowu::TimeoutAggregateMapType* eowu::ScriptWrapper::GetTimeoutWrappers() const {
+const eowu::TimeoutAggregateMapType* eowu::ScriptWrapper::GetTimeoutWrappers() {
   return &eowu::ScriptWrapper::timeout_wrappers;
 }
 
-eowu::ModelWrapper eowu::ScriptWrapper::GetModelWrapper(const std::string &id) const {
+eowu::ModelWrapper eowu::ScriptWrapper::GetModelWrapper(const std::string &id) {
   assert(IsComplete());
   
   auto resource_manager = pipeline->GetResourceManager();
@@ -274,13 +282,13 @@ eowu::TimeoutHandleWrapper eowu::ScriptWrapper::GetIntervalHandleWrapper(const s
   return get_timeout_handle_wrapper(id, &interval_wrappers, "Interval");
 }
 
-eowu::KeyboardWrapper* eowu::ScriptWrapper::GetKeyboardWrapper() const {
+eowu::KeyboardWrapper* eowu::ScriptWrapper::GetKeyboardWrapper() {
   assert(IsComplete());
   
   return keyboard.get();
 }
 
-eowu::StateWrapper* eowu::ScriptWrapper::GetStateWrapper(const std::string &id) const {
+eowu::StateWrapper* eowu::ScriptWrapper::GetStateWrapper(const std::string &id) {
   assert(IsComplete());
   
   const auto &it = states->find(id);
@@ -292,7 +300,7 @@ eowu::StateWrapper* eowu::ScriptWrapper::GetStateWrapper(const std::string &id) 
   return it->second.get();
 }
 
-eowu::StateWrapper* eowu::ScriptWrapper::GetActiveStateWrapper() const {
+eowu::StateWrapper* eowu::ScriptWrapper::GetActiveStateWrapper() {
   assert(IsComplete());
   
   const eowu::State *active_state = state_runner->GetActiveState();
@@ -304,7 +312,7 @@ eowu::StateWrapper* eowu::ScriptWrapper::GetActiveStateWrapper() const {
   return GetStateWrapper(active_state->GetId());
 }
 
-eowu::RendererWrapper eowu::ScriptWrapper::GetRendererWrapper() const {
+eowu::RendererWrapper eowu::ScriptWrapper::GetRendererWrapper() {
   assert(IsComplete());
   
   auto renderer = pipeline->GetRenderer();
@@ -342,7 +350,7 @@ eowu::VariableWrapper eowu::ScriptWrapper::GetVariable(const std::string &id) {
   return wrapper;
 }
 
-eowu::AudioSourceWrapper eowu::ScriptWrapper::GetAudioSourceWrapper(const std::string &id) const {
+eowu::AudioSourceWrapper eowu::ScriptWrapper::GetAudioSourceWrapper(const std::string &id) {
   auto it = sounds.find(id);
   
   if (it == sounds.end()) {
@@ -353,6 +361,20 @@ eowu::AudioSourceWrapper eowu::ScriptWrapper::GetAudioSourceWrapper(const std::s
   auto buffer_source = it->second;
   
   eowu::AudioSourceWrapper source_wrapper(source_aggregate, buffer_source);
+  
+  return source_wrapper;
+}
+
+eowu::XYSourceWrapper eowu::ScriptWrapper::GetXYSourceWrapper(const std::string &id) {
+  const auto it = xy_sources.find(id);
+  
+  if (it == xy_sources.end()) {
+    throw eowu::NonexistentResourceError::MessageKindId("XYSource", id);
+  }
+  
+  auto source = it->second;
+  
+  eowu::XYSourceWrapper source_wrapper(source);
   
   return source_wrapper;
 }
@@ -377,8 +399,8 @@ eowu::TargetSetWrapper* eowu::ScriptWrapper::MakeTargetSet(const std::string &id
   
   int n_inputs = lua_gettop(L);
   
-  if (n_inputs != 3) {
-    throw eowu::LuaError(eowu::util::get_message_wrong_number_of_inputs(func_id, 2, n_inputs-1));
+  if (n_inputs != 2) {
+    throw eowu::LuaError(eowu::util::get_message_wrong_number_of_inputs(func_id, 2, n_inputs));
   }
   
   std::vector<std::string> target_ids;
@@ -411,13 +433,24 @@ eowu::TargetSetWrapper* eowu::ScriptWrapper::MakeTargetSet(const std::string &id
   return ptr;
 }
 
-std::shared_ptr<eowu::LockedLuaRenderFunctions> eowu::ScriptWrapper::GetLockedRenderFunctions() const {
+eowu::ModelWrapper eowu::ScriptWrapper::MakeModelWrapper(const std::string &id) {
+  
+  auto resource_manager = eowu::ScriptWrapper::pipeline->GetResourceManager();
+  
+  auto material = resource_manager->Create<eowu::Material>(id);
+  auto model = resource_manager->Create<eowu::Model>(id);
+  
+  model->SetMaterial(material);
+  
+  return GetModelWrapper(id);
+}
+
+std::shared_ptr<eowu::LockedLuaRenderFunctions> eowu::ScriptWrapper::GetLockedRenderFunctions() {
   return eowu::ScriptWrapper::lua_render_thread_functions;
 }
 
 void eowu::ScriptWrapper::Exit() {
   assert(state_runner);
-  
   state_runner->Exit();
 }
 
@@ -492,7 +525,7 @@ eowu::TimeoutHandleWrapper eowu::ScriptWrapper::make_timeout(eowu::TimeoutAggreg
   return handle_wrapper;
 }
 
-void eowu::ScriptWrapper::CommitData() const {
+void eowu::ScriptWrapper::CommitData() {
   std::vector<char> into;
   
   eowu::serialize::unsafe_nest_aggregate("Data", 2, into);
@@ -506,7 +539,7 @@ void eowu::ScriptWrapper::CommitData() const {
   task_data_store->Write(into);
 }
 
-void eowu::ScriptWrapper::commit_states(std::vector<char> &into) const {
+void eowu::ScriptWrapper::commit_states(std::vector<char> &into) {
   //  Serialize each state's variables + timing data.
   
   const auto &state_container = *states.get();
@@ -521,7 +554,7 @@ void eowu::ScriptWrapper::commit_states(std::vector<char> &into) const {
   }
 }
 
-void eowu::ScriptWrapper::commit_variables(std::vector<char> &into) const {
+void eowu::ScriptWrapper::commit_variables(std::vector<char> &into) {
   //  Serialize each committed variable.
   
   const auto &variables = eowu::ScriptWrapper::variables.active;
@@ -586,8 +619,6 @@ std::shared_ptr<eowu::LuaContext> eowu::ScriptWrapper::get_lua_context_for_threa
 void eowu::ScriptWrapper::CreateLuaSchema(lua_State *L) {
   luabridge::getGlobalNamespace(L)
   .beginNamespace(eowu::constants::eowu_namespace)
-  .beginClass<eowu::ScriptWrapper>(eowu::constants::eowu_script_name)
-  .addConstructor<void(*)(void)>()
   .addFunction("Commit", &eowu::ScriptWrapper::CommitData)
   .addFunction("Stimulus", &eowu::ScriptWrapper::GetModelWrapper)
   .addFunction("Target", &eowu::ScriptWrapper::GetTargetWrapper)
@@ -602,11 +633,12 @@ void eowu::ScriptWrapper::CreateLuaSchema(lua_State *L) {
   .addFunction("Window", &eowu::ScriptWrapper::GetWindowWrapper)
   .addFunction("Keyboard", &eowu::ScriptWrapper::GetKeyboardWrapper)
   .addFunction("Sound", &eowu::ScriptWrapper::GetAudioSourceWrapper)
+  .addFunction("XYSource", &eowu::ScriptWrapper::GetXYSourceWrapper)
   .addFunction("Elapsed", &eowu::ScriptWrapper::GetElapsedTime)
   .addFunction("Exit", &eowu::ScriptWrapper::Exit)
   .addFunction("MakeTargetSet", &eowu::ScriptWrapper::MakeTargetSet)
   .addFunction("MakeTimeout", &eowu::ScriptWrapper::MakeTimeout)
   .addFunction("MakeInterval", &eowu::ScriptWrapper::MakeInterval)
-  .endClass()
+  .addFunction("MakeStimulus", &eowu::ScriptWrapper::MakeModelWrapper)
   .endNamespace();
 }

@@ -26,12 +26,13 @@ namespace priv {
   }
 }
 
-eowu::Renderer::Renderer() {
-  this->projection_type = eowu::projection_types::orthographic;
-  this->last_program = nullptr;
-  this->last_mesh = nullptr;
-  this->clear_color = glm::vec3(0.0);
-  this->on_buffer_swap = &priv::buffer_swap_noop;
+eowu::Renderer::Renderer() :
+on_buffer_swap(&priv::buffer_swap_noop),
+projection_type(eowu::projection_types::orthographic),
+clear_color(glm::vec3(0.0)),
+last_program(nullptr),
+last_mesh(nullptr) {
+  //
 }
 
 void eowu::Renderer::ClearQueue() {
@@ -118,7 +119,6 @@ void eowu::Renderer::next_frame() {
   }
   
   analyzed_material_ids.clear();
-  frame_timing.timer.Update();
 }
 
 void eowu::Renderer::Draw() {  

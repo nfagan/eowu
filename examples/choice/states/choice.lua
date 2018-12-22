@@ -1,12 +1,7 @@
 local choice = {}
 
-local function get_script_state()
-  local script = eowu.script()
-  return script, script:State('choice')
-end
-
-local function make_target_set(script, state)
-  local tset = script:MakeTargetSet('tset1', {'t1', 't2'})
+local function make_target_set(state)
+  local tset = eowu.MakeTargetSet('tset1', {'t1', 't2'})
   local selected = state:Variable('selected')
   local entered = state:Variable('entered')
 
@@ -30,7 +25,7 @@ local function make_target_set(script, state)
   tset:Select(function(name)
     print('Selected: ' .. name)
 
-    local tset1 = script:TargetSet('tset1')
+    local tset1 = eowu.TargetSet('tset1')
     tset1:Reset()
 
     selected:Set(name)
@@ -40,9 +35,9 @@ local function make_target_set(script, state)
   tset:Begin()
 end
 
-local function make_timeout(script, state, duration)
-  local to1 = script:MakeTimeout('to1', duration, function()
-    local tset1 = script:TargetSet('tset1')
+local function make_timeout(state, duration)
+  local to1 = eowu.MakeTimeout('to1', duration, function()
+    local tset1 = eowu.TargetSet('tset1')
     local selected = state:Variable('selected')
     local entered = state:Variable('entered')
     
@@ -54,33 +49,31 @@ local function make_timeout(script, state, duration)
 end
 
 local function entry()
-  local script, state = get_script_state()
+  local state = eowu.CurrentState()
   local entered = state:Variable('entered')
   local selected = state:Variable('selected')
 
   entered:Reset()
   selected:Reset()
 
-  make_timeout(script, state, 2000)
-  make_target_set(script, state)
+  make_timeout(state, 2000)
+  make_target_set(state)
 
-  script:Render('default')
+  eowu.Render('default')
 
   print('Entered: ' .. state.name)
 end
 
 local function exit()
-  local script = eowu.script()
-  script:TargetSet('tset1'):Reset()
+  eowu.TargetSet('tset1'):Reset()
 end
 
 local function render_default()
-  local script = eowu.script()
-  local state = script:State('choice')
-  local s1 = script:Stimulus('s1')
-  local s2 = script:Stimulus('s2')
-  local t1 = script:Target('t1')
-  local t2 = script:Target('t2')
+  local state = eowu.State('choice')
+  local s1 = eowu.Stimulus('s1')
+  local s2 = eowu.Stimulus('s2')
+  local t1 = eowu.Target('t1')
+  local t2 = eowu.Target('t2')
 
   s1:Draw()
   s2:Draw()

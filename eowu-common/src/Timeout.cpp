@@ -57,9 +57,7 @@ void eowu::Timeout::Cancel() {
   SetCallback(&eowu::Timeout::noop);
 }
 
-void eowu::Timeout::Update() {
-  timer.Update();
-  
+void eowu::Timeout::Update() {  
   bool interval_crit = type == eowu::Timeout::INTERVAL && is_first_update.load();
   bool duration_crit = timer.Elapsed() >= duration.load();
   

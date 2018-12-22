@@ -273,7 +273,6 @@ bool eowu::thread::try_await_thread_finish(const eowu::thread::SharedState &stat
   
   while (!threads_completed && timer.Elapsed() < timeout) {
     threads_completed = state.render_thread_completed && state.task_thread_completed;
-    timer.Update();
     
     if (!did_warn && timer.Elapsed() >= std::chrono::seconds(1)) {
       std::cout << "WARN: More than 1 second ellapsed waiting for render and/or task threads to complete." << std::endl;

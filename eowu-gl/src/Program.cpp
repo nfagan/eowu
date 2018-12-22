@@ -15,8 +15,8 @@
 #include <iostream>
 #endif
 
-eowu::Program::Program() {
-  is_finalized = false;
+eowu::Program::Program() : is_finalized(false) {
+  //
 }
 
 eowu::Program::~Program() {
@@ -32,20 +32,20 @@ void eowu::Program::Dispose() {
   is_finalized = false;
 }
 
-void eowu::Program::Link(const std::vector<eowu::Shader*>& shaders) {
+void eowu::Program::Link(const std::vector<eowu::Shader*> &shaders) {
   if (IsFinalized()) {
     Dispose();
   }
   
   id = glCreateProgram();
   
-  for (const auto& shader : shaders) {
+  for (const auto &shader : shaders) {
     shader->Attach(id);
   }
   
   glLinkProgram(id);
   
-  for (const auto& shader : shaders) {
+  for (const auto &shader : shaders) {
     shader->Dispose();
   }
   
@@ -65,7 +65,7 @@ bool eowu::Program::HasUniform(const std::string &name) {
     return false;
   }
   
-  const auto& it = uniform_locations.find(name);
+  const auto &it = uniform_locations.find(name);
   
   if (it == uniform_locations.end()) {
     int loc = glGetUniformLocation(id, name.c_str());
@@ -85,7 +85,7 @@ void eowu::Program::SetUniform(const std::string &name, const UniformVariantType
 }
 
 void eowu::Program::SetUniform(const eowu::Uniform &uniform) {
-  const auto& name = uniform.GetName();
+  const auto &name = uniform.GetName();
   
   if (!HasUniform(name)) {
     EOWU_LOG_WARN("Program::SetUniform: Missing uniform: " << name);
@@ -97,17 +97,21 @@ void eowu::Program::SetUniform(const eowu::Uniform &uniform) {
 }
 
 void eowu::Program::Bind() {
+#ifdef EOWU_DEBUG
   if (!IsFinalized()) {
     throw new ProgramNotFinalizedError("Attempted to bind an invalid / non-finalized program.");
   }
+#endif
   
   glUseProgram(id);
 }
 
 void eowu::Program::Unbind() {
+#ifdef EOWU_DEBUG
   if (!IsFinalized()) {
     throw new ProgramNotFinalizedError("Attempted to un-bind an invalid / non-finalized program.");
   }
+#endif
   
   glUseProgram(0);
 }

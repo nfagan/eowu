@@ -17,9 +17,7 @@ void eowu::StateRunner::Begin(eowu::State *state) {
   next(state);
 }
 
-bool eowu::StateRunner::Update() {
-  timer.Update();
-  
+bool eowu::StateRunner::Update() {  
   eowu::State *current_active_state = active_state.load();
   
   if (current_active_state == nullptr || runner_should_exit) {

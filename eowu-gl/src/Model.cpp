@@ -9,25 +9,24 @@
 #include "Material.hpp"
 #include <mutex>
 
-eowu::Model::Model() {
-  this->mesh = nullptr;
-  this->material = nullptr;
+eowu::Model::Model() : mesh(nullptr), material(nullptr) {
+  //
 }
 
-eowu::Model::Model(const eowu::Model &other) {
-  mesh = other.mesh;
-  transform = other.transform;
-  material = other.GetMaterial();
-  mesh = other.GetMesh();
+eowu::Model::Model(const eowu::Model &other) :
+mesh(other.GetMesh()),
+material(other.GetMaterial()),
+transform(other.GetTransform()) {
+  //
 }
 
-eowu::Model::Model(std::shared_ptr<eowu::Mesh> mesh) {
-  this->mesh = mesh;
+eowu::Model::Model(std::shared_ptr<eowu::Mesh> mesh_) : mesh(mesh_) {
+  //
 }
 
-eowu::Model::Model(std::shared_ptr<eowu::Mesh> mesh, std::shared_ptr<eowu::Material> material) {
-  this->mesh = mesh;
-  this->material = material;
+eowu::Model::Model(std::shared_ptr<eowu::Mesh> mesh_, std::shared_ptr<eowu::Material> material_) :
+mesh(mesh_), material(material_) {
+  //
 }
 
 const eowu::Transform& eowu::Model::GetTransform() const {

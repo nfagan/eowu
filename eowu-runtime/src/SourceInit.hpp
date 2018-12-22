@@ -37,7 +37,7 @@ namespace eowu {
     
     eowu::init::SourceResult initialize_sources(const eowu::schema::Sources &schema,
                                                 std::shared_ptr<eowu::GLPipeline> gl_pipeline);
-    eowu::init::XYSourceResult initialize_xy_sources(const eowu::schema::Sources &schema,
-                                                     std::shared_ptr<eowu::GLPipeline> gl_pipeline);
+    XYSourceInit initialize_xy_sources(const eowu::schema::Sources &schema,
+                                       std::shared_ptr<eowu::GLPipeline> gl_pipeline);
   }
 }

@@ -22,7 +22,6 @@ void test_timer_ellapsed() {
   
   while (true) {
     t2 = time::now();
-    timer.Update();
     
     if ((t2-t1).count() > limit) {
       break;

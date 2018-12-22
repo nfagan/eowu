@@ -12,13 +12,6 @@
 #include <eowu-common/random.hpp>
 #include <cstddef>
 
-#define EOWU_TARGET_RESULT_EARLY_RETURN(from, to) \
-  if (!from.status.success) { \
-    to.status.message = from.status.message; \
-    to.status.context = from.status.context; \
-    return to; \
-  }
-
 eowu::init::TargetResult eowu::init::initialize_targets(const eowu::schema::Targets &schema,
                                                         const eowu::init::XYSourceMapType &xy_sources,
                                                         const std::unordered_map<std::string, std::string> &xy_source_window_mapping,
@@ -131,8 +124,11 @@ eowu::init::TargetResult eowu::init::initialize_targets(const eowu::schema::Targ
     result.result.targets.emplace(target_id, target);
     
     //  make wrapper
-    auto target_wrapper = std::make_shared<eowu::TargetWrapper>(lua_context, target,
-                                                                target_model, renderer, window_container);
+    auto target_wrapper = std::make_shared<eowu::TargetWrapper>(lua_context,
+                                                                target,
+                                                                target_model,
+                                                                renderer,
+                                                                window_container);
     
     if (is_hidden) {
       target_wrapper->Hide();

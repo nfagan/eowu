@@ -8,6 +8,7 @@
 #include "AudioData.hpp"
 #include "Error.hpp"
 #include "AudioFile.h"
+#include <eowu-common/fs.hpp>
 
 eowu::AudioData::AudioData() : sample_rate(0), bit_depth(0), n_samples(0), n_channels(0) {
   //
@@ -15,6 +16,11 @@ eowu::AudioData::AudioData() : sample_rate(0), bit_depth(0), n_samples(0), n_cha
 
 std::shared_ptr<eowu::AudioData> eowu::AudioData::FromWavOrAiffFile(const std::string &path) {
   AudioFile<double> audio_file;
+  
+  //  Audio file implementation fails if file is directory.
+  if (eowu::fs::directory_exists(path)) {
+    throw eowu::AudioLoadError("Failed to load file: " + path + ": is a directory.");
+  }
   
   bool success = audio_file.load(path);
   

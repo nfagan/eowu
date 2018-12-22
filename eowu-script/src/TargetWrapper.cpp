@@ -70,7 +70,7 @@ bool eowu::TargetWrapper::IsInBounds() const {
 int eowu::TargetWrapper::Draw(lua_State *L) {
   //  @TODO: Refactor to share code between this and ModelWrapper.
   
-  if (is_hidden) {
+  if (is_hidden || model == nullptr) {
     return 0;
   }
   

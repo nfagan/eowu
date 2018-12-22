@@ -24,3 +24,4 @@
 #include "VariablesWrapper.hpp"
 #include "VectorWrapper.hpp"
 #include "WindowWrapper.hpp"
+#include "XYSourceWrapper.hpp"

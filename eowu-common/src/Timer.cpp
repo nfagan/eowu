@@ -7,24 +7,18 @@
 
 #include <eowu-common/Timer.hpp>
 
-eowu::Timer::Timer() : current_time(eowu::time::now()), last_time(eowu::time::now()) {
+eowu::Timer::Timer() : last_time(eowu::time::now()) {
   //
 }
 
-eowu::Timer::Timer(const eowu::Timer &other) : current_time(other.last_time.load()), last_time(other.current_time.load()) {
+eowu::Timer::Timer(const eowu::Timer &other) : last_time(other.last_time.load()) {
   //
 }
 
 void eowu::Timer::Reset() {
   last_time = eowu::time::now();
-  current_time = last_time.load();
-}
-
-void eowu::Timer::Update() {
-  current_time = eowu::time::now();
 }
 
 eowu::time::DurationType eowu::Timer::Elapsed() const {
   return eowu::time::now() - last_time.load();
-//  return current_time.load() - last_time.load();
 }

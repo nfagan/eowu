@@ -8,31 +8,25 @@
 #include "GLInit.hpp"
 #include "Contexts.hpp"
 #include "Util.hpp"
+#include "Error.hpp"
 #include <eowu-gl/eowu-gl.hpp>
 #include <stdexcept>
 #include <unordered_map>
 
-#define EOWU_SETUP_STATUS_EARLY_RETURN(name, res) \
-  if (!name.success) { \
-    res = name; \
-    return res; \
-  }
-
-eowu::SetupStatus eowu::init::initialize_gl_pipeline(std::shared_ptr<eowu::GLPipeline> gl_pipeline, const eowu::schema::Setup &schema) {
-  
+eowu::SetupStatus eowu::init::initialize_gl_pipeline(std::shared_ptr<eowu::GLPipeline> gl_pipeline,
+                                                     const eowu::schema::Setup &schema) {
   eowu::SetupStatus result;
   
-  //  glfw init
-  auto glfw_init = init::initialize_glfw(gl_pipeline);
-  EOWU_SETUP_STATUS_EARLY_RETURN(glfw_init, result);
-  
-  //  window init
-  auto window_init = init::open_windows(gl_pipeline, schema);
-  EOWU_SETUP_STATUS_EARLY_RETURN(window_init, result);
-  
-  //  resource init
-  auto resource_init = init::create_resources(gl_pipeline, schema);
-  EOWU_SETUP_STATUS_EARLY_RETURN(resource_init, result);
+  try {
+    init::initialize_glfw(gl_pipeline);
+    init::open_windows(gl_pipeline, schema);
+    init::create_resources(gl_pipeline, schema);
+  } catch (const eowu::SetupError &err) {
+    result.message = err.what();
+    result.context = err.context;
+    
+    return result;
+  }
   
   result.success = true;
   
@@ -43,18 +37,14 @@ std::string eowu::init::get_message_n_of_n(std::size_t iter, std::size_t size) {
   return std::to_string(iter) + " of " + std::to_string(size);
 }
 
-eowu::SetupStatus eowu::init::create_textures(std::shared_ptr<eowu::GLPipeline> gl_pipeline,
-                                              const eowu::schema::Setup &schema) {
-  eowu::SetupStatus result;
+void eowu::init::create_textures(std::shared_ptr<eowu::GLPipeline> gl_pipeline,
+                                 const eowu::schema::Setup &schema) {
   
   auto n_windows = gl_pipeline->GetWindowContainer()->Size();
   
   if (n_windows == 0) {
     EOWU_LOG_INFO("init::create_texture: No windows specified. Ignoring textures.");
-    
-    result.success = true;
-    
-    return result;
+    return;
   }
   
   auto texture_manager = gl_pipeline->GetTextureManager();
@@ -73,22 +63,16 @@ eowu::SetupStatus eowu::init::create_textures(std::shared_ptr<eowu::GLPipeline> 
     try {
       texture_manager->LoadImage(filename, id);
     } catch (const std::exception &e) {
-      result.message = e.what();
-      result.context = std::string(eowu::contexts::gl_init) + "::CreateTextures";
-      
-      return result;
+      std::string context = std::string(eowu::contexts::gl_init) + "::CreateTextures";
+      throw eowu::SetupError(e.what(), context);
     }
     
     current_texture++;
   }
-  
-  result.success = true;
-  
-  return result;
 }
 
-eowu::SetupStatus eowu::init::create_meshes(std::shared_ptr<eowu::GLPipeline> gl_pipeline, const eowu::schema::Setup &schema) {
-  eowu::SetupStatus result;
+void eowu::init::create_meshes(std::shared_ptr<eowu::GLPipeline> gl_pipeline,
+                               const eowu::schema::Setup &schema) {
   
   auto resource_manager = gl_pipeline->GetResourceManager();
   auto mesh_factory_functions = eowu::init::get_geometry_to_mesh_factory_map();
@@ -103,10 +87,10 @@ eowu::SetupStatus eowu::init::create_meshes(std::shared_ptr<eowu::GLPipeline> gl
     
     //  if we missed something in validation, this will catch it.
     if (mesh_func_it == mesh_factory_functions.end()) {
-      result.message = "Internal error: no mesh implementation for mesh type '" + mesh_type + "'.";
-      result.context = eowu::contexts::gl_init + std::string("::create_models");
+      std::string message = "Internal error: no mesh implementation for mesh type '" + mesh_type + "'.";
+      std::string context = eowu::contexts::gl_init + std::string("::create_models");
       
-      return result;
+      throw eowu::SetupError(message, context);
     }
     
     auto mesh = resource_manager->Create<eowu::Mesh>(mesh_id);
@@ -114,14 +98,10 @@ eowu::SetupStatus eowu::init::create_meshes(std::shared_ptr<eowu::GLPipeline> gl
     //  call the mesh_factory function mapped to this mesh_type.
     mesh_func_it->second(mesh.get());
   }
-  
-  result.success = true;
-  
-  return result;
 }
 
-eowu::SetupStatus eowu::init::create_models(std::shared_ptr<eowu::GLPipeline> gl_pipeline, const eowu::schema::Setup &schema) {
-  eowu::SetupStatus result;
+void eowu::init::create_models(std::shared_ptr<eowu::GLPipeline> gl_pipeline,
+                               const eowu::schema::Setup &schema) {
   
   std::unordered_map<std::string, std::shared_ptr<eowu::Mesh>> meshes;
   
@@ -132,10 +112,8 @@ eowu::SetupStatus eowu::init::create_models(std::shared_ptr<eowu::GLPipeline> gl
   
   //  models
   for (const auto &it : stimuli) {
-    
     const auto &stim_schema = it.second;
-    
-    const std::string &stim_id = stim_schema.stimulus_id;
+    const auto &stim_id = stim_schema.stimulus_id;
     
     //  handle mesh assignment
     std::shared_ptr<eowu::Mesh> mesh = nullptr;
@@ -146,10 +124,7 @@ eowu::SetupStatus eowu::init::create_models(std::shared_ptr<eowu::GLPipeline> gl
       try {
         mesh = resource_manager->Get<eowu::Mesh>(mesh_id);
       } catch (const std::exception &e) {
-        result.message = e.what();
-        result.context = "init::create_models";
-        
-        return result;
+        throw eowu::SetupError(e.what(), "init::create_models");
       }
     }
     
@@ -172,8 +147,8 @@ eowu::SetupStatus eowu::init::create_models(std::shared_ptr<eowu::GLPipeline> gl
     try {
       units = eowu::units::get_units_from_string_label(stim_schema.units);
     } catch (const std::exception &e) {
-      result.message = e.what();
-      result.context = eowu::contexts::gl_init + std::string("::GetUnits");
+      std::string context = eowu::contexts::gl_init + std::string("::GetUnits");
+      throw eowu::SetupError(e.what(), context);
     }
     
     auto pos = eowu::util::require_vec3(stim_schema.position);
@@ -185,58 +160,29 @@ eowu::SetupStatus eowu::init::create_models(std::shared_ptr<eowu::GLPipeline> gl
     trans.SetRotation(rot);
     trans.SetUnits(units);
   }
-  
-  result.success = true;
-  
-  return result;
 }
 
-eowu::SetupStatus eowu::init::create_resources(std::shared_ptr<eowu::GLPipeline> gl_pipeline, const eowu::schema::Setup &schema) {
-  
-  eowu::SetupStatus result;
-  
-  //  texture init
-  auto tex_init = init::create_textures(gl_pipeline, schema);
-  EOWU_SETUP_STATUS_EARLY_RETURN(tex_init, result);
-  
-  //  mesh init
-  auto mesh_init = init::create_meshes(gl_pipeline, schema);
-  EOWU_SETUP_STATUS_EARLY_RETURN(mesh_init, result);
-  
-  //  model init
-  auto model_init = init::create_models(gl_pipeline, schema);
-  EOWU_SETUP_STATUS_EARLY_RETURN(model_init, result);
-  
-  result.success = true;
-  
-  return result;
+void eowu::init::create_resources(std::shared_ptr<eowu::GLPipeline> gl_pipeline,
+                                  const eowu::schema::Setup &schema) {
+  init::create_textures(gl_pipeline, schema);
+  init::create_meshes(gl_pipeline, schema);
+  init::create_models(gl_pipeline, schema);
 }
 
-eowu::SetupStatus eowu::init::initialize_glfw(std::shared_ptr<eowu::GLPipeline> gl_pipeline) {
-  eowu::SetupStatus result;
-  
+void eowu::init::initialize_glfw(std::shared_ptr<eowu::GLPipeline> gl_pipeline) {
   auto context_manager = gl_pipeline->GetContextManager();
   
   try {
     context_manager->Initialize();
   } catch (const std::exception &e) {
-    result.message = e.what();
-    result.context = eowu::contexts::gl_init;
-    
-    return result;
+    throw eowu::SetupError(e.what(), eowu::contexts::gl_init);
   }
-  
-  result.success = true;
-  
-  return result;
 }
 
-eowu::SetupStatus eowu::init::open_windows(std::shared_ptr<eowu::GLPipeline> gl_pipeline,
-                                           const eowu::schema::Setup &schema) {
+void eowu::init::open_windows(std::shared_ptr<eowu::GLPipeline> gl_pipeline,
+                              const eowu::schema::Setup &schema) {
   
   EOWU_LOG_INFO("init::open_windows: Opening windows.");
-  
-  eowu::SetupStatus result;
   
   auto context_manager = gl_pipeline->GetContextManager();
   auto window_container = gl_pipeline->GetWindowContainer();
@@ -262,18 +208,13 @@ eowu::SetupStatus eowu::init::open_windows(std::shared_ptr<eowu::GLPipeline> gl_
       
       window_container->Emplace(win_id, win);
     } catch (const std::exception &e) {
-      result.message = e.what();
-      result.context = eowu::contexts::gl_init + std::string("::OpenWindow");
+      std::string context = eowu::contexts::gl_init + std::string("::OpenWindow");
       
-      return result;
+      throw eowu::SetupError(e.what(), context);
     }
   }
   
-  result.success = true;
-  
   EOWU_LOG_INFO("init::open_windows: Done opening windows.");
-  
-  return result;
 }
 
 std::unordered_map<std::string, eowu::init::MeshFactoryFunction> eowu::init::get_geometry_to_mesh_factory_map() {  

@@ -27,6 +27,8 @@ public:
   Model(std::shared_ptr<eowu::Mesh> mesh);
   Model(std::shared_ptr<eowu::Mesh> mesh, std::shared_ptr<eowu::Material> material);
   
+  ~Model() = default;
+  
   void NextFrame();
   
   void SetMesh(std::shared_ptr<eowu::Mesh> mesh);
@@ -41,8 +43,6 @@ public:
   std::shared_ptr<eowu::Material> GetMaterial() const;
   std::shared_ptr<eowu::Mesh> GetMesh() const;
   const eowu::Identifier& GetIdentifier() const;
-  
-  ~Model() = default;
 private:
   mutable std::shared_mutex mut;
   

@@ -139,7 +139,7 @@ void eowu::State::exit() {
 }
 
 void eowu::State::loop() {
-  local_timer.Update();
+  //
 }
 
 bool eowu::State::check_exit_conditions() const {
