@@ -150,9 +150,9 @@ int eowu::runtime::main(const std::string &file) {
                                  interval_wrappers);
 
   //
-	//	Detach gl-context from main thread.
-	auto context_manager = gl_pipeline->GetContextManager();
-	context_manager->DetachCurrentContext();
+  //	Detach gl-context from main thread.
+  auto context_manager = gl_pipeline->GetContextManager();
+  context_manager->DetachCurrentContext();
   
   //
   //  Render thread
