@@ -12,6 +12,7 @@
 #include <eowu-gl/eowu-gl.hpp>
 #include <memory>
 #include <vector>
+#include <functional>
 
 struct lua_State;
 
@@ -24,7 +25,7 @@ namespace eowu {
 class eowu::TargetSetWrapper {
 public:
   TargetSetWrapper(std::shared_ptr<eowu::LuaContext> lua_context,
-                   const std::vector<eowu::XYTarget*> &targets);
+                   std::shared_ptr<eowu::XYTargetSet> target_set);
   
   ~TargetSetWrapper() = default;
   
@@ -39,11 +40,11 @@ public:
   static void CreateLuaSchema(lua_State *L);
 private:
   std::shared_ptr<eowu::LuaContext> lua_context;
-  eowu::XYTargetSet target_set;
+  std::shared_ptr<eowu::XYTargetSet> target_set;
   
   eowu::LuaFunction on_entry;
   eowu::LuaFunction on_exit;
   eowu::LuaFunction on_select;
   
-  void configure_callbacks();
+  const std::function<void(eowu::XYTarget*)> get_callback(luabridge::LuaRef func);
 };

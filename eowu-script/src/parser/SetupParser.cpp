@@ -114,6 +114,12 @@ eowu::parser::ParseResult<eowu::schema::Setup> eowu::parser::setup(const luabrid
     EOWU_PARSER_EARLY_RETURN_ALLOW_MISSING(variable_result, result, variables);
   }
   
+  //  Fonts
+  if (kv.count("Fonts") > 0) {
+    auto font_result = eowu::parser::fonts(kv.at("Fonts"));
+    EOWU_PARSER_EARLY_RETURN_ALLOW_MISSING(font_result, result, fonts);
+  }
+  
   result.success = true;
   
   return result;  
@@ -347,6 +353,38 @@ eowu::parser::ParseResult<eowu::schema::Stimulus> eowu::parser::stimulus(const l
     result.message = e.what();
     result.context = "Stimuli::" + stimulus_id;
     return result;
+  }
+  
+  result.success = true;
+  
+  return result;
+}
+
+//
+//  fonts
+//
+
+eowu::parser::ParseResult<eowu::schema::Fonts> eowu::parser::fonts(const luabridge::LuaRef &table) {
+  using namespace eowu::parser;
+  using namespace eowu::schema;
+  
+  ParseResult<Fonts> result;
+  
+  auto kv = get_string_map_from_table(table);
+  
+  for (const auto &it : kv) {
+    const auto &font_id = it.first;
+    
+    try {
+      std::string font_file_path = eowu::parser::get_string_or_error(kv, font_id);
+      eowu::schema::Font font(font_file_path);
+      result.result.fonts.emplace(font_id, font);
+    } catch (const std::exception &e) {
+      result.message = e.what();
+      result.context = "Fonts::" + font_id;
+      
+      return result;
+    }
   }
   
   result.success = true;

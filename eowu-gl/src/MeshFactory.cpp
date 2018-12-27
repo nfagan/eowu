@@ -34,7 +34,7 @@ void eowu::mesh_factory::make_frame_circle(eowu::Mesh *mesh) {
 }
 
 void eowu::mesh_factory::make_frame_triangle(eowu::Mesh *mesh) {
-  static const std::array<float, 8> vertex_data = {
+  static const std::array<float, 8> vertex_data{
     -0.5f, -0.5f,
     0.0f, 0.5f,
     0.5f, -0.5f,
@@ -60,7 +60,7 @@ void eowu::mesh_factory::make_frame_triangle(eowu::Mesh *mesh) {
 }
 
 void eowu::mesh_factory::make_frame_quad(eowu::Mesh *mesh) {
-  static const std::array<float, 16> vertex_data = {
+  static const std::array<float, 16> vertex_data{
     -0.5f, 0.5f,
     -0.5f, -0.5f,
     
@@ -97,7 +97,7 @@ void eowu::mesh_factory::make_frame_quad(eowu::Mesh *mesh) {
 
 void eowu::mesh_factory::make_quad(eowu::Mesh *mesh) {
   
-  static const std::array<float, 48> vertex_data = {
+  static const std::array<float, 48> vertex_data{
     -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
     -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
     0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
@@ -129,7 +129,7 @@ void eowu::mesh_factory::make_quad(eowu::Mesh *mesh) {
 
 void eowu::mesh_factory::make_triangle(eowu::Mesh *mesh) {
   
-  static const std::array<float, 24> vertex_data = {
+  static const std::array<float, 24> vertex_data{
     -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
     1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
     0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f

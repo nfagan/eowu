@@ -75,6 +75,8 @@ const eowu::Identifier& eowu::Model::GetIdentifier() const {
 }
 
 void eowu::Model::NextFrame() {
+  std::shared_lock<std::shared_mutex> lock(mut);
+  
   if (material) {
     material->NextFrame();
   }

@@ -233,6 +233,7 @@ void eowu::init::init_render_schema(lua_State *L) {
   eowu::RendererWrapper::CreateLuaSchema(L);
   eowu::VectorWrapper::CreateLuaSchema(L);
   eowu::ModelWrapper::CreateLuaSchema(L);
+  eowu::TextModelWrapper::CreateLuaSchema(L);
   eowu::KeyboardWrapper::CreateLuaSchema(L);
   eowu::WindowWrapper::CreateLuaSchema(L);
 }

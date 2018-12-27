@@ -17,6 +17,7 @@
 #include "RendererWrapper.hpp"
 #include "TargetWrapper.hpp"
 #include "TargetSetWrapper.hpp"
+#include "TextModelWrapper.hpp"
 #include "TimeoutWrapper.hpp"
 #include "TimeoutHandleWrapper.hpp"
 #include "TimeWrapper.hpp"

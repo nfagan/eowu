@@ -36,6 +36,7 @@ namespace eowu {
     bool is_resizeable;
     
     std::string title;
+    std::string alias;
     
     WindowProperties();
     WindowProperties(unsigned int width, unsigned int height);

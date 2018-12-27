@@ -14,6 +14,7 @@ namespace eowu {
   namespace data {
     eowu::data::Struct from_lua(const std::string &name, const luabridge::LuaRef &value);
     void to_lua(lua_State *L, const eowu::data::Struct &s);
+    void to_lua(lua_State *L, const std::vector<std::string> &s);
     
     namespace priv {
       void from_lua(const std::string &name, const luabridge::LuaRef &from, eowu::data::Struct *to);

@@ -10,6 +10,7 @@
 #include <eowu-common/types.hpp>
 #include <unordered_map>
 #include <mutex>
+#include <vector>
 #include <string>
 
 struct GLFWwindow;
@@ -30,8 +31,8 @@ public:
   Keyboard() = default;
   ~Keyboard() = default;
   
-  bool IsPressed(int key);
-  bool IsPressed(const std::string &key);
+  bool IsPressed(int key) const;
+  bool IsPressed(const std::string &key) const;
   
   bool WasPressed(int key);
   bool WasPressed(const std::string &key);
@@ -40,6 +41,7 @@ public:
   
   static int GetKeyCode(const std::string &name);
   static bool IsKeyName(const std::string &name);
+  static std::vector<std::string> GetKeyNames();
   
   friend void eowu::glfw::window_key_press_callback(GLFWwindow *window, int key, int scancode, int action, int mode);
 private:

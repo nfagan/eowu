@@ -15,6 +15,11 @@ is_initialized(false) {
 }
 
 eowu::FontManager::~FontManager() {
+  //  Delete faces before deleting free type
+  for (const auto &face_it : font_faces) {
+    face_it.second->dispose();
+  }
+  
   FT_Done_FreeType(ft_library);
 }
 
@@ -26,16 +31,28 @@ void eowu::FontManager::Initialize() {
   auto res = FT_Init_FreeType(&ft_library);
   
   if (res) {
-    throw eowu::FontError("Failed to initialize FreeType library.");
+    throw eowu::FontError("Failed to initialize FreeType library", res);
   }
   
   is_initialized = true;
 }
 
-std::shared_ptr<eowu::FontFace> eowu::FontManager::GetFontFace(const std::string &filename, eowu::s32 face_index) {
+bool eowu::FontManager::HasFontFace(const std::string &alias) const {
+  return font_faces.count(alias) > 0;
+}
+
+std::shared_ptr<eowu::FontFace> eowu::FontManager::GetFontFace(const std::string &alias) {
+  return font_faces.at(alias);
+}
+
+std::shared_ptr<eowu::FontFace> eowu::FontManager::LoadFontFace(const std::string &filename,
+                                                                const std::string &alias,
+                                                                eowu::s32 face_index) {
   auto face = std::make_shared<eowu::FontFace>(this);
   
   face->open(filename.c_str(), face_index);
+  
+  font_faces[alias] = face;
   
   return face;
 }

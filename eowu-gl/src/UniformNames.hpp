@@ -15,5 +15,7 @@ namespace eowu {
     
     extern const char* const face_color;
     extern const char* const opacity;
+    
+    extern const char* const text;
   }
 }

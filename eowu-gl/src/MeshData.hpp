@@ -19,7 +19,7 @@ class eowu::MeshData {
   
 public:
   MeshData();
-  ~MeshData();
+  ~MeshData() = default;
   
   void Create(const std::vector<eowu::Vertex> &vertices, const std::vector<unsigned int> &indices);
   bool IsCreated() const;

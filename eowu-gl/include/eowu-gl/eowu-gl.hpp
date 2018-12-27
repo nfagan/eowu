@@ -10,6 +10,7 @@
 #include "../../src/Attribute.hpp"
 #include "../../src/AttributeTypes.hpp"
 #include "../../src/ContextManager.hpp"
+#include "../../src/Font.hpp"
 #include "../../src/GLPipeline.hpp"
 #include "../../src/Material.hpp"
 #include "../../src/Mesh.hpp"

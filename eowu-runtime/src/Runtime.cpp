@@ -68,13 +68,15 @@ int eowu::runtime::main(const std::string &file) {
   
   //  gl pipeline
   auto gl_pipeline = eowu::GLPipeline::GetInstance();
-  auto gl_status = init::initialize_gl_pipeline(gl_pipeline, setup_schema);
+  auto gl_init = init::initialize_gl_pipeline(gl_pipeline, setup_schema);
   
-  if (!gl_status.success) {
-    gl_status.file = file;
-    gl_status.print();
+  if (!gl_init.status.success) {
+    gl_init.status.file = file;
+    gl_init.status.print();
     return EXIT_FAILURE;
   }
+  
+  eowu::ScriptWrapper::SetTextModels(gl_init.result.text_models);
   
   //  sources
   auto source_status = eowu::init::initialize_sources(setup_schema.sources, gl_pipeline);
@@ -117,7 +119,6 @@ int eowu::runtime::main(const std::string &file) {
   
   //
   //  otherwise, the gl pipeline and sources are ok.
-  
   auto script_wrapper_result = eowu::init::initialize_script_wrapper(file,
                                                                      setup_schema,
                                                                      gl_pipeline,

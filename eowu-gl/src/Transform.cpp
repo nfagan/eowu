@@ -11,40 +11,40 @@
 #include <mutex>
 #include <utility>
 
-eowu::Transform::Transform() {
-  position = glm::vec3(0.0f);
-  rotation = glm::vec3(0.0f);
-  scale = glm::vec3(0.0f);
-  screen_dimensions = glm::vec2(0.0f);
-  
-  units = eowu::units::pixels;
+eowu::Transform::Transform() :
+units(eowu::units::pixels),
+position(glm::vec3(0.0f)),
+rotation(glm::vec3(0.0f)),
+scale(glm::vec3(0.0f)),
+screen_dimensions(glm::vec2(0.0f)) {
+  //
 }
 
-eowu::Transform::Transform(const eowu::Transform &other) {
-  position = other.GetPosition();
-  rotation = other.GetRotation();
-  scale = other.GetScale();
-  screen_dimensions = other.GetScreenDimensions();
-  
-  units = other.units.load();
+eowu::Transform::Transform(const eowu::Transform &other) :
+units(other.GetUnits()),
+position(other.GetPosition()),
+rotation(other.GetRotation()),
+scale(other.GetScale()),
+screen_dimensions(other.GetScreenDimensions()) {
+  //
 }
 
-eowu::Transform::Transform(eowu::Transform &&other) noexcept {
-  position = std::move(other.GetPosition());
-  rotation = std::move(other.GetRotation());
-  scale = std::move(other.GetScale());
-  screen_dimensions = std::move(other.GetScreenDimensions());
-  
-  units = std::move(other.units.load());
+eowu::Transform::Transform(eowu::Transform &&other) noexcept :
+units(std::move(other.GetUnits())),
+position(std::move(other.GetPosition())),
+rotation(std::move(other.GetRotation())),
+scale(std::move(other.GetScale())),
+screen_dimensions(std::move(other.GetScreenDimensions())) {
+  //
 }
 
 eowu::Transform& eowu::Transform::operator=(eowu::Transform &&other) noexcept {
+  units = std::move(GetUnits());
+  
   position = std::move(other.GetPosition());
   rotation = std::move(other.GetRotation());
   scale = std::move(other.GetScale());
   screen_dimensions = std::move(other.GetScreenDimensions());
-  
-  units = std::move(other.units.load());
   
   return *this;
 }

@@ -32,7 +32,7 @@ void eowu::Keyboard::mark_released(int key) {
   pressed_state[key] = false;
 }
 
-bool eowu::Keyboard::IsPressed(int key) {
+bool eowu::Keyboard::IsPressed(int key) const {
   std::unique_lock<std::mutex> lock(mut);
   
   if (pressed_state.count(key) == 0) {
@@ -42,7 +42,7 @@ bool eowu::Keyboard::IsPressed(int key) {
   return pressed_state.at(key);
 }
 
-bool eowu::Keyboard::IsPressed(const std::string &key) {
+bool eowu::Keyboard::IsPressed(const std::string &key) const {
   return IsPressed(GetKeyCode(key));
 }
 
@@ -85,6 +85,16 @@ bool eowu::Keyboard::IsKeyName(const std::string &name) {
   return key_map.count(name) > 0;
 }
 
+std::vector<std::string> eowu::Keyboard::GetKeyNames() {
+  std::vector<std::string> result;
+  
+  for (const auto &it : eowu::Keyboard::key_map) {
+    result.push_back(it.first);
+  }
+  
+  return result;
+}
+
 const std::unordered_map<std::string, int> eowu::Keyboard::key_map{
   {"0", GLFW_KEY_0},
   {"1", GLFW_KEY_1},
@@ -124,14 +134,24 @@ const std::unordered_map<std::string, int> eowu::Keyboard::key_map{
   {"y", GLFW_KEY_Y},
   {"z", GLFW_KEY_Z},
   //
+  {"'", GLFW_KEY_APOSTROPHE},
+  {",", GLFW_KEY_COMMA},
+  {".", GLFW_KEY_PERIOD},
+  {"[", GLFW_KEY_LEFT_BRACKET},
+  {"]", GLFW_KEY_RIGHT_BRACKET},
+  {"/", GLFW_KEY_SLASH},
+  {"\\", GLFW_KEY_BACKSLASH},
+  //
   {"up", GLFW_KEY_UP},
   {"down", GLFW_KEY_DOWN},
   {"left", GLFW_KEY_LEFT},
   {"right", GLFW_KEY_RIGHT},
   //
   {"space", GLFW_KEY_SPACE},
+  {"backspace", GLFW_KEY_BACKSPACE},
   {"escape", GLFW_KEY_ESCAPE},
   {"enter", GLFW_KEY_ENTER},
+  {"delete", GLFW_KEY_DELETE},
   {"left-shift", GLFW_KEY_LEFT_SHIFT},
   {"right-shift", GLFW_KEY_RIGHT_SHIFT}
 };

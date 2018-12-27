@@ -5,6 +5,8 @@ state.First = true
 state.Duration = -1
 
 function state.Entry()
+  eowu.MakeStimulus('s1')
+
   eowu.Render('default')
 
   print('Press + hold space / enter to play sound; press escape to exit.')
@@ -15,12 +17,20 @@ local sound_handles = {}
 local function default_render()
   local kb = eowu.Keyboard()
   local s1 = eowu.Stimulus('s1')
+  local text = eowu.Text('cour')
 
   s1:Geometry('circ')
   s1:Units('mixed')
   s1:Size({200, 200})
   s1:Position({0.5, 0.5})
   s1:Opacity(1.0)
+
+  text:Text('~~ eowu ~~')
+  text:Color({1, 1, 0})
+  text:Units('normalized')
+  text:Position({0.5, 0.1})
+  text:Scale(0.25)
+  text:Center(true)
 
   if kb:Pressed('space') then
     sound_handles[1] = eowu.Sound('piano'):Play()
@@ -43,7 +53,8 @@ local function default_render()
   else
     if sound_handles[2] then sound_handles[2]:Stop() end
   end
-
+  
+  text:Draw()
   s1:Draw()
 end
 

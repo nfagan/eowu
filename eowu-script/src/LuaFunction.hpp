@@ -38,8 +38,6 @@ public:
   
   static const LuaFunction& get_no_op(lua_State *L);
 private:
-  mutable std::recursive_mutex mut;
-  
   std::atomic<bool> did_call;
   luabridge::LuaRef function_reference;
 };

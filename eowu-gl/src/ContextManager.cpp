@@ -123,6 +123,7 @@ eowu::WindowType eowu::ContextManager::OpenWindow(const eowu::WindowProperties &
   auto win = std::make_shared<eowu::Window>(monitor, new_window, client_width, client_height);
   
   win->SetSwapInterval(props.swap_interval);
+  win->SetAlias(props.alias);
   
   register_window(win);
   

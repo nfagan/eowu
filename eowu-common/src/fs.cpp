@@ -11,6 +11,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <mutex>
+#include <fstream>
 
 #ifdef EOWU_IS_WIN
 #include <windows.h>
@@ -123,6 +124,11 @@ bool eowu::fs::directory_exists(const std::string &path) {
   } else {
     return false;
   }
+}
+
+bool eowu::fs::file_exists(const std::string &path) {
+  std::ifstream file(path);
+  return file.good();
 }
 
 #ifndef EOWU_IS_WIN

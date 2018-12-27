@@ -29,6 +29,7 @@ public:
   unsigned int GetIndex() const;
   unsigned int GetWidth() const;
   unsigned int GetHeight() const;
+  unsigned int GetId() const;
   
 private:
   bool is_empty;

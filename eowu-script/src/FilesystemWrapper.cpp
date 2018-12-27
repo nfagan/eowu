@@ -20,7 +20,7 @@ void eowu::FilesystemWrapper::CreateLuaSchema(lua_State *L) {
   .beginNamespace(eowu::constants::eowu_fs_namespace)
   .addFunction("root", &eowu::FilesystemWrapper::get_eowu_root_directory)
   .addFunction("setroot", &eowu::FilesystemWrapper::set_eowu_root_directory)
-  .addFunction("fullfile", &eowu::FilesystemWrapper::full_file)
+  .addFunction("join", &eowu::FilesystemWrapper::full_file)
   .addCFunction("dir", &eowu::FilesystemWrapper::dir)
   .addCFunction("find", &eowu::FilesystemWrapper::find)
   .endNamespace()

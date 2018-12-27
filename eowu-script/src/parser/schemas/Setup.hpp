@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include "Fonts.hpp"
 #include "Windows.hpp"
 #include "Textures.hpp"
 #include "Geometry.hpp"
@@ -39,6 +40,7 @@ namespace eowu {
       eowu::schema::Paths paths;
       eowu::schema::Variables variables;
       eowu::schema::Save save;
+      eowu::schema::Fonts fonts;
     };
   }
 }

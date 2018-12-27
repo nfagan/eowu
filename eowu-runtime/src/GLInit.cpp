@@ -11,24 +11,25 @@
 #include "Error.hpp"
 #include <eowu-gl/eowu-gl.hpp>
 #include <stdexcept>
-#include <unordered_map>
 
-eowu::SetupStatus eowu::init::initialize_gl_pipeline(std::shared_ptr<eowu::GLPipeline> gl_pipeline,
-                                                     const eowu::schema::Setup &schema) {
-  eowu::SetupStatus result;
+eowu::init::GLInitResult eowu::init::initialize_gl_pipeline(std::shared_ptr<eowu::GLPipeline> gl_pipeline,
+                                                            const eowu::schema::Setup &schema) {
+  eowu::init::GLInitResult result;
   
   try {
     init::initialize_glfw(gl_pipeline);
     init::open_windows(gl_pipeline, schema);
     init::create_resources(gl_pipeline, schema);
+    //  Create text models
+    result.result.text_models = init::initialize_fonts(gl_pipeline, schema.fonts);
   } catch (const eowu::SetupError &err) {
-    result.message = err.what();
-    result.context = err.context;
+    result.status.message = err.what();
+    result.status.context = err.context;
     
     return result;
   }
   
-  result.success = true;
+  result.status.success = true;
   
   return result;
 }
@@ -186,6 +187,7 @@ void eowu::init::open_windows(std::shared_ptr<eowu::GLPipeline> gl_pipeline,
   
   auto context_manager = gl_pipeline->GetContextManager();
   auto window_container = gl_pipeline->GetWindowContainer();
+  auto renderer = gl_pipeline->GetRenderer();
   
   const auto &window_mapping = schema.windows.windows;
   
@@ -201,12 +203,14 @@ void eowu::init::open_windows(std::shared_ptr<eowu::GLPipeline> gl_pipeline,
     open_spec.width = input_spec.width;
     open_spec.height = input_spec.height;
     open_spec.title = input_spec.title;
+    open_spec.alias = win_id;
     
     try {
       auto win = context_manager->OpenWindow(open_spec);
-      win->SetAlias(win_id);
       
       window_container->Emplace(win_id, win);
+      //  Create resources specific to this window.
+      renderer->RegisterWindow(win);
     } catch (const std::exception &e) {
       std::string context = eowu::contexts::gl_init + std::string("::OpenWindow");
       
@@ -215,6 +219,47 @@ void eowu::init::open_windows(std::shared_ptr<eowu::GLPipeline> gl_pipeline,
   }
   
   EOWU_LOG_INFO("init::open_windows: Done opening windows.");
+}
+
+std::unordered_map<std::string, std::shared_ptr<eowu::TextModel>>
+eowu::init::initialize_fonts(std::shared_ptr<eowu::GLPipeline> gl_pipeline,
+                                  const eowu::schema::Fonts &fonts) {
+  
+  std::unordered_map<std::string, std::shared_ptr<eowu::TextModel>> text_models;
+  
+  auto font_manager = gl_pipeline->GetFontManager();
+  const auto &font_mappings = fonts.fonts;
+  
+  try {
+    font_manager->Initialize();
+    
+    for (const auto &it : font_mappings) {
+      //  @TODO: Refactor this; only here for demo.
+      const auto &font_alias = it.first;
+      const auto &font_spec = it.second;
+      
+      auto font_face = font_manager->LoadFontFace(font_spec.file_path, font_alias);
+      
+      font_face->SetPixelSizes(eowu::FontFace::PixelSizes::AutoWidth(96));
+      font_face->LoadGlyphsAscii();
+     
+      //  Create text model for this font
+      text_models[font_alias] = init::create_text_model();
+    }
+  } catch (const eowu::FontError &e) {
+    throw eowu::SetupError(e.what(), "font_manager::Initialize");
+  }
+  
+  return text_models;
+}
+
+std::shared_ptr<eowu::TextModel> eowu::init::create_text_model() {
+  
+  auto text_model = std::make_shared<eowu::TextModel>();
+  auto material = std::make_shared<eowu::Material>();
+  text_model->SetMaterial(material);
+  
+  return text_model;
 }
 
 std::unordered_map<std::string, eowu::init::MeshFactoryFunction> eowu::init::get_geometry_to_mesh_factory_map() {  

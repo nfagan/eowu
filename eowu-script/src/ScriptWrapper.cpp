@@ -15,6 +15,7 @@
 #include "RuntimeUtil.hpp"
 #include "parser/ParseUtil.hpp"
 #include <eowu-common/config.hpp>
+#include <eowu-common/random.hpp>
 #include <eowu-gl/eowu-gl.hpp>
 #include <eowu-audio.hpp>
 #include <eowu-state/eowu-state.hpp>
@@ -57,8 +58,11 @@ std::unordered_map<std::string, const eowu::XYSource*> eowu::ScriptWrapper::xy_s
 //  sounds
 std::unordered_map<std::string, std::shared_ptr<eowu::AudioBufferSource>> eowu::ScriptWrapper::sounds{};
 //
+//  text models
+std::unordered_map<std::string, std::shared_ptr<eowu::TextModel>> eowu::ScriptWrapper::text_models{};
+//
 //  target sets
-std::unordered_map<std::string, std::unique_ptr<eowu::TargetSetWrapper>> eowu::ScriptWrapper::target_sets{};
+std::unordered_map<std::string, std::shared_ptr<eowu::XYTargetSet>> eowu::ScriptWrapper::target_sets{};
 //
 //  timeouts
 eowu::TimeoutAggregateMapType eowu::ScriptWrapper::timeout_wrappers{};
@@ -135,6 +139,10 @@ void eowu::ScriptWrapper::SetGLPipeline(std::shared_ptr<eowu::GLPipeline> pipeli
   eowu::ScriptWrapper::pipeline = pipeline;
 }
 
+void eowu::ScriptWrapper::SetTextModels(const std::unordered_map<std::string, std::shared_ptr<eowu::TextModel>> &text_models) {
+  eowu::ScriptWrapper::text_models = text_models;
+}
+
 void eowu::ScriptWrapper::SetAudioContext(std::shared_ptr<eowu::AudioContext> context) {
   eowu::ScriptWrapper::audio_context = context;
 }
@@ -169,6 +177,8 @@ void eowu::ScriptWrapper::SetXYSources(const std::unordered_map<std::string, con
 }
 
 int eowu::ScriptWrapper::SetRenderFunctionPair(lua_State *L) {
+  assert(IsComplete());
+  
   const char* const func_id = "Render";
   
   int n_inputs = lua_gettop(L);
@@ -250,6 +260,27 @@ eowu::ModelWrapper eowu::ScriptWrapper::GetModelWrapper(const std::string &id) {
   return model_wrapper;
 }
 
+eowu::TextModelWrapper eowu::ScriptWrapper::GetTextModelWrapper(const std::string &id) {
+  assert(IsComplete());
+  
+  auto it = text_models.find(id);
+  
+  if (it == text_models.end()) {
+    throw eowu::NonexistentResourceError::MessageKindId("Font", id);
+  }
+  
+  auto font_manager = pipeline->GetFontManager();
+  auto renderer = pipeline->GetRenderer();
+  auto window_container = pipeline->GetWindowContainer();
+  
+  auto text_model = it->second;
+  auto font_face = font_manager->GetFontFace(id);
+  
+  eowu::TextModelWrapper wrapper(text_model, font_face, renderer, window_container);
+  
+  return wrapper;
+}
+
 eowu::TargetWrapper* eowu::ScriptWrapper::GetTargetWrapper(const std::string &id) {
   assert(IsComplete());
   
@@ -262,7 +293,7 @@ eowu::TargetWrapper* eowu::ScriptWrapper::GetTargetWrapper(const std::string &id
   return it->second.get();
 }
 
-eowu::TargetSetWrapper* eowu::ScriptWrapper::GetTargetSetWrapper(const std::string &id) {
+eowu::TargetSetWrapper eowu::ScriptWrapper::GetTargetSetWrapper(const std::string &id) {
   assert(IsComplete());
   
   const auto &it = target_sets.find(id);
@@ -271,7 +302,9 @@ eowu::TargetSetWrapper* eowu::ScriptWrapper::GetTargetSetWrapper(const std::stri
     throw eowu::NonexistentResourceError::MessageKindId("TargetSet", id);
   }
   
-  return it->second.get();
+  eowu::TargetSetWrapper wrapper(lua_contexts.task, it->second);
+  
+  return wrapper;
 }
 
 eowu::TimeoutHandleWrapper eowu::ScriptWrapper::GetTimeoutHandleWrapper(const std::string &id) {
@@ -389,7 +422,7 @@ eowu::TimeoutHandleWrapper eowu::ScriptWrapper::MakeInterval(const std::string &
   return make_timeout(wrappers, id, ms, func, "MakeInterval", eowu::Timeout::INTERVAL);
 }
 
-eowu::TargetSetWrapper* eowu::ScriptWrapper::MakeTargetSet(const std::string &id, lua_State *L) {
+eowu::TargetSetWrapper eowu::ScriptWrapper::MakeTargetSet(const std::string &id, lua_State *L) {
   const char* const func_id = "MakeTargetSet";
   
   //  Ensure we're calling from the task thread.
@@ -426,11 +459,12 @@ eowu::TargetSetWrapper* eowu::ScriptWrapper::MakeTargetSet(const std::string &id
     target_ptrs.push_back(it->second.get());
   }
   
-  auto target_set = std::make_unique<eowu::TargetSetWrapper>(lua_contexts.task, target_ptrs);
-  eowu::TargetSetWrapper *ptr = target_set.get();
-  target_sets[id] = std::move(target_set);
+  auto target_set = std::make_shared<eowu::XYTargetSet>(target_ptrs);
+  target_sets[id] = target_set;
   
-  return ptr;
+  eowu::TargetSetWrapper wrapper(lua_contexts.task, target_set);
+  
+  return wrapper;
 }
 
 eowu::ModelWrapper eowu::ScriptWrapper::MakeModelWrapper(const std::string &id) {
@@ -621,6 +655,7 @@ void eowu::ScriptWrapper::CreateLuaSchema(lua_State *L) {
   .beginNamespace(eowu::constants::eowu_namespace)
   .addFunction("Commit", &eowu::ScriptWrapper::CommitData)
   .addFunction("Stimulus", &eowu::ScriptWrapper::GetModelWrapper)
+  .addFunction("Text", &eowu::ScriptWrapper::GetTextModelWrapper)
   .addFunction("Target", &eowu::ScriptWrapper::GetTargetWrapper)
   .addFunction("TargetSet", &eowu::ScriptWrapper::GetTargetSetWrapper)
   .addFunction("Timeout", &eowu::ScriptWrapper::GetTimeoutHandleWrapper)

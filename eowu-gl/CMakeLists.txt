@@ -25,8 +25,10 @@ include_directories(deps/variant/include)
 include_directories(deps/stb)
 
 #  FREETYPE
-add_subdirectory(deps/freetype-2.9.1)
-include_directories(deps/freetype-2.9.1/include)
+#add_subdirectory(deps/freetype-2.9.1)
+#include_directories(deps/freetype-2.9.1/include)
+
+find_package(Freetype REQUIRED)
 
 file(GLOB TEST_SRC
   test/*.cpp 
@@ -55,6 +57,7 @@ target_include_directories(eowu-gl PUBLIC
   ${GLM_INCLUDE_DIR} 
   ${VARIANT_INCLUDE_DIR} 
   ${EOWU_GL_INCLUDE_DIR}
+  ${FREETYPE_INCLUDE_DIRS}
 )
 
 target_include_directories(eowu-gl-test PUBLIC include/)
@@ -62,6 +65,6 @@ target_include_directories(eowu-gl-test PUBLIC include/)
 set_property(TARGET eowu-gl PROPERTY CXX_STANDARD 17)
 set_property(TARGET eowu-gl-test PROPERTY CXX_STANDARD 17)
 
-target_link_libraries(eowu-gl eowu-common glfw)
+target_link_libraries(eowu-gl eowu-common glfw ${FREETYPE_LIBRARIES})
 target_link_libraries(eowu-gl-test eowu-gl glfw)
 

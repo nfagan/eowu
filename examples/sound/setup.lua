@@ -1,10 +1,7 @@
 Setup = {}
 
-local fullfile = eowu.fs.fullfile
-
-local res_root = fullfile({eowu.fs.root(), 'res'})
-local sound_root = fullfile({res_root, 'sounds'})
-local texture_root = fullfile({res_root, 'textures'})
+local join = eowu.fs.join
+local res_root = join({eowu.fs.root(), 'res'})
 
 Setup.Windows = {
   w1 = {
@@ -18,17 +15,17 @@ Setup.Geometry = {
   }
 }
 
-Setup.Sounds = {
-  guitar = fullfile({sound_root, 'guitar.wav'}),
-  piano = fullfile({sound_root, 'piano.wav'})
+Setup.Fonts = {
+  cour = join({res_root, 'fonts', 'cour.ttf'})
 }
 
-Setup.Stimuli = {
-  s1 = {}
+Setup.Sounds = {
+  guitar = join({res_root, 'sounds', 'guitar.wav'}),
+  piano = join({res_root, 'sounds', 'piano.wav'})
 }
 
 Setup.Textures = {
-  t1 = fullfile({texture_root, 'eg.png'})
+  t1 = join({res_root, 'textures', 'eg.png'})
 }
 
 Setup.States = {

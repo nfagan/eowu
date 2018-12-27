@@ -51,6 +51,8 @@ eowu::Texture eowu::load::image(const std::string &filename) {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   
+  glBindTexture(GL_TEXTURE_2D, 0);
+  
   stbi_image_free(data);
   
   eowu::Texture texture;

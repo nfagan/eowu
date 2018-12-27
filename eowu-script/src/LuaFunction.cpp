@@ -25,27 +25,17 @@ did_call(other.did_call.load()), function_reference(other.GetReference()) {
 }
 
 eowu::LuaFunction& eowu::LuaFunction::operator=(const eowu::LuaFunction &other) {
-  if (this != &other) {
-    std::lock(mut, other.mut);
-    std::lock_guard<std::recursive_mutex> own_lock(mut);
-    std::lock_guard<std::recursive_mutex> other_lock(other.mut);
-    
-    did_call = other.did_call.load();
-    function_reference = other.GetReference();
-  }
+  did_call = other.did_call.load();
+  function_reference = other.GetReference();
   
   return *this;
 }
 
 void eowu::LuaFunction::Set(const eowu::LuaFunction &other) {
-  std::unique_lock<std::recursive_mutex> lock(other.mut);
-  
   Set(other.function_reference);
 }
 
 const luabridge::LuaRef& eowu::LuaFunction::GetReference() const {
-  std::unique_lock<std::recursive_mutex> lock(mut);
-  
   return function_reference;
 }
 
@@ -54,8 +44,6 @@ bool eowu::LuaFunction::DidCall() const {
 }
 
 void eowu::LuaFunction::Set(const luabridge::LuaRef &ref) {
-  std::unique_lock<std::recursive_mutex> lock(mut);
-  
   if (!ref.isFunction()) {
     throw eowu::LuaError("Attempted to assign a non-function lua object.");
   }
@@ -66,11 +54,7 @@ void eowu::LuaFunction::Set(const luabridge::LuaRef &ref) {
 }
 
 bool eowu::LuaFunction::IsValid() const {
-  std::unique_lock<std::recursive_mutex> lock(mut);
-  
-  bool res = function_reference.isFunction();
-  
-  return res;
+  return function_reference.isFunction();
 }
 
 void eowu::LuaFunction::AbortCall() {

@@ -7,13 +7,15 @@
 
 #include "Texture.hpp"
 #include <glad/glad.h>
+#include <iostream>
 
-eowu::Texture::Texture() {
-  is_empty = true;
-  id = 0;
-  width = 0;
-  height = 0;
-  index = 0;
+eowu::Texture::Texture() :
+is_empty(true),
+id(0),
+width(0),
+height(0),
+index(0) {
+  //
 }
 
 void eowu::Texture::Bind() const {
@@ -22,12 +24,18 @@ void eowu::Texture::Bind() const {
 }
 
 void eowu::Texture::Dispose() const {
-  glDeleteTextures(1, &id);
+  if (!is_empty) {
+    glDeleteTextures(1, &id);
+  }
 }
 
 void eowu::Texture::SetId(unsigned int id) {
   this->id = id;
   is_empty = false;
+}
+
+unsigned int eowu::Texture::GetId() const {
+  return id;
 }
 
 void eowu::Texture::SetIndex(unsigned int index) {

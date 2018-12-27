@@ -38,6 +38,9 @@ namespace eowu {
   class XYSource;
   class StateRunner;
   class TimeoutHandleWrapper;
+  class TextModelWrapper;
+  
+  class TextModel;
   
   class AudioContext;
   class AudioBufferSource;
@@ -67,6 +70,7 @@ public:
   static void SetXYSources(const std::unordered_map<std::string, const eowu::XYSource*> &sources);
   
   static void SetGLPipeline(std::shared_ptr<eowu::GLPipeline> pipeline);
+  static void SetTextModels(const std::unordered_map<std::string, std::shared_ptr<eowu::TextModel>> &text_models);
   static void SetAudioContext(std::shared_ptr<eowu::AudioContext> context);
   static void SetRenderFunctions(eowu::LuaFunctionContainerType render_functions);
   static void SetFlipFunctions(eowu::LuaFunctionContainerType render_functions);
@@ -84,7 +88,7 @@ public:
   
   static int SetRenderFunctionPair(lua_State *L);
   
-  static eowu::TargetSetWrapper* MakeTargetSet(const std::string &id, lua_State *L);
+  static eowu::TargetSetWrapper MakeTargetSet(const std::string &id, lua_State *L);
   static eowu::TimeoutHandleWrapper MakeTimeout(const std::string &id, int ms, luabridge::LuaRef func);
   static eowu::TimeoutHandleWrapper MakeInterval(const std::string &id, int ms, luabridge::LuaRef func);
   static eowu::ModelWrapper MakeModelWrapper(const std::string &id);
@@ -98,11 +102,12 @@ public:
   static eowu::StateWrapper* GetActiveStateWrapper();
   static eowu::KeyboardWrapper* GetKeyboardWrapper();
   static eowu::TargetWrapper* GetTargetWrapper(const std::string &id);
-  static eowu::TargetSetWrapper* GetTargetSetWrapper(const std::string &id);
+  static eowu::TargetSetWrapper GetTargetSetWrapper(const std::string &id);
   static eowu::TimeoutHandleWrapper GetTimeoutHandleWrapper(const std::string &id);
   static eowu::TimeoutHandleWrapper GetIntervalHandleWrapper(const std::string &id);
   static eowu::RendererWrapper GetRendererWrapper();
   static eowu::ModelWrapper GetModelWrapper(const std::string &id);
+  static eowu::TextModelWrapper GetTextModelWrapper(const std::string &id);
   static eowu::VariableWrapper GetVariable(const std::string &id);
   static eowu::WindowWrapper GetWindowWrapper(const std::string &id);
   static eowu::AudioSourceWrapper GetAudioSourceWrapper(const std::string &id);
@@ -144,10 +149,11 @@ private:
   static Variables variables;
   static std::shared_ptr<eowu::data::Store> task_data_store;
   static std::shared_ptr<eowu::LockedLuaRenderFunctions> lua_render_thread_functions;
-  static std::unordered_map<std::string, std::unique_ptr<eowu::TargetSetWrapper>> target_sets;
+  static std::unordered_map<std::string, std::shared_ptr<eowu::XYTargetSet>> target_sets;
   static std::unordered_map<std::string, std::shared_ptr<eowu::XYTarget>> xy_targets;
   static std::unordered_map<std::string, const eowu::XYSource*> xy_sources;
   static std::unordered_map<std::string, std::shared_ptr<eowu::AudioBufferSource>> sounds;
+  static std::unordered_map<std::string, std::shared_ptr<eowu::TextModel>> text_models;
   static std::unique_ptr<eowu::KeyboardWrapper> keyboard;
   static ThreadIds thread_ids;
   static eowu::StateRunner *state_runner;

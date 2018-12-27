@@ -27,6 +27,8 @@ namespace eowu {
     bool directory_exists(const std::string &path);
     bool change_directory(const std::string &path);
     
+    bool file_exists(const std::string &path);
+    
     std::string nonexistent_directory_message(const std::string &path, const std::string &type);
     
     std::string full_file(const std::vector<std::string> &components);

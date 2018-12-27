@@ -11,8 +11,6 @@
 
 template<typename ...Args>
 void eowu::LuaFunction::Call(Args... args) {
-  std::unique_lock<std::recursive_mutex> lock(mut);
-  
   try {
     function_reference(args...);
     did_call = true;

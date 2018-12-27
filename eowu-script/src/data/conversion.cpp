@@ -73,6 +73,10 @@ void eowu::data::to_lua(lua_State *L, const eowu::data::Struct &s) {
   mpark::visit(::priv::insert_visitor{L}, s.value);
 }
 
+void eowu::data::to_lua(lua_State *L, const std::vector<std::string> &value) {
+  ::priv::insert_visitor{L}(value);
+}
+
 eowu::data::Struct eowu::data::from_lua(const std::string &name, const luabridge::LuaRef &value) {
   eowu::data::Struct result;
   

@@ -28,6 +28,8 @@ namespace eowu {
     ParseResult<eowu::schema::Paths> paths(const luabridge::LuaRef &table);
     ParseResult<eowu::schema::Save> save(const luabridge::LuaRef &table);
     
+    ParseResult<eowu::schema::Fonts> fonts(const luabridge::LuaRef &table);
+    
     ParseResult<eowu::schema::Stimulus> stimulus(const luabridge::LuaRef &table,
                                                  const std::string &stimulus_id);
     ParseResult<eowu::schema::Stimuli> stimuli(const luabridge::LuaRef &table);

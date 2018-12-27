@@ -11,6 +11,7 @@
 #include "ResourceManager.hpp"
 #include "TextureManager.hpp"
 #include "WindowContainerMap.hpp"
+#include "font/FontManager.hpp"
 #include <iostream>
 
 eowu::GLPipeline::GLPipeline() {
@@ -19,6 +20,7 @@ eowu::GLPipeline::GLPipeline() {
   resource_manager = std::make_shared<eowu::ResourceManager>();
   texture_manager = std::make_shared<eowu::TextureManager>();
   window_container = std::make_shared<eowu::WindowContainerMap>();
+  font_manager = std::make_shared<eowu::FontManager>();
 }
 
 std::shared_ptr<eowu::ContextManager> eowu::GLPipeline::GetContextManager() const {
@@ -39,6 +41,10 @@ std::shared_ptr<eowu::TextureManager> eowu::GLPipeline::GetTextureManager() cons
 
 std::shared_ptr<eowu::WindowContainerMap> eowu::GLPipeline::GetWindowContainer() const {
   return window_container;
+}
+
+std::shared_ptr<eowu::FontManager> eowu::GLPipeline::GetFontManager() const {
+  return font_manager;
 }
 
 std::shared_ptr<eowu::GLPipeline> eowu::GLPipeline::GetInstance() {

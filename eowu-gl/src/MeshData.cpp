@@ -11,12 +11,8 @@
 #include <glad/glad.h>
 #include <cstddef>
 
-eowu::MeshData::MeshData() {
-  is_created = false;
-}
-
-eowu::MeshData::~MeshData() {
-//  Dispose();
+eowu::MeshData::MeshData() : is_created(false) {
+  //
 }
 
 void eowu::MeshData::Dispose() {

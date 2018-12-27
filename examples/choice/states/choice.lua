@@ -5,12 +5,16 @@ local function make_target_set(state)
   local selected = state:Variable('selected')
   local entered = state:Variable('entered')
 
+  local t0 = eowu.Elapsed()
+
   tset:Duration(500)
 
   tset:Entry(function(name)
     print('Entered: ' .. name)
 
     entered:Set(true)
+
+    t0 = eowu.Elapsed()
   end)
 
   tset:Exit(function(name)
@@ -27,6 +31,8 @@ local function make_target_set(state)
 
     local tset1 = eowu.TargetSet('tset1')
     tset1:Reset()
+
+    print('Took: ' .. (eowu.Elapsed() - t0) * 1e3 .. ' ms.')
 
     selected:Set(name)
     state:Exit('choice_success')

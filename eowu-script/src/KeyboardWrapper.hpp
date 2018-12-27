@@ -22,11 +22,12 @@ public:
   KeyboardWrapper(eowu::Keyboard &keyboard);
   
   bool WasPressed(const std::string &key);
-  bool IsDown(const std::string &key);
+  bool IsDown(const std::string &key) const;
+  int GetKeyNames(lua_State *L);
   
   static void CreateLuaSchema(lua_State *L);
 private:
   eowu::Keyboard &keyboard;
   
-  void assert_key_name(const std::string &key);
+  void assert_key_name(const std::string &key) const;
 };

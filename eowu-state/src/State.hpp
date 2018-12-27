@@ -82,7 +82,6 @@ private:
   
   void entry();
   void exit();
-  void loop();
   bool check_exit_conditions() const;
   void set_default_callbacks();
 };

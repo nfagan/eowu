@@ -8,6 +8,7 @@
 #pragma once
 
 #include "ContextManager.hpp"
+#include "TextRenderer.hpp"
 #include "Model.hpp"
 #include "ProjectionTypes.hpp"
 #include "Identifier.hpp"
@@ -23,8 +24,6 @@
 namespace eowu {
   class Renderer;
   
-  using ModelAggregateType = std::vector<eowu::Model>;
-  
   using BufferSwapCallbackType = std::function<void(const eowu::WindowType&)>;
 }
 
@@ -32,20 +31,25 @@ class eowu::Renderer {
   
 public:
   Renderer();
+  ~Renderer() = default;
   
-  void ClearQueue();
-  void Queue(const ModelAggregateType &models, eowu::WindowType window);
+  void Queue(const std::vector<eowu::Model> &models, eowu::WindowType window);
   void Queue(const eowu::Model &model, eowu::WindowType window);
+  void Queue(const eowu::TextRenderer::DrawableComponent &component, eowu::WindowType window);
+  void ClearQueue();
   
   void Draw();
   
   void SetClearColor(const glm::vec3 &color);
-  
   void SetOnBufferSwap(const eowu::BufferSwapCallbackType &cb);
-  
   eowu::time::DurationType Delta();
+  
+  void RegisterWindow(eowu::WindowType window);
+  void RegisterWindows(const std::vector<eowu::WindowType> &windows);
 private:
   mutable std::mutex mut;
+  
+  eowu::TextRenderer text_renderer;
   
   eowu::BufferSwapCallbackType on_buffer_swap;
 
@@ -67,12 +71,17 @@ private:
   std::shared_ptr<eowu::Mesh> last_mesh;
   eowu::WindowType last_window;
   
+private:
   glm::mat4 get_projection_matrix(eowu::WindowType window) const;
   glm::mat4 get_view_matrix() const;
   
   std::vector<eowu::Model>& get_models_container(const eowu::WindowType &window);
   
+  void configure_window_context(const eowu::WindowType &window);
   void next_frame();
   void draw(eowu::WindowType window);
-  void draw_one_model(const eowu::WindowType &window, const eowu::Model &model);
+  std::size_t draw_one_model(const eowu::Model &model,
+                             const eowu::WindowType &window,
+                             const glm::mat4 &projection_matrix,
+                             const std::size_t is_first_model);
 };

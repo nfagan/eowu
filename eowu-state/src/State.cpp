@@ -49,7 +49,6 @@ void eowu::State::OnExit() {
 
 void eowu::State::OnLoop() {
   std::unique_lock<std::mutex> lock(mut);
-  loop();
   on_loop(this);
 }
 
@@ -136,10 +135,6 @@ void eowu::State::exit() {
   if (global_timer) {
     global_time_points.exit = global_timer->Elapsed();
   }
-}
-
-void eowu::State::loop() {
-  //
 }
 
 bool eowu::State::check_exit_conditions() const {
