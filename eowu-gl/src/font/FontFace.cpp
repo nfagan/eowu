@@ -33,9 +33,7 @@ void eowu::FontFace::SetPixelSizes(eowu::FontFace::PixelSizes pixel_sizes) {
 }
 
 const eowu::FontGlyph& eowu::FontFace::GetGlyph(char character) const {
-  std::string single_char(1, 'a');
-  single_char[0] = character;
-  
+  std::string single_char(1, character);
   return GetGlyph(single_char);
 }
 
@@ -54,9 +52,7 @@ bool eowu::FontFace::HasGlyph(const std::string &character) const {
 }
 
 bool eowu::FontFace::HasGlyph(char character) const {
-  std::string single_char(1, 'a');
-  single_char[0] = character;
-  
+  std::string single_char(1, character);  
   return HasGlyph(single_char);
 }
 
