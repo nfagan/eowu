@@ -223,7 +223,7 @@ void eowu::init::open_windows(std::shared_ptr<eowu::GLPipeline> gl_pipeline,
 
 std::unordered_map<std::string, std::shared_ptr<eowu::TextModel>>
 eowu::init::initialize_fonts(std::shared_ptr<eowu::GLPipeline> gl_pipeline,
-                                  const eowu::schema::Fonts &fonts) {
+                             const eowu::schema::Fonts &fonts) {
   
   std::unordered_map<std::string, std::shared_ptr<eowu::TextModel>> text_models;
   
@@ -234,7 +234,6 @@ eowu::init::initialize_fonts(std::shared_ptr<eowu::GLPipeline> gl_pipeline,
     font_manager->Initialize();
     
     for (const auto &it : font_mappings) {
-      //  @TODO: Refactor this; only here for demo.
       const auto &font_alias = it.first;
       const auto &font_spec = it.second;
       

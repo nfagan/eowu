@@ -15,6 +15,7 @@
 #include <string>
 #include <shared_mutex>
 #include <mutex>
+#include <utility>
 
 namespace eowu {
   class Model;
@@ -36,7 +37,7 @@ public:
   ~ResourceManagerImpl() = default;
   
   template <typename Resource, typename ...A>
-  std::shared_ptr<Resource> Create(const std::string &id, A... args);
+  std::shared_ptr<Resource> Create(const std::string &id, A&&... args);
   
   template <typename Resource>
   bool Has(const std::string &id) const;
@@ -52,10 +53,10 @@ private:
 
 template <typename ...T>
 template <typename Resource, typename ...A>
-std::shared_ptr<Resource> eowu::ResourceManagerImpl<T...>::Create(const std::string &id, A... args) {
+std::shared_ptr<Resource> eowu::ResourceManagerImpl<T...>::Create(const std::string &id, A&&... args) {
   std::unique_lock<std::shared_mutex> lock(mut);
   
-  auto res = std::make_shared<Resource>(args...);
+  auto res = std::make_shared<Resource>(std::forward<A>(args)...);
   
   auto &resource_container = std::get<eowu::ResourceMapType<Resource>>(resources);
   
