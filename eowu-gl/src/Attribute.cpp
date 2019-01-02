@@ -7,13 +7,16 @@
 
 #include "Attribute.hpp"
 
-eowu::Attribute::Attribute(const std::string &kind, const eowu::AttributeAggregateType &components) {
-  this->kind = kind;
-  this->components = components;
+eowu::Attribute::Attribute(const std::string &kind_, const eowu::AttributeAggregateType &components_) :
+kind(kind_),
+components(components_) {
+  //
 }
 
-eowu::Attribute::Attribute(const std::string &kind, const eowu::AttributeComponentType *components,
-                           std::size_t n_components) {
+eowu::Attribute::Attribute(const std::string &kind_,
+                           const eowu::AttributeComponentType *components,
+                           std::size_t n_components) :
+kind(kind_) {
   
   eowu::AttributeAggregateType vec_components;
   
@@ -21,7 +24,6 @@ eowu::Attribute::Attribute(const std::string &kind, const eowu::AttributeCompone
     vec_components.push_back(components[i]);
   }
   
-  this->kind = kind;
   this->components = std::move(vec_components);
 }
 
